@@ -1,0 +1,28 @@
+scalar ISO8601DateTime
+
+input CursorIn {
+    limit: Int!
+    offset: Int!
+    cursor: String!
+}
+
+type CursorOut {
+    count: Int!
+    limit: Int!
+    offset: Int!
+    isEnd: Boolean!
+    cursor: String!
+}
+
+enum OrderIn {
+    ASC
+    DESC
+}
+
+enum AuthenticatedRequestStatus {
+    OK
+    FORBIDDEN
+    NOT_FOUND
+    BAD_REQUEST
+    SERVER_INTERNAL_ERROR
+}

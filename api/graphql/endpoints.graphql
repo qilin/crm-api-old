@@ -1,0 +1,9 @@
+type Query {
+    auth: AuthQuery
+    ms: MsQuery
+}
+
+type Mutation {
+    auth: AuthMutation
+    ms: MsMutation
+}

@@ -1,0 +1,39 @@
+# General defenition
+
+# Queries type definitions
+
+type MsQuery {
+    search(query: String!, cursor: CursorIn!, order: OrderIn!): SearchOut! @goField(forceResolver: true)
+}
+
+enum SearchOutStatus {
+    OK
+    FORBIDDEN
+    NOT_FOUND
+    BAD_REQUEST
+    SERVER_INTERNAL_ERROR
+}
+
+type SearchOut {
+    status: SearchOutStatus!
+    id: [ID!]!
+    cursor: CursorOut!
+}
+
+# Mutations type definitions
+
+type MsMutation {
+    new(name: String!): NewOut! @goField(forceResolver: true)
+}
+
+enum NewOutStatus {
+    OK
+    FORBIDDEN
+    BAD_REQUEST
+    SERVER_INTERNAL_ERROR
+}
+
+type NewOut {
+    status: NewOutStatus!
+    id: ID!
+}

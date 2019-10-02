@@ -1,0 +1,22 @@
+protoc:
+  version: 3.9.1
+
+generate:
+  go_options:
+    import_path: github.com/qilin/go-blueprint
+
+  plugins:
+    - name: go
+      type: go
+      flags: plugins=grpc
+      output: generated
+
+    - name: micro
+      type: go
+      flags: plugins=grpc
+      output: generated
+
+#    - name: grpc-gateway
+#      type: gogo
+#      flags: plugins=grpc
+#      output: generated

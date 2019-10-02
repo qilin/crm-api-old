@@ -1,0 +1,49 @@
+version: '3.7'
+services:
+  blueprint-migrate:
+    depends_on:
+      - postgres
+    restart: on-failure
+    container_name: blueprint-migrate
+    image: p1hub/qilin-go-blueprint:${TAG}
+    command: ["migrate","up","--dsn","postgres://blueprint:insecure@postgres:5432/blueprint?sslmode=disable"]
+    environment:
+      - APP_TRACING_DISABLED=true
+    networks:
+      - default
+  blueprint-gateway:
+    depends_on:
+      - blueprint-migrate
+    container_name: blueprint-gateway
+    image: p1hub/qilin-go-blueprint:${TAG}
+    restart: always
+    ports:
+      - "8080:8080"
+    command: ["gateway","-c","configs/local.yaml","-b",":8080","-d"]
+    environment:
+      - APP_POSTGRES_DSN=postgres://blueprint:insecure@postgres:5432?sslmode=disable
+      - APP_GRPC_SERVICES_MS_TARGET=blueprint-daemon:8080
+    networks:
+      - default
+  blueprint-daemon:
+    depends_on:
+      - blueprint-migrate
+    container_name: blueprint-daemon
+    image: p1hub/qilin-go-blueprint:${TAG}
+    restart: always
+    ports:
+      - "8081:8080"
+    command: ["daemon","-c","configs/local.yaml","-b",":8080","-d"]
+    environment:
+      - APP_POSTGRES_DSN=postgres://blueprint:insecure@postgres:5432?sslmode=disable
+    networks:
+      - default
+  postgres:
+    container_name: blueprint-postgres
+    ports:
+      - "5567:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+volumes:
+  postgres:

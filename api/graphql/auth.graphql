@@ -1,0 +1,34 @@
+# General defenition
+
+# Queries type definitions
+
+type AuthQuery {
+    signin(email: String!, password: String!): SigninOut! @goField(forceResolver: true)
+}
+
+enum SigninOutStatus {
+    OK
+    BAD_REQUEST
+    SERVER_INTERNAL_ERROR
+}
+
+type SigninOut {
+    status: SigninOutStatus!
+}
+
+# Mutations type definitions
+
+type AuthMutation {
+    signup(email: String!, password: String!): SignupOut! @goField(forceResolver: true)
+}
+
+enum SignupOutStatus {
+    OK
+    BAD_REQUEST
+    SERVER_INTERNAL_ERROR
+    USER_EXISTS
+}
+
+type SignupOut {
+    status: SignupOutStatus!
+}
