@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"gopkg.in/go-playground/validator.v9"
+
 	"github.com/99designs/gqlgen/graphql"
 	graphql1 "github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/db/domain"
@@ -35,10 +37,11 @@ func (c *Config) Reload(ctx context.Context) {
 
 // Resolver config graphql resolvers
 type Resolver struct {
-	ctx  context.Context
-	cfg  *Config
-	repo Repo
-	trx  *trx.Manager
+	ctx      context.Context
+	cfg      *Config
+	repo     Repo
+	validate validator.Validate
+	trx      *trx.Manager
 	provider.LMT
 }
 
@@ -73,8 +76,9 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config)
 			ctx:  ctx,
 			cfg:  cfg,
 			repo: appSet.Repo,
-			trx:  appSet.Trx,
-			LMT:  &set,
+			//validate: appSet.Validate,
+			trx: appSet.Trx,
+			LMT: &set,
 		},
 	}
 	return c

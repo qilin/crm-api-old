@@ -33,7 +33,11 @@ func (a *UserRepo) Get(ctx context.Context, email string, password string) (*dom
 		out *domain2.UserItem
 		e   error
 	)
-	e = db.Where("email=? AND password=?", email, password).First(out).Error
+	pwd, e := hashPassword(password)
+	if e != nil {
+		return out, e
+	}
+	e = db.Where("email=? AND password=?", email, pwd).First(out).Error
 	return out, e
 }
 

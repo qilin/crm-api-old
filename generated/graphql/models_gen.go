@@ -13,9 +13,7 @@ type AuthMutation struct {
 }
 
 type AuthQuery struct {
-	Signin  *SigninOut  `json:"signin"`
-	Me      *MeOut      `json:"me"`
-	Signout *SignoutOut `json:"signout"`
+	Signin *SigninOut `json:"signin"`
 }
 
 type CursorIn struct {
@@ -30,11 +28,6 @@ type CursorOut struct {
 	Offset int    `json:"offset"`
 	IsEnd  bool   `json:"isEnd"`
 	Cursor string `json:"cursor"`
-}
-
-type MeOut struct {
-	Status AuthenticatedRequestStatus `json:"status"`
-	Email  string                     `json:"email"`
 }
 
 type MsMutation struct {
@@ -58,10 +51,7 @@ type SearchOut struct {
 
 type SigninOut struct {
 	Status SigninOutStatus `json:"status"`
-}
-
-type SignoutOut struct {
-	Status *AuthenticatedRequestStatus `json:"status"`
+	Token  string          `json:"token"`
 }
 
 type SignupOut struct {

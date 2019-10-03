@@ -3,12 +3,13 @@ package dispatcher
 import (
 	"context"
 
-	"github.com/qilin/crm-api/internal/dispatcher/common"
-
 	"github.com/google/wire"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
+	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/go-core/config"
 	"github.com/qilin/go-core/invoker"
 	"github.com/qilin/go-core/provider"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // ProviderCfg
@@ -19,6 +20,15 @@ func ProviderCfg(cfg config.Configurator) (*Config, func(), error) {
 	}
 	e := cfg.UnmarshalKeyOnReload(common.UnmarshalKey, c)
 	return c, func() {}, e
+}
+
+// Validators
+func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validate, _ func(), err error) {
+	validate = validator.New()
+
+	// add needed validators
+
+	return validate, func() {}, nil
 }
 
 // ProviderDispatcher

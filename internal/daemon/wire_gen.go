@@ -7,7 +7,6 @@ package daemon
 
 import (
 	"context"
-
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/pkg/postgres"
@@ -100,8 +99,10 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		return nil, nil, err
 	}
 	listRepo := repo.NewListRepo(db)
+	userRepo := repo.NewUserRepo(db)
 	daemonRepo := Repo{
 		List: listRepo,
+		User: userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
@@ -217,8 +218,10 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	listRepo := repo.NewListRepo(db)
+	userRepo := repo.NewUserRepo(db)
 	daemonRepo := Repo{
 		List: listRepo,
+		User: userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{

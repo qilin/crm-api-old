@@ -19,8 +19,14 @@ func (r *Resolver) AuthQuery() graphql1.AuthQueryResolver {
 }
 
 func (r *authMutationResolver) Signup(ctx context.Context, obj *graphql1.AuthMutation, email string, password string) (*graphql1.SignupOut, error) {
-	// validate email and password
-	// todo
+	// validate email
+	// todo: bind validate (wire)
+	//e := r.validate.Var(email, "email,required")
+	//if e != nil {
+	//	return &graphql1.SignupOut{
+	//		Status: graphql1.SignupOutStatusBadRequest,
+	//	}, e
+	//}
 	// check email already taken
 	isExists, e := r.repo.User.IsExistsEmail(ctx, email)
 	if e != nil {
@@ -34,7 +40,7 @@ func (r *authMutationResolver) Signup(ctx context.Context, obj *graphql1.AuthMut
 			Status: graphql1.SignupOutStatusUserExists,
 		}, nil
 	}
-	// create user
+	//create user
 	user := &domain.UserItem{
 		Email:    email,
 		Password: password,
@@ -51,13 +57,21 @@ func (r *authMutationResolver) Signup(ctx context.Context, obj *graphql1.AuthMut
 }
 
 func (r *authQueryResolver) Signin(ctx context.Context, obj *graphql1.AuthQuery, email string, password string) (*graphql1.SigninOut, error) {
+	// validate email
+	// todo
+	user, e := r.repo.User.Get(ctx, email, password)
+	if e != nil {
+		return &graphql1.SigninOut{
+			Status: graphql1.SigninOutStatusServerInternalError,
+		}, e
+	}
+	// gen JWT
+	// todo
+	jwt := user.Email
+	//
 	return &graphql1.SigninOut{
 		Status: graphql1.SigninOutStatusServerInternalError,
-	}, nil
-}
-func (r *authQueryResolver) Me(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.MeOut, error) {
-	return &graphql1.MeOut{
-		Status: graphql1.AuthenticatedRequestStatusForbidden,
+		Token:  jwt,
 	}, nil
 }
 

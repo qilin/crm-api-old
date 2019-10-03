@@ -3,6 +3,8 @@ package resolver
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/validators"
+
 	"github.com/google/wire"
 	"github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/db/repo"
@@ -26,7 +28,8 @@ func CfgTest() (*Config, func(), error) {
 
 type AppSet struct {
 	Repo Repo
-	Trx  *trx.Manager
+	//Validate validator.Validate
+	Trx *trx.Manager
 }
 
 // Provider
@@ -61,6 +64,7 @@ var (
 		Provider,
 		CfgTest,
 		ProviderTestRepo,
+		validators.WireTestSet,
 		wire.Struct(new(AppSet), "*"),
 	)
 )

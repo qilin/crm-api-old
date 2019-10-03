@@ -7,7 +7,6 @@ package resolver
 
 import (
 	"context"
-
 	"github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
@@ -100,8 +99,10 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
+	userRepo := repo.NewUserRepo(db)
 	listRepo := repo.NewListRepo(db)
 	resolverRepo := Repo{
+		User: userRepo,
 		List: listRepo,
 	}
 	manager := trx.NewTrxManager(db)
@@ -217,8 +218,10 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
+	userRepo := repo.NewUserRepo(db)
 	listRepo := repo.NewListRepo(db)
 	resolverRepo := Repo{
+		User: userRepo,
 		List: listRepo,
 	}
 	manager := trx.NewTrxManager(db)

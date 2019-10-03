@@ -7,7 +7,6 @@ package http
 
 import (
 	"context"
-
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/dispatcher"
@@ -102,8 +101,10 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
+	userRepo := repo.NewUserRepo(db)
 	listRepo := repo.NewListRepo(db)
 	resolverRepo := resolver.Repo{
+		User: userRepo,
 		List: listRepo,
 	}
 	manager := trx.NewTrxManager(db)
@@ -333,8 +334,10 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
+	userRepo := repo.NewUserRepo(db)
 	listRepo := repo.NewListRepo(db)
 	resolverRepo := resolver.Repo{
+		User: userRepo,
 		List: listRepo,
 	}
 	manager := trx.NewTrxManager(db)

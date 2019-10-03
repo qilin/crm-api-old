@@ -51,9 +51,7 @@ type ComplexityRoot struct {
 	}
 
 	AuthQuery struct {
-		Me      func(childComplexity int) int
-		Signin  func(childComplexity int, email string, password string) int
-		Signout func(childComplexity int) int
+		Signin func(childComplexity int, email string, password string) int
 	}
 
 	CursorOut struct {
@@ -62,11 +60,6 @@ type ComplexityRoot struct {
 		IsEnd  func(childComplexity int) int
 		Limit  func(childComplexity int) int
 		Offset func(childComplexity int) int
-	}
-
-	MeOut struct {
-		Email  func(childComplexity int) int
-		Status func(childComplexity int) int
 	}
 
 	MsMutation struct {
@@ -100,10 +93,7 @@ type ComplexityRoot struct {
 
 	SigninOut struct {
 		Status func(childComplexity int) int
-	}
-
-	SignoutOut struct {
-		Status func(childComplexity int) int
+		Token  func(childComplexity int) int
 	}
 
 	SignupOut struct {
@@ -116,7 +106,6 @@ type AuthMutationResolver interface {
 }
 type AuthQueryResolver interface {
 	Signin(ctx context.Context, obj *AuthQuery, email string, password string) (*SigninOut, error)
-	Me(ctx context.Context, obj *AuthQuery) (*MeOut, error)
 }
 type MsMutationResolver interface {
 	New(ctx context.Context, obj *MsMutation, name string) (*NewOut, error)
@@ -160,13 +149,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AuthMutation.Signup(childComplexity, args["email"].(string), args["password"].(string)), true
 
-	case "AuthQuery.me":
-		if e.complexity.AuthQuery.Me == nil {
-			break
-		}
-
-		return e.complexity.AuthQuery.Me(childComplexity), true
-
 	case "AuthQuery.signin":
 		if e.complexity.AuthQuery.Signin == nil {
 			break
@@ -178,13 +160,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AuthQuery.Signin(childComplexity, args["email"].(string), args["password"].(string)), true
-
-	case "AuthQuery.signout":
-		if e.complexity.AuthQuery.Signout == nil {
-			break
-		}
-
-		return e.complexity.AuthQuery.Signout(childComplexity), true
 
 	case "CursorOut.count":
 		if e.complexity.CursorOut.Count == nil {
@@ -220,20 +195,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CursorOut.Offset(childComplexity), true
-
-	case "MeOut.email":
-		if e.complexity.MeOut.Email == nil {
-			break
-		}
-
-		return e.complexity.MeOut.Email(childComplexity), true
-
-	case "MeOut.status":
-		if e.complexity.MeOut.Status == nil {
-			break
-		}
-
-		return e.complexity.MeOut.Status(childComplexity), true
 
 	case "MsMutation.new":
 		if e.complexity.MsMutation.New == nil {
@@ -329,12 +290,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SigninOut.Status(childComplexity), true
 
-	case "SignoutOut.status":
-		if e.complexity.SignoutOut.Status == nil {
+	case "SigninOut.token":
+		if e.complexity.SigninOut.Token == nil {
 			break
 		}
 
-		return e.complexity.SignoutOut.Status(childComplexity), true
+		return e.complexity.SigninOut.Token(childComplexity), true
 
 	case "SignupOut.status":
 		if e.complexity.SignupOut.Status == nil {
@@ -411,8 +372,6 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 type AuthQuery {
     signin(email: String!, password: String!): SigninOut! @goField(forceResolver: true)
-    me: MeOut! @goField(forceResolver: true)
-    signout: SignoutOut
 }
 
 enum SigninOutStatus {
@@ -423,15 +382,7 @@ enum SigninOutStatus {
 
 type SigninOut {
     status: SigninOutStatus!
-}
-
-type MeOut {
-    status: AuthenticatedRequestStatus!
-    email: String!
-}
-
-type SignoutOut {
-    status: AuthenticatedRequestStatus
+    token: String!
 }
 
 # Mutations type definitions
@@ -612,7 +563,7 @@ func (ec *executionContext) field_MsQuery_search_args(ctx context.Context, rawAr
 	args["query"] = arg0
 	var arg1 CursorIn
 	if tmp, ok := rawArgs["cursor"]; ok {
-		arg1, err = ec.unmarshalNCursorIn2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐCursorIn(ctx, tmp)
+		arg1, err = ec.unmarshalNCursorIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorIn(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -620,7 +571,7 @@ func (ec *executionContext) field_MsQuery_search_args(ctx context.Context, rawAr
 	args["cursor"] = arg1
 	var arg2 OrderIn
 	if tmp, ok := rawArgs["order"]; ok {
-		arg2, err = ec.unmarshalNOrderIn2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐOrderIn(ctx, tmp)
+		arg2, err = ec.unmarshalNOrderIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐOrderIn(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -720,7 +671,7 @@ func (ec *executionContext) _AuthMutation_signup(ctx context.Context, field grap
 	res := resTmp.(*SignupOut)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignupOut(ctx, field.Selections, res)
+	return ec.marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AuthQuery_signin(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
@@ -764,78 +715,7 @@ func (ec *executionContext) _AuthQuery_signin(ctx context.Context, field graphql
 	res := resTmp.(*SigninOut)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSigninOut(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _AuthQuery_me(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "AuthQuery",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.AuthQuery().Me(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*MeOut)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNMeOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMeOut(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _AuthQuery_signout(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "AuthQuery",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Signout, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*SignoutOut)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOSignoutOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignoutOut(ctx, field.Selections, res)
+	return ec.marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CursorOut_count(ctx context.Context, field graphql.CollectedField, obj *CursorOut) (ret graphql.Marshaler) {
@@ -1023,80 +903,6 @@ func (ec *executionContext) _CursorOut_cursor(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _MeOut_status(ctx context.Context, field graphql.CollectedField, obj *MeOut) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "MeOut",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(AuthenticatedRequestStatus)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _MeOut_email(ctx context.Context, field graphql.CollectedField, obj *MeOut) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "MeOut",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Email, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _MsMutation_new(ctx context.Context, field graphql.CollectedField, obj *MsMutation) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1138,7 +944,7 @@ func (ec *executionContext) _MsMutation_new(ctx context.Context, field graphql.C
 	res := resTmp.(*NewOut)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNNewOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐNewOut(ctx, field.Selections, res)
+	return ec.marshalNNewOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _MsQuery_search(ctx context.Context, field graphql.CollectedField, obj *MsQuery) (ret graphql.Marshaler) {
@@ -1182,7 +988,7 @@ func (ec *executionContext) _MsQuery_search(ctx context.Context, field graphql.C
 	res := resTmp.(*SearchOut)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSearchOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSearchOut(ctx, field.Selections, res)
+	return ec.marshalNSearchOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_auth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1216,7 +1022,7 @@ func (ec *executionContext) _Mutation_auth(ctx context.Context, field graphql.Co
 	res := resTmp.(*AuthMutation)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthMutation(ctx, field.Selections, res)
+	return ec.marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthMutation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_ms(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1250,7 +1056,7 @@ func (ec *executionContext) _Mutation_ms(ctx context.Context, field graphql.Coll
 	res := resTmp.(*MsMutation)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOMsMutation2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMsMutation(ctx, field.Selections, res)
+	return ec.marshalOMsMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsMutation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _NewOut_status(ctx context.Context, field graphql.CollectedField, obj *NewOut) (ret graphql.Marshaler) {
@@ -1287,7 +1093,7 @@ func (ec *executionContext) _NewOut_status(ctx context.Context, field graphql.Co
 	res := resTmp.(NewOutStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNNewOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx, field.Selections, res)
+	return ec.marshalNNewOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _NewOut_id(ctx context.Context, field graphql.CollectedField, obj *NewOut) (ret graphql.Marshaler) {
@@ -1358,7 +1164,7 @@ func (ec *executionContext) _Query_auth(ctx context.Context, field graphql.Colle
 	res := resTmp.(*AuthQuery)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthQuery(ctx, field.Selections, res)
+	return ec.marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthQuery(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_ms(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1392,7 +1198,7 @@ func (ec *executionContext) _Query_ms(ctx context.Context, field graphql.Collect
 	res := resTmp.(*MsQuery)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOMsQuery2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMsQuery(ctx, field.Selections, res)
+	return ec.marshalOMsQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsQuery(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1504,7 +1310,7 @@ func (ec *executionContext) _SearchOut_status(ctx context.Context, field graphql
 	res := resTmp.(SearchOutStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSearchOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx, field.Selections, res)
+	return ec.marshalNSearchOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SearchOut_id(ctx context.Context, field graphql.CollectedField, obj *SearchOut) (ret graphql.Marshaler) {
@@ -1578,7 +1384,7 @@ func (ec *executionContext) _SearchOut_cursor(ctx context.Context, field graphql
 	res := resTmp.(*CursorOut)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNCursorOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐCursorOut(ctx, field.Selections, res)
+	return ec.marshalNCursorOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SigninOut_status(ctx context.Context, field graphql.CollectedField, obj *SigninOut) (ret graphql.Marshaler) {
@@ -1615,10 +1421,10 @@ func (ec *executionContext) _SigninOut_status(ctx context.Context, field graphql
 	res := resTmp.(SigninOutStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSigninOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx, field.Selections, res)
+	return ec.marshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SignoutOut_status(ctx context.Context, field graphql.CollectedField, obj *SignoutOut) (ret graphql.Marshaler) {
+func (ec *executionContext) _SigninOut_token(ctx context.Context, field graphql.CollectedField, obj *SigninOut) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1628,7 +1434,7 @@ func (ec *executionContext) _SignoutOut_status(ctx context.Context, field graphq
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "SignoutOut",
+		Object:   "SigninOut",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1637,19 +1443,22 @@ func (ec *executionContext) _SignoutOut_status(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
+		return obj.Token, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*AuthenticatedRequestStatus)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOAuthenticatedRequestStatus2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SignupOut_status(ctx context.Context, field graphql.CollectedField, obj *SignupOut) (ret graphql.Marshaler) {
@@ -1686,7 +1495,7 @@ func (ec *executionContext) _SignupOut_status(ctx context.Context, field graphql
 	res := resTmp.(SignupOutStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignupOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx, field.Selections, res)
+	return ec.marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2939,22 +2748,6 @@ func (ec *executionContext) _AuthQuery(ctx context.Context, sel ast.SelectionSet
 				}
 				return res
 			})
-		case "me":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._AuthQuery_me(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "signout":
-			out.Values[i] = ec._AuthQuery_signout(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2999,38 +2792,6 @@ func (ec *executionContext) _CursorOut(ctx context.Context, sel ast.SelectionSet
 			}
 		case "cursor":
 			out.Values[i] = ec._CursorOut_cursor(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var meOutImplementors = []string{"MeOut"}
-
-func (ec *executionContext) _MeOut(ctx context.Context, sel ast.SelectionSet, obj *MeOut) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, meOutImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MeOut")
-		case "status":
-			out.Values[i] = ec._MeOut_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "email":
-			out.Values[i] = ec._MeOut_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3284,30 +3045,11 @@ func (ec *executionContext) _SigninOut(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var signoutOutImplementors = []string{"SignoutOut"}
-
-func (ec *executionContext) _SignoutOut(ctx context.Context, sel ast.SelectionSet, obj *SignoutOut) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, signoutOutImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SignoutOut")
-		case "status":
-			out.Values[i] = ec._SignoutOut_status(ctx, field, obj)
+		case "token":
+			out.Values[i] = ec._SigninOut_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3591,15 +3333,6 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, v interface{}) (AuthenticatedRequestStatus, error) {
-	var res AuthenticatedRequestStatus
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, sel ast.SelectionSet, v AuthenticatedRequestStatus) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
@@ -3614,15 +3347,15 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCursorIn2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐCursorIn(ctx context.Context, v interface{}) (CursorIn, error) {
+func (ec *executionContext) unmarshalNCursorIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorIn(ctx context.Context, v interface{}) (CursorIn, error) {
 	return ec.unmarshalInputCursorIn(ctx, v)
 }
 
-func (ec *executionContext) marshalNCursorOut2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐCursorOut(ctx context.Context, sel ast.SelectionSet, v CursorOut) graphql.Marshaler {
+func (ec *executionContext) marshalNCursorOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorOut(ctx context.Context, sel ast.SelectionSet, v CursorOut) graphql.Marshaler {
 	return ec._CursorOut(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCursorOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐCursorOut(ctx context.Context, sel ast.SelectionSet, v *CursorOut) graphql.Marshaler {
+func (ec *executionContext) marshalNCursorOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorOut(ctx context.Context, sel ast.SelectionSet, v *CursorOut) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3689,25 +3422,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNMeOut2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMeOut(ctx context.Context, sel ast.SelectionSet, v MeOut) graphql.Marshaler {
-	return ec._MeOut(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNMeOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMeOut(ctx context.Context, sel ast.SelectionSet, v *MeOut) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._MeOut(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNNewOut2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐNewOut(ctx context.Context, sel ast.SelectionSet, v NewOut) graphql.Marshaler {
+func (ec *executionContext) marshalNNewOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOut(ctx context.Context, sel ast.SelectionSet, v NewOut) graphql.Marshaler {
 	return ec._NewOut(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNNewOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐNewOut(ctx context.Context, sel ast.SelectionSet, v *NewOut) graphql.Marshaler {
+func (ec *executionContext) marshalNNewOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOut(ctx context.Context, sel ast.SelectionSet, v *NewOut) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3717,29 +3436,29 @@ func (ec *executionContext) marshalNNewOut2ᚖgithubᚗcomᚋqilinᚋgoᚑbluepr
 	return ec._NewOut(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNNewOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx context.Context, v interface{}) (NewOutStatus, error) {
+func (ec *executionContext) unmarshalNNewOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx context.Context, v interface{}) (NewOutStatus, error) {
 	var res NewOutStatus
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNNewOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx context.Context, sel ast.SelectionSet, v NewOutStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNNewOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx context.Context, sel ast.SelectionSet, v NewOutStatus) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNOrderIn2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐOrderIn(ctx context.Context, v interface{}) (OrderIn, error) {
+func (ec *executionContext) unmarshalNOrderIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐOrderIn(ctx context.Context, v interface{}) (OrderIn, error) {
 	var res OrderIn
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNOrderIn2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐOrderIn(ctx context.Context, sel ast.SelectionSet, v OrderIn) graphql.Marshaler {
+func (ec *executionContext) marshalNOrderIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐOrderIn(ctx context.Context, sel ast.SelectionSet, v OrderIn) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNSearchOut2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSearchOut(ctx context.Context, sel ast.SelectionSet, v SearchOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOut(ctx context.Context, sel ast.SelectionSet, v SearchOut) graphql.Marshaler {
 	return ec._SearchOut(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSearchOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSearchOut(ctx context.Context, sel ast.SelectionSet, v *SearchOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOut(ctx context.Context, sel ast.SelectionSet, v *SearchOut) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3749,20 +3468,20 @@ func (ec *executionContext) marshalNSearchOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblu
 	return ec._SearchOut(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSearchOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx context.Context, v interface{}) (SearchOutStatus, error) {
+func (ec *executionContext) unmarshalNSearchOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx context.Context, v interface{}) (SearchOutStatus, error) {
 	var res SearchOutStatus
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNSearchOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx context.Context, sel ast.SelectionSet, v SearchOutStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx context.Context, sel ast.SelectionSet, v SearchOutStatus) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNSigninOut2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v SigninOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSigninOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v SigninOut) graphql.Marshaler {
 	return ec._SigninOut(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v *SigninOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v *SigninOut) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3772,20 +3491,20 @@ func (ec *executionContext) marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblu
 	return ec._SigninOut(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSigninOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, v interface{}) (SigninOutStatus, error) {
+func (ec *executionContext) unmarshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, v interface{}) (SigninOutStatus, error) {
 	var res SigninOutStatus
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNSigninOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, sel ast.SelectionSet, v SigninOutStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, sel ast.SelectionSet, v SigninOutStatus) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNSignupOut2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v SignupOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSignupOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v SignupOut) graphql.Marshaler {
 	return ec._SignupOut(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v *SignupOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v *SignupOut) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3795,12 +3514,12 @@ func (ec *executionContext) marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblu
 	return ec._SignupOut(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSignupOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, v interface{}) (SignupOutStatus, error) {
+func (ec *executionContext) unmarshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, v interface{}) (SignupOutStatus, error) {
 	var res SignupOutStatus
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNSignupOutStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, sel ast.SelectionSet, v SignupOutStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, sel ast.SelectionSet, v SignupOutStatus) graphql.Marshaler {
 	return v
 }
 
@@ -4044,50 +3763,26 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAuthMutation2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthMutation(ctx context.Context, sel ast.SelectionSet, v AuthMutation) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthMutation2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthMutation(ctx context.Context, sel ast.SelectionSet, v AuthMutation) graphql.Marshaler {
 	return ec._AuthMutation(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthMutation(ctx context.Context, sel ast.SelectionSet, v *AuthMutation) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthMutation(ctx context.Context, sel ast.SelectionSet, v *AuthMutation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._AuthMutation(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAuthQuery2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthQuery(ctx context.Context, sel ast.SelectionSet, v AuthQuery) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthQuery2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthQuery(ctx context.Context, sel ast.SelectionSet, v AuthQuery) graphql.Marshaler {
 	return ec._AuthQuery(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthQuery(ctx context.Context, sel ast.SelectionSet, v *AuthQuery) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthQuery(ctx context.Context, sel ast.SelectionSet, v *AuthQuery) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._AuthQuery(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, v interface{}) (AuthenticatedRequestStatus, error) {
-	var res AuthenticatedRequestStatus
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalOAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, sel ast.SelectionSet, v AuthenticatedRequestStatus) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) unmarshalOAuthenticatedRequestStatus2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, v interface{}) (*AuthenticatedRequestStatus, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOAuthenticatedRequestStatus2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, sel ast.SelectionSet, v *AuthenticatedRequestStatus) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -4113,37 +3808,26 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOMsMutation2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMsMutation(ctx context.Context, sel ast.SelectionSet, v MsMutation) graphql.Marshaler {
+func (ec *executionContext) marshalOMsMutation2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsMutation(ctx context.Context, sel ast.SelectionSet, v MsMutation) graphql.Marshaler {
 	return ec._MsMutation(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOMsMutation2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMsMutation(ctx context.Context, sel ast.SelectionSet, v *MsMutation) graphql.Marshaler {
+func (ec *executionContext) marshalOMsMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsMutation(ctx context.Context, sel ast.SelectionSet, v *MsMutation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._MsMutation(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOMsQuery2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMsQuery(ctx context.Context, sel ast.SelectionSet, v MsQuery) graphql.Marshaler {
+func (ec *executionContext) marshalOMsQuery2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsQuery(ctx context.Context, sel ast.SelectionSet, v MsQuery) graphql.Marshaler {
 	return ec._MsQuery(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOMsQuery2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐMsQuery(ctx context.Context, sel ast.SelectionSet, v *MsQuery) graphql.Marshaler {
+func (ec *executionContext) marshalOMsQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsQuery(ctx context.Context, sel ast.SelectionSet, v *MsQuery) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._MsQuery(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSignoutOut2githubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignoutOut(ctx context.Context, sel ast.SelectionSet, v SignoutOut) graphql.Marshaler {
-	return ec._SignoutOut(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOSignoutOut2ᚖgithubᚗcomᚋqilinᚋgoᚑblueprintᚋgeneratedᚋgraphqlᚐSignoutOut(ctx context.Context, sel ast.SelectionSet, v *SignoutOut) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SignoutOut(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
