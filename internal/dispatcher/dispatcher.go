@@ -3,6 +3,7 @@ package dispatcher
 import (
 	"context"
 
+	jwtverifier "github.com/ProtocolONE/authone-jwt-verifier-golang"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
@@ -14,9 +15,10 @@ import (
 
 // Dispatcher
 type Dispatcher struct {
-	ctx    context.Context
-	cfg    Config
-	appSet AppSet
+	ctx     context.Context
+	cfg     Config
+	authCfg common.AuthConfig
+	appSet  AppSet
 	provider.LMT
 }
 
@@ -63,16 +65,18 @@ func (c *Config) Reload(ctx context.Context) {
 }
 
 type AppSet struct {
-	GraphQL *graphql.GraphQL
+	GraphQL     *graphql.GraphQL
+	JwtVerifier *jwtverifier.JwtVerifier
 }
 
 // New
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) *Dispatcher {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, authCfg *common.AuthConfig) *Dispatcher {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	return &Dispatcher{
-		ctx:    ctx,
-		cfg:    *cfg,
-		appSet: appSet,
-		LMT:    &set,
+		ctx:     ctx,
+		cfg:     *cfg,
+		authCfg: *authCfg,
+		appSet:  appSet,
+		LMT:     &set,
 	}
 }

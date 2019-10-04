@@ -9,6 +9,8 @@ import (
 	"context"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
+	"github.com/qilin/crm-api/internal/jwt"
+	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/pkg/postgres"
 	"github.com/qilin/crm-api/pkg/resolver"
 	"github.com/qilin/go-core/config"
@@ -123,7 +125,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	graphqlConfig, cleanup11, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig)
+	validatorSet, cleanup11, err := validators.Provider()
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -137,7 +139,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup12, err := Cfg(configurator)
+	validate, cleanup12, err := validators.ProviderValidators(validatorSet)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -152,7 +154,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	graphQL, cleanup13, err := Provider(ctx, graphqlConfig, awareSet, config2)
+	jwtConfig, cleanup13, err := jwt.Provider(configurator)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -168,7 +170,64 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
+	graphqlConfig, cleanup14, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate, jwtConfig)
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	config2, cleanup15, err := Cfg(configurator)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	graphQL, cleanup16, err := Provider(ctx, graphqlConfig, awareSet, config2)
+	if err != nil {
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return graphQL, func() {
+		cleanup16()
+		cleanup15()
+		cleanup14()
 		cleanup13()
 		cleanup12()
 		cleanup11()
@@ -274,7 +333,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	graphqlConfig, cleanup10, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig)
+	validatorSet, cleanup10, err := validators.Provider()
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -287,7 +346,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup11, err := CfgTest()
+	validate, cleanup11, err := validators.ProviderValidators(validatorSet)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -301,7 +360,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	graphQL, cleanup12, err := Provider(ctx, graphqlConfig, awareSet, config2)
+	jwtConfig, cleanup12, err := jwt.Provider(configurator)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -316,7 +375,61 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
+	graphqlConfig, cleanup13, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate, jwtConfig)
+	if err != nil {
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	config2, cleanup14, err := CfgTest()
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	graphQL, cleanup15, err := Provider(ctx, graphqlConfig, awareSet, config2)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return graphQL, func() {
+		cleanup15()
+		cleanup14()
+		cleanup13()
 		cleanup12()
 		cleanup11()
 		cleanup10()

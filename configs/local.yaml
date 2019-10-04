@@ -42,3 +42,21 @@ grpc:
         time: 5m
         timeout: 10s
         permitWithoutStream: false
+dispatcher:
+  auth:
+    clientId: "unknown"
+    clientSecret: "unknown"
+    redirectUrl: "unknown"
+  jwt:
+    alg: "ES256"
+    private: |
+      -----BEGIN EC PRIVATE KEY-----
+      MHcCAQEEIJCl8EiCdc8/zRpgnaX0wQS8nOdi29hEnHA+6OYm8jE0oAoGCCqGSM49
+      AwEHoUQDQgAEa9fBxVOSbv7iQ3UC0xMwzdqK3QGU1uGDpgNhuOGdNVdleb5iYfGy
+      YqvXPWN02gwFBePLWYBKEPslgeUQEpJ0GQ==
+      -----END EC PRIVATE KEY-----
+    public: |
+      -----BEGIN PUBLIC KEY-----
+      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEa9fBxVOSbv7iQ3UC0xMwzdqK3QGU
+      1uGDpgNhuOGdNVdleb5iYfGyYqvXPWN02gwFBePLWYBKEPslgeUQEpJ0GQ==
+      -----END PUBLIC KEY-----

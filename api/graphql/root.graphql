@@ -26,3 +26,8 @@ enum AuthenticatedRequestStatus {
     BAD_REQUEST
     SERVER_INTERNAL_ERROR
 }
+
+enum RoleEnum {
+    ADMIN
+    USER
+}

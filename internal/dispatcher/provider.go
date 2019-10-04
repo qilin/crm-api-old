@@ -3,13 +3,12 @@ package dispatcher
 import (
 	"context"
 
+	jwtverifier "github.com/ProtocolONE/authone-jwt-verifier-golang"
 	"github.com/google/wire"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
-	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/go-core/config"
 	"github.com/qilin/go-core/invoker"
 	"github.com/qilin/go-core/provider"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 // ProviderCfg
@@ -22,30 +21,44 @@ func ProviderCfg(cfg config.Configurator) (*Config, func(), error) {
 	return c, func() {}, e
 }
 
-// Validators
-func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validate, _ func(), err error) {
-	validate = validator.New()
-
-	// add needed validators
-
-	return validate, func() {}, nil
+func ProviderAuthCfg(cfg config.Configurator) (*common.AuthConfig, func(), error) {
+	c := &common.AuthConfig{}
+	e := cfg.UnmarshalKey(common.UnmarshalAuthConfigKey, c)
+	return c, func() {}, e
 }
 
 // ProviderDispatcher
-func ProviderDispatcher(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) (*Dispatcher, func(), error) {
-	d := New(ctx, set, appSet, cfg)
+func ProviderDispatcher(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, authCfg *common.AuthConfig) (*Dispatcher, func(), error) {
+	d := New(ctx, set, appSet, cfg, authCfg)
 	return d, func() {}, nil
+}
+
+// jwt verifier
+func ProviderJwtVerifier(cfg *common.AuthConfig) *jwtverifier.JwtVerifier {
+	return jwtverifier.NewJwtVerifier(jwtverifier.Config{
+		ClientID:     cfg.ClientId,
+		ClientSecret: cfg.ClientSecret,
+		Scopes:       []string{"openid", "offline"},
+		RedirectURL:  cfg.RedirectUrl,
+		Issuer:       cfg.Issuer,
+	})
 }
 
 var (
 	WireSet = wire.NewSet(
 		ProviderDispatcher,
+		//ProviderValidators,
+		ProviderAuthCfg,
+		ProviderJwtVerifier,
 		ProviderCfg,
 		wire.Struct(new(AppSet), "*"),
 	)
 
 	WireTestSet = wire.NewSet(
 		ProviderDispatcher,
+		//ProviderValidators,
+		ProviderAuthCfg,
+		ProviderJwtVerifier,
 		ProviderCfg,
 		wire.Struct(new(AppSet), "*"),
 	)

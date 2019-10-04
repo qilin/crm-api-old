@@ -7,3 +7,9 @@ directive @goModel(model: String, models: [String!]) on OBJECT
 
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION
+
+directive @isAuthenticated on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
+directive @hasRole(role: [RoleEnum]) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION

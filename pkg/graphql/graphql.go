@@ -23,6 +23,7 @@ import (
 )
 
 var errInternalServer = errors.New("internal server error")
+var errAccessDenied = errors.New("access denied")
 
 // GraphQL
 type GraphQL struct {
@@ -51,17 +52,17 @@ func (g *GraphQL) Routers(echoHttp *echo.Echo) {
 			return nil
 		}),
 		handler.ErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
-			// panic error
-			if _, ok := e.(*gqErrs.PanicErr); ok {
+			switch e.(type) {
+			case *gqErrs.PanicErr:
 				g.L().Alert("recover on middleware, err: %v", logger.Args(e))
-				goto done
-			}
-			// client error
-			g.L().Error("internal server error, err: %v", logger.Args(e))
-			if _, ok := e.(*gqErrs.ClientErr); !ok {
+			case *gqErrs.AccessDeniedErr:
+				g.L().Info("internal server error, err: %v", logger.Args(e))
+			case *gqErrs.ClientErr:
+				g.L().Error("internal server error, err: %v", logger.Args(e))
+			default:
+				g.L().Error("internal server error, err: %v", logger.Args(e))
 				e = errInternalServer
 			}
-		done:
 			return gqlgen.DefaultErrorPresenter(ctx, e)
 		}),
 	}

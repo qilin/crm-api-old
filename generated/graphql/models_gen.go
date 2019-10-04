@@ -13,7 +13,9 @@ type AuthMutation struct {
 }
 
 type AuthQuery struct {
-	Signin *SigninOut `json:"signin"`
+	Signin  *SigninOut  `json:"signin"`
+	Me      *User       `json:"me"`
+	Signout *SignoutOut `json:"signout"`
 }
 
 type CursorIn struct {
@@ -54,8 +56,16 @@ type SigninOut struct {
 	Token  string          `json:"token"`
 }
 
+type SignoutOut struct {
+	Status AuthenticatedRequestStatus `json:"status"`
+}
+
 type SignupOut struct {
 	Status SignupOutStatus `json:"status"`
+}
+
+type User struct {
+	Email string `json:"email"`
 }
 
 type AuthenticatedRequestStatus string
@@ -188,6 +198,47 @@ func (e *OrderIn) UnmarshalGQL(v interface{}) error {
 }
 
 func (e OrderIn) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type RoleEnum string
+
+const (
+	RoleEnumAdmin RoleEnum = "ADMIN"
+	RoleEnumUser  RoleEnum = "USER"
+)
+
+var AllRoleEnum = []RoleEnum{
+	RoleEnumAdmin,
+	RoleEnumUser,
+}
+
+func (e RoleEnum) IsValid() bool {
+	switch e {
+	case RoleEnumAdmin, RoleEnumUser:
+		return true
+	}
+	return false
+}
+
+func (e RoleEnum) String() string {
+	return string(e)
+}
+
+func (e *RoleEnum) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RoleEnum(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RoleEnum", str)
+	}
+	return nil
+}
+
+func (e RoleEnum) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

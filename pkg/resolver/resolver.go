@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"gopkg.in/go-playground/validator.v9"
-
 	"github.com/99designs/gqlgen/graphql"
 	graphql1 "github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/db/trx"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
+	jwtInternal "github.com/qilin/crm-api/internal/jwt"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
 	"github.com/qilin/go-core/invoker"
 	"github.com/qilin/go-core/logger"
 	"github.com/qilin/go-core/provider"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type mutationResolver struct{ *Resolver }
@@ -39,8 +40,9 @@ func (c *Config) Reload(ctx context.Context) {
 type Resolver struct {
 	ctx      context.Context
 	cfg      *Config
+	jwt      *jwtInternal.Config
 	repo     Repo
-	validate validator.Validate
+	validate *validator.Validate
 	trx      *trx.Manager
 	provider.LMT
 }
@@ -69,17 +71,38 @@ type Repo struct {
 }
 
 // New returns instance of config graphql resolvers
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) graphql1.Config {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, validate *validator.Validate, jwt *jwtInternal.Config) graphql1.Config {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
 	c := graphql1.Config{
 		Resolvers: &Resolver{
-			ctx:  ctx,
-			cfg:  cfg,
-			repo: appSet.Repo,
-			//validate: appSet.Validate,
-			trx: appSet.Trx,
-			LMT: &set,
+			ctx:      ctx,
+			cfg:      cfg,
+			jwt:      jwt,
+			repo:     appSet.Repo,
+			validate: validate,
+			trx:      appSet.Trx,
+			LMT:      &set,
 		},
+	}
+	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role []*graphql1.RoleEnum) (res interface{}, err error) {
+		user := common.ExtractUserContext(ctx)
+		if user.IsEmpty() {
+			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("Access denied"))
+		}
+
+		for _, r := range role {
+			if _, ok := user.Roles[r.String()]; ok {
+				return next(ctx)
+			}
+		}
+		return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("Access denied"))
+	}
+	c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+		user := common.ExtractUserContext(ctx)
+		if user.IsEmpty() {
+			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("Access denied"))
+		}
+		return next(ctx)
 	}
 	return c
 }
