@@ -23,9 +23,9 @@ func (d *Dispatcher) GetUserDetailsMiddleware(next echo.HandlerFunc) echo.Handle
 			return next(ctx)
 		}
 
-		// @todo parse
+		// @todo parse jwt and fill
 		ctx.Set("user", common.AuthUser{
-			//
+			Id: 1,
 		})
 
 		return next(ctx)
