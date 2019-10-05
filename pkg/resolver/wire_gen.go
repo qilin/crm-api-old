@@ -7,16 +7,16 @@ package resolver
 
 import (
 	"context"
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/metric"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
 	"github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/pkg/postgres"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/logger"
-	"github.com/qilin/go-core/metric"
-	"github.com/qilin/go-core/provider"
-	"github.com/qilin/go-core/tracing"
 )
 
 // Injectors from injector.go:
@@ -52,7 +52,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	configuration, cleanup6, err := tracing.ProviderCfg(configurator)
+	tracingConfig, cleanup6, err := tracing.ProviderCfg(configurator)
 	if err != nil {
 		cleanup5()
 		cleanup4()
@@ -61,7 +61,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	tracer, cleanup7, err := tracing.Provider(ctx, configuration, zap)
+	tracer, cleanup7, err := tracing.Provider(ctx, tracingConfig, zap)
 	if err != nil {
 		cleanup6()
 		cleanup5()
@@ -183,7 +183,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	configuration, cleanup6, err := tracing.ProviderCfg(configurator)
+	tracingConfig, cleanup6, err := tracing.ProviderCfg(configurator)
 	if err != nil {
 		cleanup5()
 		cleanup4()
@@ -192,7 +192,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	tracer, cleanup7, err := tracing.Provider(ctx, configuration, zap)
+	tracer, cleanup7, err := tracing.Provider(ctx, tracingConfig, zap)
 	if err != nil {
 		cleanup6()
 		cleanup5()

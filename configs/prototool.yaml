@@ -3,7 +3,7 @@ protoc:
 
 generate:
   go_options:
-    import_path: github.com/qilin/go-blueprint
+    import_path: github.com/qilin/crm-api
 
   plugins:
     - name: go

@@ -66,4 +66,4 @@ query{
 
 ## ENV
 * APP_WD - work directory, default: application directory 
-* APP_POSTGRES_DSN - example `postgres://blueprint:insecure@localhost:5567?sslmode=disable`
+* APP_POSTGRES_DSN - example `postgres://qilin:insecure@localhost:5567?sslmode=disable`

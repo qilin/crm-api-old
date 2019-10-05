@@ -6,12 +6,15 @@ else
   ROOT_DIR="$( cd "$( dirname "$0" )" && pwd )/.."
 fi
 
-GO_PATH=${ROOT_DIR}/../../../..
-GO_IMAGE=p1hub/qilin-docker-go
+GO_IMAGE=p1hub/go
 GO_IMAGE_TAG=1.12
-GO_PKG=github.com/qilin/go-blueprint
+DIND_IMAGE=p1hub/dind
+DIND_IMAGE_TAG=latest
+PROTOTOOL_IMAGE=p1hub/prototool
+PROTOTOOL_IMAGE_TAG=latest
+GO_PKG=github.com/qilin/crm-api
 GOOS="linux"
 GOARCH="amd64"
-DOCKER_NETWORK="blueprint-default"
-DOCKER_IMAGE=p1hub/qilin-go-blueprint
-PROJECT_NAME="blueprint"
+DOCKER_NETWORK="p1devnet"
+DOCKER_IMAGE=p1hub/qilin-crm-api
+PROJECT_NAME="qilin-crm-api"

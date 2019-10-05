@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 
-	"github.com/qilin/go-core/logger"
-	"github.com/qilin/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )

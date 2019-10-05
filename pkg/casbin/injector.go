@@ -3,10 +3,10 @@
 package casbin
 
 import (
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/casbin/casbin"
 	"github.com/google/wire"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/invoker"
 )
 
 // Build returns casbin.Enforcer instance with resolved dependencies

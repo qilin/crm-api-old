@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/qilin/go-core/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 )
 
 type loggerAdapter struct {

@@ -5,11 +5,11 @@ package postgres
 import (
 	"context"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	"github.com/jinzhu/gorm"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/provider"
 )
 
 // Build returns GORM instance with resolved dependencies

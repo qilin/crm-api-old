@@ -12,16 +12,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"github.com/qilin/crm-api/cmd"
 	"github.com/qilin/crm-api/cmd/version"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/entrypoint"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/logger"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"go.uber.org/automaxprocs/maxprocs"
 )
 
@@ -44,18 +43,12 @@ const (
 	defaultGracefulDelay = 50 * time.Millisecond
 )
 
-// http://www.patorjk.com/software/taag/#p=display&f=Big&t=Blueprint
+// http://www.patorjk.com/software/taag/#p=display&f=Calvin%20S&t=QILIN%20CRM%20API
 
 var logo = `
-  ____  _                       _       _   
- |  _ \| |                     (_)     | |  
- | |_) | |_   _  ___ _ __  _ __ _ _ __ | |_ 
- |  _ <| | | | |/ _ \ '_ \| '__| | '_ \| __|
- | |_) | | |_| |  __/ |_) | |  | | | | | |_ 
- |____/|_|\__,_|\___| .__/|_|  |_|_| |_|\__|
-                    | |                     
-                    |_|      
-
+╔═╗ ╦╦  ╦╔╗╔  ╔═╗╦═╗╔╦╗  ╔═╗╔═╗╦
+║═╬╗║║  ║║║║  ║  ╠╦╝║║║  ╠═╣╠═╝║
+╚═╝╚╩╩═╝╩╝╚╝  ╚═╝╩╚═╩ ╩  ╩ ╩╩  ╩
 		VERSION: %v`
 
 // Root command
@@ -70,9 +63,14 @@ var rootCmd = &cobra.Command{
 		// initializing
 		initial.WorkDir = os.Getenv(envWorkDir)
 		if len(initial.WorkDir) == 0 {
-			initial.WorkDir, e = filepath.Abs(filepath.Dir(os.Args[0]))
-			if e != nil {
-				return e
+			dir, err := os.Getwd()
+			if err == nil {
+				initial.WorkDir = dir
+			} else {
+				initial.WorkDir, e = filepath.Abs(filepath.Dir(os.Args[0]))
+				if e != nil {
+					return e
+				}
 			}
 		}
 		initial.WorkDir, e = filepath.Abs(initial.WorkDir)
@@ -167,7 +165,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	initial.Viper = viper.New()
+	initial.Viper = config.NewViper()
 	initial.Viper.SetConfigType(viperCfgType)
 	initial.Viper.SetEnvPrefix(envPrefix)
 	initial.Viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
@@ -181,6 +179,23 @@ func init() {
 }
 
 func Execute(cmds ...*cobra.Command) {
+	rootCmd.AddCommand(cmds...)
+	if e := rootCmd.Execute(); e != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", e.Error())
+		os.Exit(1)
+	}
+}
+
+func ExecuteDefault(defaultArgs []string, cmds ...*cobra.Command) {
+	if len(defaultArgs) != 0 {
+		var cmdFromArgs string
+		if len(os.Args) > 1 {
+			cmdFromArgs = os.Args[1]
+		}
+		if strings.HasPrefix(cmdFromArgs, "-") || cmdFromArgs == "" {
+			os.Args = append(os.Args[:1], append(defaultArgs, os.Args[1:]...)...)
+		}
+	}
 	rootCmd.AddCommand(cmds...)
 	if e := rootCmd.Execute(); e != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v\n", e.Error())

@@ -3,13 +3,13 @@ package dispatcher
 import (
 	"context"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"github.com/qilin/crm-api/pkg/graphql"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/logger"
-	"github.com/qilin/go-core/provider"
 )
 
 // Dispatcher

@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/google/wire"
 	"github.com/jinzhu/gorm"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/logger"
 
 	// Attach GORM postgres adapter
 	_ "github.com/jinzhu/gorm/dialects/postgres"

@@ -8,16 +8,16 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/pkg/errors"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/provider"
 	"github.com/vektah/gqlparser/gqlerror"
 
 	gqlgen "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/gorilla/websocket"
 	"github.com/qilin/crm-api/generated/graphql"
-	"github.com/qilin/go-core/logger"
 
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
 )

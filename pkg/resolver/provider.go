@@ -5,13 +5,13 @@ import (
 
 	"github.com/qilin/crm-api/internal/validators"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	"github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/pkg/postgres"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/provider"
 )
 
 // Cfg

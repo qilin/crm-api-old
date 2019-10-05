@@ -3,10 +3,10 @@ package daemon
 import (
 	"context"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/cmd"
 	"github.com/qilin/crm-api/internal/daemon"
-	"github.com/qilin/go-core/entrypoint"
-	"github.com/qilin/go-core/logger"
 	"github.com/spf13/cobra"
 )
 
