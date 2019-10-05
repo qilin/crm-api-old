@@ -17,6 +17,10 @@ CGO_ENABLED ?= 0
 DIND_UID ?= 0
 DING_GUID ?= 0
 
+ifeq ($(GO111MODULE),auto)
+override GO111MODULE = on
+endif
+
 ifeq ($(OS),Windows_NT)
 override ROOT_DIR = $(shell echo $(CURRENT_DIR) | sed -e "s:^/./:\U&:g")
 else
@@ -40,7 +44,6 @@ up: clean ## initialize required tools
 	(docker network inspect $${DOCKER_NETWORK} &>/dev/null && echo "Docker network \"$${DOCKER_NETWORK}\" already created") || \
 	(echo "Create docker network \"$${DOCKER_NETWORK}\"" && docker network create $${DOCKER_NETWORK})
 	if [ "${DIND}" != "1" ]; then \
-		export GO111MODULE=on ;\
 		go get github.com/google/wire/cmd/wire@v0.3.0 && \
 			go get github.com/99designs/gqlgen@v0.9.3 && \
 			go get -u github.com/golangci/golangci-lint/cmd/golangci-lint && \
@@ -59,7 +62,7 @@ build: ## build application
 		$(call go_docker,"make build") ;\
     else \
 		. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
-        GO111MODULE=on GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=${CGO_ENABLED} \
+        GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=${CGO_ENABLED} \
         go build -ldflags "-X $${GO_PKG}/cmd/version.appVersion=$(TAG)-$$(date -u +%Y%m%d%H%M)" -o "$(ROOT_DIR)/bin" main.go ;\
     fi;
 .PHONY: build
@@ -68,7 +71,6 @@ clean: ## remove generated files, tidy vendor dependencies
 	if [ "${DIND}" = "1" ]; then \
 		$(call go_docker,"make clean") ;\
     else \
-        export GO111MODULE=on ;\
         go mod tidy ;\
     	rm -rf *.out generated/* vendor bin ;\
     fi;
@@ -153,7 +155,7 @@ go-depends: ## view final versions that will be used in a build for all direct a
 		$(call go_docker,"make go-depends") ;\
     else \
         cd $(ROOT_DIR) ;\
-        GO111MODULE=on go list -m all ;\
+        go list -m all ;\
     fi;
 .PHONY: go-depends
 
@@ -162,7 +164,7 @@ go-generate: ## go generate
 		$(call go_docker,"make go-generate") ;\
     else \
         cd $(ROOT_DIR) ;\
-        GO111MODULE=on go generate $$(go list ./...) || exit 1 ;\
+        go generate $$(go list ./...) || exit 1 ;\
     fi;
 .PHONY: go-generate
 
@@ -171,7 +173,7 @@ go-update-all: ## view available minor and patch upgrades for all direct and ind
 		$(call go_docker,"make go-update-all") ;\
     else \
         cd $(ROOT_DIR) ;\
-    	GO111MODULE=on go list -u -m all ;\
+    	go list -u -m all ;\
     fi;
 .PHONY: go-update-all
 
@@ -179,7 +181,7 @@ gqlgen-generate: ## generate graphql server
 	if [ "${DIND}" = "1" ]; then \
 		$(call go_docker,"make gqlgen-generate") ;\
     else \
-        GO111MODULE=on go run github.com/99designs/gqlgen -v -c $(ROOT_DIR)/configs/gqlgen.yml ;\
+        go run github.com/99designs/gqlgen -v -c $(ROOT_DIR)/configs/gqlgen.yml ;\
     fi;
 .PHONY: gqlgen-generate
 
@@ -199,7 +201,7 @@ test-with-coverage: ## test application with race and total coverage
 		$(call go_docker,"make test-with-coverage") ;\
     else \
 		export WD=$(ROOT_DIR) ;\
-        GO111MODULE=on CGO_ENABLED=1 \
+        CGO_ENABLED=1 \
         go test -v -race -covermode atomic -coverprofile coverage.out ${TEST_ARGS} ./... || exit 1 ;\
         go tool cover -func=coverage.out ;\
     fi;
@@ -210,7 +212,7 @@ test: ## test application with race
 		$(call go_docker,"make test") ;\
     else \
 		export WD=$(ROOT_DIR) ;\
-        GO111MODULE=on CGO_ENABLED=1 \
+        CGO_ENABLED=1 \
         go test -race -v ${TEST_ARGS} ./... ;\
     fi;
 .PHONY: test
@@ -220,7 +222,6 @@ vendor: ## update vendor dependencies
 		$(call go_docker,"make vendor") ;\
     else \
         rm -rf $(ROOT_DIR)/vendor ;\
-    	GO111MODULE=on \
     	go mod vendor ;\
     fi;
 .PHONY: vendor
@@ -229,7 +230,6 @@ go-download-deps: ## download dependencies
 	if [ "${DIND}" = "1" ]; then \
 		$(call go_docker,"make go-download-deps") ;\
     else \
-    	GO111MODULE=on \
     	go get -d ./... ;\
     fi;
 .PHONY: go-download-deps

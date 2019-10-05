@@ -1,17 +1,14 @@
 
 ## How to start on Windows
 * Install **MSYS2** https://www.msys2.org/ and append `bin` directory of MSYS2 to the `PATH` environment variable
+* Launch **msys2.exe** application from msys64 folder
+* Execute command `pacman -S make mingw64/mingw-w64-x86_64-gcc`, then you can close console and use your preffered terminal
 * Install `docker`
-* All commands should be execute in **DIND** container run `make dind`
-* See **Development** section below for examine commands of make
+* Install `go` and see **Development** section below
 
 ## How to start on Mac, Linux
 * Install `make`, `docker`
-* There are two way for development: 
-    * Native (recommend) 
-        * Install `go` and see **Development** section below
-    * DIND container (slow file system on Mac)
-        * Run `make dind` and see **Development** section below
+* Install `go` and see **Development** section below
 
 ## Development
 * For help, run `make`
@@ -52,7 +49,7 @@ query{
 }
 ```
 
-## Migration (for Windows run only in DIND)
+## Migration
 * new: `./scripts/sql-migrate.sh new -env="local" {name}`
 * up: `./scripts/sql-migrate.sh up -env="local"`
 * down: `./scripts/sql-migrate.sh down -env="local"`
