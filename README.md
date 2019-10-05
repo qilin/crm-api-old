@@ -1,6 +1,6 @@
 
 ## How to start on Windows
-* Install **MSYS2** https://www.msys2.org/ and append `bin` directory of MSYS2 to the `PATH` environment variable
+* Install **MSYS2** https://www.msys2.org/ and append `msys64\usr\bin` directory of MSYS2 to the `PATH` environment variable
 * Launch **msys2.exe** application from msys64 folder
 * Execute command `pacman -S make mingw64/mingw-w64-x86_64-gcc`, then you can close console and use your preffered terminal
 * Install `docker`
