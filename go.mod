@@ -5,7 +5,8 @@ go 1.12
 require (
 	cloud.google.com/go v0.46.3 // indirect
 	github.com/99designs/gqlgen v0.9.3
-	github.com/ProtocolONE/go-core/v2 v2.0.0
+	github.com/ProtocolONE/go-core/v2 v2.1.0
+	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
 	github.com/casbin/casbin v1.8.3
 	github.com/fatih/color v1.7.0
 	github.com/gobuffalo/packr v1.30.1 // indirect

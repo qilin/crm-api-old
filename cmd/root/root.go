@@ -1,10 +1,10 @@
 package root
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/alexeyco/simpletable"
+	"github.com/gurukami/typ/v2"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -142,16 +142,43 @@ var rootCmd = &cobra.Command{
 				fmt.Println(color.RedString("\n\n# DEBUG INFO\n"))
 				fmt.Printf("\nWork directory: %v\n\n", ep.WorkDir())
 				fmt.Println(color.GreenString("# CONFIG FILE SETTINGS\n\n"))
-				b, _ := json.Marshal(initial.Viper.AllSettings())
-				var out bytes.Buffer
-				e := json.Indent(&out, b, "", "  ")
-				if e != nil {
-					log.Error("can't prettify config")
-					os.Exit(1)
+
+				var data [][]interface{}
+
+				for _, item := range initial.Viper.AllEnrichedSettings() {
+					data = append(data, []interface{}{
+						item.Key + "\n-> " + strings.Join(item.ENV, "\n-> "),
+						item.Value,
+						item.Type,
+					}, []interface{}{"", "", ""})
 				}
-				fmt.Println(out.String())
+
+				table := simpletable.New()
+
+				table.Header = &simpletable.Header{
+					Cells: []*simpletable.Cell{
+						{Align: simpletable.AlignCenter, Text: "Key Path -> ENV"},
+						{Align: simpletable.AlignCenter, Text: "Value"},
+						{Align: simpletable.AlignCenter, Text: "Type"},
+					},
+				}
+
+				for _, row := range data {
+					r := []*simpletable.Cell{
+						{Align: simpletable.AlignLeft, Text: typ.Of(row[0]).String().V()},
+						{Align: simpletable.AlignLeft, Text: typ.Of(row[1]).String().V()},
+						{Align: simpletable.AlignLeft, Text: typ.Of(row[2]).String().V()},
+					}
+					table.Body.Cells = append(table.Body.Cells, r)
+				}
+
+				table.SetStyle(simpletable.StyleMarkdown)
+				fmt.Println(table.String())
+				fmt.Println()
+
 				fmt.Println(color.CyanString("\n# LOGS\n\n"))
 			}
+
 			_, err := maxprocs.Set(maxprocs.Logger(log.Printf))
 			return err
 		}
