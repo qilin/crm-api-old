@@ -11,20 +11,6 @@ services:
       - APP_TRACING_DISABLED=true
     networks:
       - default
-  qilin-crm-gateway:
-    depends_on:
-      - qilin-crm-migrate
-    container_name: qilin-crm-gateway
-    image: p1hub/qilin-crm-api:${TAG}
-    restart: always
-    ports:
-      - "8080:8080"
-    command: ["gateway","-c","configs/local.yaml","-b",":8080","-d"]
-    environment:
-      - APP_POSTGRES_DSN=postgres://qilin:insecure@postgres:5432?sslmode=disable
-      - APP_GRPC_SERVICES_MS_TARGET=qilin-crm-daemon:8080
-    networks:
-      - default
   qilin-crm-daemon:
     depends_on:
       - qilin-crm-migrate
@@ -32,7 +18,7 @@ services:
     image: p1hub/qilin-crm-api:${TAG}
     restart: always
     ports:
-      - "8081:8080"
+      - "8080:8080"
     command: ["daemon","-c","configs/local.yaml","-b",":8080","-d"]
     environment:
       - APP_POSTGRES_DSN=postgres://qilin:insecure@postgres:5432?sslmode=disable

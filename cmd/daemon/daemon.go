@@ -6,22 +6,22 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/cmd"
-	"github.com/qilin/crm-api/internal/daemon"
+	"github.com/qilin/crm-api/pkg/http"
 	"github.com/spf13/cobra"
 )
 
-const Prefix = "cmd.deamon"
+const Prefix = "cmd.daemon"
 
 var (
 	Cmd = &cobra.Command{
 		Use:           "daemon",
-		Short:         "GRPC API daemon",
+		Short:         "Gateway API daemon",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Run: func(_ *cobra.Command, _ []string) {
 			log := cmd.Slave.Logger().WithFields(logger.Fields{"service": Prefix})
 			var (
-				s *daemon.Daemon
+				s *http.HTTP
 				c func()
 				e error
 			)
@@ -36,7 +36,7 @@ var (
 					log.Info("catch reload in %s, debug: %v, ok: %v", logger.Args(Prefix, initial.WorkDir, ok))
 				})
 				initial, _ := entrypoint.CtxExtractInitial(ctx)
-				s, c, e = daemon.Build(ctx, initial, cmd.Observer)
+				s, c, e = http.Build(ctx, initial, cmd.Observer)
 				if e != nil {
 					return e
 				}
@@ -53,5 +53,5 @@ var (
 
 func init() {
 	// pflags
-	Cmd.PersistentFlags().StringP(daemon.UnmarshalKeyBind, "b", ":8081", "bind address")
+	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":8080", "bind address")
 }

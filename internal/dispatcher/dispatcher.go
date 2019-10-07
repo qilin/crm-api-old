@@ -29,6 +29,8 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	for _, h := range d.appSet.GraphQL.Middleware() {
 		echoHttp.Use(echo.WrapMiddleware(h))
 	}
+	// jwt
+	echoHttp.Use(d.GetUserDetailsMiddleware)
 	// middleware#2: recover
 	echoHttp.Use(middleware.Recover())
 	// middleware#1: CORS

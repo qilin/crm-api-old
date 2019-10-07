@@ -15,8 +15,3 @@ generate:
       type: go
       flags: plugins=grpc
       output: generated
-
-#    - name: grpc-gateway
-#      type: gogo
-#      flags: plugins=grpc
-#      output: generated
