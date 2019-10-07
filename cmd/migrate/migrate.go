@@ -3,15 +3,11 @@ package migrate
 import (
 	"database/sql"
 	"fmt"
-
-	global "github.com/qilin/crm-api/cmd"
-
-	//
-	"os"
-
 	_ "github.com/lib/pq"
+	global "github.com/qilin/crm-api/cmd"
 	"github.com/rubenv/sql-migrate"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
@@ -21,7 +17,7 @@ var (
 	ms               *migrate.FileMigrationSource
 	initCmdFn        = func(cmd *cobra.Command, _ []string) (re error) {
 		ms = &migrate.FileMigrationSource{
-			Dir: global.Slave.WorkDir() + "/migrations",
+			Dir: global.Slave.WorkDir() + "/assets/migrations",
 		}
 		migrate.SetTable(argTable)
 		db, re = sql.Open("postgres", argDsn)
@@ -46,6 +42,7 @@ var (
 				os.Exit(1)
 			}
 			fmt.Printf("Applied %d migrations!\n", n)
+			os.Exit(0)
 		},
 	}
 	cmdDown = &cobra.Command{
@@ -64,6 +61,7 @@ var (
 				os.Exit(1)
 			}
 			fmt.Printf("Applied %d migrations!\n", n)
+			os.Exit(0)
 		},
 	}
 	Cmd = &cobra.Command{

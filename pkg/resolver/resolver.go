@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 
+	"gopkg.in/go-playground/validator.v9"
+
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	graphql1 "github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	jwtInternal "github.com/qilin/crm-api/internal/jwt"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/logger"
-	"github.com/qilin/go-core/provider"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type mutationResolver struct{ *Resolver }

@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/logger"
-	"github.com/qilin/go-core/provider"
 )
 
 // HTTP

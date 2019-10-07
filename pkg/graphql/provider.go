@@ -4,12 +4,12 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	"github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/pkg/resolver"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/provider"
 )
 
 // Cfg

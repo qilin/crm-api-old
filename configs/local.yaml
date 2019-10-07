@@ -7,13 +7,13 @@ metric:
     options:
       sampleRate: 1.0
   scope:
-    prefix: blueprint
+    prefix: qilin
     tags:
-      service: blueprint
+      service: qilin
   interval: 1s
 tracing:
   disabled: true
-  serviceName: blueprint
+  serviceName: qilin
 graphql:
   introspection: true
   dataloader:
@@ -24,7 +24,7 @@ graphql:
     endpoint: /query
   route: /query
 postgres:
-  dsn: postgres://blueprint:insecure@localhost:5567/blueprint?sslmode=disable
+  dsn: postgres://qilin:insecure@localhost:5567/qilin?sslmode=disable
   maxOpenConns: 5
   maxIdleConns: 3
   connMaxLifetime: 15m

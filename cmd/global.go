@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/qilin/go-core/entrypoint"
-	"github.com/qilin/go-core/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 )
 
 var (

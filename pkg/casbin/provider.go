@@ -1,11 +1,11 @@
 package casbin
 
 import (
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/casbin/casbin"
 	"github.com/google/wire"
 	"github.com/qiangmzsx/string-adapter"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/invoker"
 )
 
 // ProviderCfg returns configuration for production GORM

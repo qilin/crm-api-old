@@ -1,10 +1,10 @@
 package root
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/alexeyco/simpletable"
+	"github.com/gurukami/typ/v2"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -12,16 +12,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"github.com/qilin/crm-api/cmd"
 	"github.com/qilin/crm-api/cmd/version"
-	"github.com/qilin/go-core/config"
-	"github.com/qilin/go-core/entrypoint"
-	"github.com/qilin/go-core/invoker"
-	"github.com/qilin/go-core/logger"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"go.uber.org/automaxprocs/maxprocs"
 )
 
@@ -44,18 +43,12 @@ const (
 	defaultGracefulDelay = 50 * time.Millisecond
 )
 
-// http://www.patorjk.com/software/taag/#p=display&f=Big&t=Blueprint
+// http://www.patorjk.com/software/taag/#p=display&f=Calvin%20S&t=QILIN%20CRM%20API
 
 var logo = `
-  ____  _                       _       _   
- |  _ \| |                     (_)     | |  
- | |_) | |_   _  ___ _ __  _ __ _ _ __ | |_ 
- |  _ <| | | | |/ _ \ '_ \| '__| | '_ \| __|
- | |_) | | |_| |  __/ |_) | |  | | | | | |_ 
- |____/|_|\__,_|\___| .__/|_|  |_|_| |_|\__|
-                    | |                     
-                    |_|      
-
+╔═╗ ╦╦  ╦╔╗╔  ╔═╗╦═╗╔╦╗  ╔═╗╔═╗╦
+║═╬╗║║  ║║║║  ║  ╠╦╝║║║  ╠═╣╠═╝║
+╚═╝╚╩╩═╝╩╝╚╝  ╚═╝╩╚═╩ ╩  ╩ ╩╩  ╩
 		VERSION: %v`
 
 // Root command
@@ -70,9 +63,14 @@ var rootCmd = &cobra.Command{
 		// initializing
 		initial.WorkDir = os.Getenv(envWorkDir)
 		if len(initial.WorkDir) == 0 {
-			initial.WorkDir, e = filepath.Abs(filepath.Dir(os.Args[0]))
-			if e != nil {
-				return e
+			dir, err := os.Getwd()
+			if err == nil {
+				initial.WorkDir = dir
+			} else {
+				initial.WorkDir, e = filepath.Abs(filepath.Dir(os.Args[0]))
+				if e != nil {
+					return e
+				}
 			}
 		}
 		initial.WorkDir, e = filepath.Abs(initial.WorkDir)
@@ -144,16 +142,43 @@ var rootCmd = &cobra.Command{
 				fmt.Println(color.RedString("\n\n# DEBUG INFO\n"))
 				fmt.Printf("\nWork directory: %v\n\n", ep.WorkDir())
 				fmt.Println(color.GreenString("# CONFIG FILE SETTINGS\n\n"))
-				b, _ := json.Marshal(initial.Viper.AllSettings())
-				var out bytes.Buffer
-				e := json.Indent(&out, b, "", "  ")
-				if e != nil {
-					log.Error("can't prettify config")
-					os.Exit(1)
+
+				var data [][]interface{}
+
+				for _, item := range initial.Viper.AllEnrichedSettings() {
+					data = append(data, []interface{}{
+						item.Key + "\n-> " + strings.Join(item.ENV, "\n-> "),
+						item.Value,
+						item.Type,
+					}, []interface{}{"", "", ""})
 				}
-				fmt.Println(out.String())
+
+				table := simpletable.New()
+
+				table.Header = &simpletable.Header{
+					Cells: []*simpletable.Cell{
+						{Align: simpletable.AlignCenter, Text: "Key Path -> ENV"},
+						{Align: simpletable.AlignCenter, Text: "Value"},
+						{Align: simpletable.AlignCenter, Text: "Type"},
+					},
+				}
+
+				for _, row := range data {
+					r := []*simpletable.Cell{
+						{Align: simpletable.AlignLeft, Text: typ.Of(row[0]).String().V()},
+						{Align: simpletable.AlignLeft, Text: typ.Of(row[1]).String().V()},
+						{Align: simpletable.AlignLeft, Text: typ.Of(row[2]).String().V()},
+					}
+					table.Body.Cells = append(table.Body.Cells, r)
+				}
+
+				table.SetStyle(simpletable.StyleMarkdown)
+				fmt.Println(table.String())
+				fmt.Println()
+
 				fmt.Println(color.CyanString("\n# LOGS\n\n"))
 			}
+
 			_, err := maxprocs.Set(maxprocs.Logger(log.Printf))
 			return err
 		}
@@ -167,7 +192,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	initial.Viper = viper.New()
+	initial.Viper = config.NewViper()
 	initial.Viper.SetConfigType(viperCfgType)
 	initial.Viper.SetEnvPrefix(envPrefix)
 	initial.Viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
@@ -181,6 +206,23 @@ func init() {
 }
 
 func Execute(cmds ...*cobra.Command) {
+	rootCmd.AddCommand(cmds...)
+	if e := rootCmd.Execute(); e != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", e.Error())
+		os.Exit(1)
+	}
+}
+
+func ExecuteDefault(defaultArgs []string, cmds ...*cobra.Command) {
+	if len(defaultArgs) != 0 {
+		var cmdFromArgs string
+		if len(os.Args) > 1 {
+			cmdFromArgs = os.Args[1]
+		}
+		if strings.HasPrefix(cmdFromArgs, "-") || cmdFromArgs == "" {
+			os.Args = append(os.Args[:1], append(defaultArgs, os.Args[1:]...)...)
+		}
+	}
 	rootCmd.AddCommand(cmds...)
 	if e := rootCmd.Execute(); e != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v\n", e.Error())

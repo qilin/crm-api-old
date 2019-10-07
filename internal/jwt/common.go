@@ -3,7 +3,7 @@ package jwt
 import (
 	"context"
 
-	"github.com/qilin/go-core/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 )
 
 const (
