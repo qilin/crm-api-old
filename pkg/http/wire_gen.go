@@ -16,6 +16,7 @@ import (
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/dispatcher"
+	"github.com/qilin/crm-api/internal/handlers"
 	"github.com/qilin/crm-api/internal/jwt"
 	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/pkg/graphql"
@@ -103,11 +104,13 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	userRepo := repo.NewUserRepo(db)
+	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	listRepo := repo.NewListRepo(db)
+	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
-		User: userRepo,
-		List: listRepo,
+		JwtKeys: jwtKeysRepo,
+		List:    listRepo,
+		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := resolver.AppSet{
@@ -156,7 +159,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	jwtConfig, cleanup13, err := jwt.Provider(configurator)
+	graphqlConfig, cleanup13, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -172,7 +175,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	graphqlConfig, cleanup14, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate, jwtConfig)
+	config2, cleanup14, err := graphql.Cfg(configurator)
 	if err != nil {
 		cleanup13()
 		cleanup12()
@@ -189,7 +192,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup15, err := graphql.Cfg(configurator)
+	graphQL, cleanup15, err := graphql.Provider(ctx, graphqlConfig, awareSet, config2)
 	if err != nil {
 		cleanup14()
 		cleanup13()
@@ -207,7 +210,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	graphQL, cleanup16, err := graphql.Provider(ctx, graphqlConfig, awareSet, config2)
+	commonHandlers, cleanup16, err := handlers.ProviderHandlers(initial, validate, awareSet)
 	if err != nil {
 		cleanup15()
 		cleanup14()
@@ -226,32 +229,33 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	authConfig, cleanup17, err := dispatcher.ProviderAuthCfg(configurator)
-	if err != nil {
-		cleanup16()
-		cleanup15()
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	jwtVerifier := dispatcher.ProviderJwtVerifier(authConfig)
+	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo)
 	dispatcherAppSet := dispatcher.AppSet{
 		GraphQL:     graphQL,
-		JwtVerifier: jwtVerifier,
+		Handlers:    commonHandlers,
+		JwtVerifier: jwtVerefier,
 	}
-	dispatcherConfig, cleanup18, err := dispatcher.ProviderCfg(configurator)
+	dispatcherConfig, cleanup17, err := dispatcher.ProviderCfg(configurator)
+	if err != nil {
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherDispatcher, cleanup18, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
 	if err != nil {
 		cleanup17()
 		cleanup16()
@@ -272,7 +276,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherDispatcher, cleanup19, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig, authConfig)
+	httpConfig, cleanup19, err := Cfg(configurator)
 	if err != nil {
 		cleanup18()
 		cleanup17()
@@ -294,32 +298,8 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup20, err := Cfg(configurator)
+	http, cleanup20, err := Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
-		cleanup19()
-		cleanup18()
-		cleanup17()
-		cleanup16()
-		cleanup15()
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	http, cleanup21, err := Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
-	if err != nil {
-		cleanup20()
 		cleanup19()
 		cleanup18()
 		cleanup17()
@@ -342,7 +322,6 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		return nil, nil, err
 	}
 	return http, func() {
-		cleanup21()
 		cleanup20()
 		cleanup19()
 		cleanup18()
@@ -432,11 +411,13 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	userRepo := repo.NewUserRepo(db)
+	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	listRepo := repo.NewListRepo(db)
+	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
-		User: userRepo,
-		List: listRepo,
+		JwtKeys: jwtKeysRepo,
+		List:    listRepo,
+		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := resolver.AppSet{
@@ -482,7 +463,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	jwtConfig, cleanup12, err := jwt.Provider(configurator)
+	graphqlConfig, cleanup12, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -497,7 +478,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	graphqlConfig, cleanup13, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate, jwtConfig)
+	config2, cleanup13, err := graphql.CfgTest()
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -513,7 +494,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup14, err := graphql.CfgTest()
+	graphQL, cleanup14, err := graphql.Provider(ctx, graphqlConfig, awareSet, config2)
 	if err != nil {
 		cleanup13()
 		cleanup12()
@@ -530,7 +511,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	graphQL, cleanup15, err := graphql.Provider(ctx, graphqlConfig, awareSet, config2)
+	commonHandlers, cleanup15, err := handlers.ProviderHandlers(initial, validate, awareSet)
 	if err != nil {
 		cleanup14()
 		cleanup13()
@@ -548,31 +529,32 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	authConfig, cleanup16, err := dispatcher.ProviderAuthCfg(configurator)
-	if err != nil {
-		cleanup15()
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	jwtVerifier := dispatcher.ProviderJwtVerifier(authConfig)
+	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo)
 	dispatcherAppSet := dispatcher.AppSet{
 		GraphQL:     graphQL,
-		JwtVerifier: jwtVerifier,
+		Handlers:    commonHandlers,
+		JwtVerifier: jwtVerefier,
 	}
-	dispatcherConfig, cleanup17, err := dispatcher.ProviderCfg(configurator)
+	dispatcherConfig, cleanup16, err := dispatcher.ProviderCfg(configurator)
+	if err != nil {
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherDispatcher, cleanup17, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
 	if err != nil {
 		cleanup16()
 		cleanup15()
@@ -592,7 +574,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherDispatcher, cleanup18, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig, authConfig)
+	httpConfig, cleanup18, err := CfgTest()
 	if err != nil {
 		cleanup17()
 		cleanup16()
@@ -613,31 +595,8 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup19, err := CfgTest()
+	http, cleanup19, err := Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
-		cleanup18()
-		cleanup17()
-		cleanup16()
-		cleanup15()
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	http, cleanup20, err := Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
-	if err != nil {
-		cleanup19()
 		cleanup18()
 		cleanup17()
 		cleanup16()
@@ -659,7 +618,6 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	return http, func() {
-		cleanup20()
 		cleanup19()
 		cleanup18()
 		cleanup17()

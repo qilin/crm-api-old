@@ -37,8 +37,6 @@ type Config struct {
 type ResolverRoot interface {
 	AuthMutation() AuthMutationResolver
 	AuthQuery() AuthQueryResolver
-	MsMutation() MsMutationResolver
-	MsQuery() MsQueryResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 }
@@ -68,33 +66,12 @@ type ComplexityRoot struct {
 		Offset func(childComplexity int) int
 	}
 
-	MsMutation struct {
-		New func(childComplexity int, name string) int
-	}
-
-	MsQuery struct {
-		Search func(childComplexity int, query string, cursor CursorIn, order OrderIn) int
-	}
-
 	Mutation struct {
 		Auth func(childComplexity int) int
-		Ms   func(childComplexity int) int
-	}
-
-	NewOut struct {
-		ID     func(childComplexity int) int
-		Status func(childComplexity int) int
 	}
 
 	Query struct {
 		Auth func(childComplexity int) int
-		Ms   func(childComplexity int) int
-	}
-
-	SearchOut struct {
-		Cursor func(childComplexity int) int
-		ID     func(childComplexity int) int
-		Status func(childComplexity int) int
 	}
 
 	SigninOut struct {
@@ -112,6 +89,7 @@ type ComplexityRoot struct {
 
 	User struct {
 		Email func(childComplexity int) int
+		ID    func(childComplexity int) int
 	}
 }
 
@@ -123,19 +101,11 @@ type AuthQueryResolver interface {
 	Me(ctx context.Context, obj *AuthQuery) (*User, error)
 	Signout(ctx context.Context, obj *AuthQuery) (*SignoutOut, error)
 }
-type MsMutationResolver interface {
-	New(ctx context.Context, obj *MsMutation, name string) (*NewOut, error)
-}
-type MsQueryResolver interface {
-	Search(ctx context.Context, obj *MsQuery, query string, cursor CursorIn, order OrderIn) (*SearchOut, error)
-}
 type MutationResolver interface {
 	Auth(ctx context.Context) (*AuthMutation, error)
-	Ms(ctx context.Context) (*MsMutation, error)
 }
 type QueryResolver interface {
 	Auth(ctx context.Context) (*AuthQuery, error)
-	Ms(ctx context.Context) (*MsQuery, error)
 }
 
 type executableSchema struct {
@@ -226,30 +196,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CursorOut.Offset(childComplexity), true
 
-	case "MsMutation.new":
-		if e.complexity.MsMutation.New == nil {
-			break
-		}
-
-		args, err := ec.field_MsMutation_new_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MsMutation.New(childComplexity, args["name"].(string)), true
-
-	case "MsQuery.search":
-		if e.complexity.MsQuery.Search == nil {
-			break
-		}
-
-		args, err := ec.field_MsQuery_search_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MsQuery.Search(childComplexity, args["query"].(string), args["cursor"].(CursorIn), args["order"].(OrderIn)), true
-
 	case "Mutation.auth":
 		if e.complexity.Mutation.Auth == nil {
 			break
@@ -257,61 +203,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Auth(childComplexity), true
 
-	case "Mutation.ms":
-		if e.complexity.Mutation.Ms == nil {
-			break
-		}
-
-		return e.complexity.Mutation.Ms(childComplexity), true
-
-	case "NewOut.id":
-		if e.complexity.NewOut.ID == nil {
-			break
-		}
-
-		return e.complexity.NewOut.ID(childComplexity), true
-
-	case "NewOut.status":
-		if e.complexity.NewOut.Status == nil {
-			break
-		}
-
-		return e.complexity.NewOut.Status(childComplexity), true
-
 	case "Query.auth":
 		if e.complexity.Query.Auth == nil {
 			break
 		}
 
 		return e.complexity.Query.Auth(childComplexity), true
-
-	case "Query.ms":
-		if e.complexity.Query.Ms == nil {
-			break
-		}
-
-		return e.complexity.Query.Ms(childComplexity), true
-
-	case "SearchOut.cursor":
-		if e.complexity.SearchOut.Cursor == nil {
-			break
-		}
-
-		return e.complexity.SearchOut.Cursor(childComplexity), true
-
-	case "SearchOut.id":
-		if e.complexity.SearchOut.ID == nil {
-			break
-		}
-
-		return e.complexity.SearchOut.ID(childComplexity), true
-
-	case "SearchOut.status":
-		if e.complexity.SearchOut.Status == nil {
-			break
-		}
-
-		return e.complexity.SearchOut.Status(childComplexity), true
 
 	case "SigninOut.status":
 		if e.complexity.SigninOut.Status == nil {
@@ -347,6 +244,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Email(childComplexity), true
+
+	case "User.id":
+		if e.complexity.User.ID == nil {
+			break
+		}
+
+		return e.complexity.User.ID(childComplexity), true
 
 	}
 	return 0, false
@@ -421,6 +325,7 @@ type AuthQuery {
 }
 
 type User {
+    id: Int!
     email: String!
 }
 
@@ -472,51 +377,10 @@ directive @hasRole(role: [RoleEnum]) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION`},
 	&ast.Source{Name: "api/graphql/endpoints.graphql", Input: `type Query {
     auth: AuthQuery
-    ms: MsQuery
 }
 
 type Mutation {
     auth: AuthMutation
-    ms: MsMutation
-}`},
-	&ast.Source{Name: "api/graphql/ms.graphql", Input: `# General defenition
-
-# Queries type definitions
-
-type MsQuery {
-    search(query: String!, cursor: CursorIn!, order: OrderIn!): SearchOut! @goField(forceResolver: true)
-}
-
-enum SearchOutStatus {
-    OK
-    FORBIDDEN
-    NOT_FOUND
-    BAD_REQUEST
-    SERVER_INTERNAL_ERROR
-}
-
-type SearchOut {
-    status: SearchOutStatus!
-    id: [ID!]!
-    cursor: CursorOut!
-}
-
-# Mutations type definitions
-
-type MsMutation {
-    new(name: String!): NewOut! @goField(forceResolver: true)
-}
-
-enum NewOutStatus {
-    OK
-    FORBIDDEN
-    BAD_REQUEST
-    SERVER_INTERNAL_ERROR
-}
-
-type NewOut {
-    status: NewOutStatus!
-    id: ID!
 }`},
 	&ast.Source{Name: "api/graphql/root.graphql", Input: `scalar ISO8601DateTime
 
@@ -612,50 +476,6 @@ func (ec *executionContext) field_AuthQuery_signin_args(ctx context.Context, raw
 		}
 	}
 	args["password"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_MsMutation_new_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_MsQuery_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["query"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["query"] = arg0
-	var arg1 CursorIn
-	if tmp, ok := rawArgs["cursor"]; ok {
-		arg1, err = ec.unmarshalNCursorIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorIn(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["cursor"] = arg1
-	var arg2 OrderIn
-	if tmp, ok := rawArgs["order"]; ok {
-		arg2, err = ec.unmarshalNOrderIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐOrderIn(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["order"] = arg2
 	return args, nil
 }
 
@@ -1092,94 +912,6 @@ func (ec *executionContext) _CursorOut_cursor(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _MsMutation_new(ctx context.Context, field graphql.CollectedField, obj *MsMutation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "MsMutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_MsMutation_new_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MsMutation().New(rctx, obj, args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*NewOut)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNNewOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOut(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _MsQuery_search(ctx context.Context, field graphql.CollectedField, obj *MsQuery) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "MsQuery",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_MsQuery_search_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MsQuery().Search(rctx, obj, args["query"].(string), args["cursor"].(CursorIn), args["order"].(OrderIn))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*SearchOut)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSearchOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOut(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_auth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1214,114 +946,6 @@ func (ec *executionContext) _Mutation_auth(ctx context.Context, field graphql.Co
 	return ec.marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthMutation(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_ms(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Ms(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*MsMutation)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOMsMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsMutation(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _NewOut_status(ctx context.Context, field graphql.CollectedField, obj *NewOut) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "NewOut",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(NewOutStatus)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNNewOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _NewOut_id(ctx context.Context, field graphql.CollectedField, obj *NewOut) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "NewOut",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_auth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1354,40 +978,6 @@ func (ec *executionContext) _Query_auth(ctx context.Context, field graphql.Colle
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthQuery(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_ms(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Ms(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*MsQuery)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOMsQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsQuery(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1463,117 +1053,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SearchOut_status(ctx context.Context, field graphql.CollectedField, obj *SearchOut) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "SearchOut",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(SearchOutStatus)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSearchOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SearchOut_id(ctx context.Context, field graphql.CollectedField, obj *SearchOut) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "SearchOut",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2ᚕstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SearchOut_cursor(ctx context.Context, field graphql.CollectedField, obj *SearchOut) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "SearchOut",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*CursorOut)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNCursorOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SigninOut_status(ctx context.Context, field graphql.CollectedField, obj *SigninOut) (ret graphql.Marshaler) {
@@ -1722,6 +1201,43 @@ func (ec *executionContext) _SignupOut_status(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -3097,78 +2613,6 @@ func (ec *executionContext) _CursorOut(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
-var msMutationImplementors = []string{"MsMutation"}
-
-func (ec *executionContext) _MsMutation(ctx context.Context, sel ast.SelectionSet, obj *MsMutation) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, msMutationImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MsMutation")
-		case "new":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._MsMutation_new(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var msQueryImplementors = []string{"MsQuery"}
-
-func (ec *executionContext) _MsQuery(ctx context.Context, sel ast.SelectionSet, obj *MsQuery) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, msQueryImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MsQuery")
-		case "search":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._MsQuery_search(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3186,40 +2630,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "auth":
 			out.Values[i] = ec._Mutation_auth(ctx, field)
-		case "ms":
-			out.Values[i] = ec._Mutation_ms(ctx, field)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var newOutImplementors = []string{"NewOut"}
-
-func (ec *executionContext) _NewOut(ctx context.Context, sel ast.SelectionSet, obj *NewOut) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, newOutImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("NewOut")
-		case "status":
-			out.Values[i] = ec._NewOut_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "id":
-			out.Values[i] = ec._NewOut_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3257,58 +2667,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_auth(ctx, field)
 				return res
 			})
-		case "ms":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_ms(ctx, field)
-				return res
-			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var searchOutImplementors = []string{"SearchOut"}
-
-func (ec *executionContext) _SearchOut(ctx context.Context, sel ast.SelectionSet, obj *SearchOut) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, searchOutImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SearchOut")
-		case "status":
-			out.Values[i] = ec._SearchOut_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "id":
-			out.Values[i] = ec._SearchOut_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "cursor":
-			out.Values[i] = ec._SearchOut_cursor(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3417,6 +2779,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
+		case "id":
+			out.Values[i] = ec._User_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3701,67 +3068,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCursorIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorIn(ctx context.Context, v interface{}) (CursorIn, error) {
-	return ec.unmarshalInputCursorIn(ctx, v)
-}
-
-func (ec *executionContext) marshalNCursorOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorOut(ctx context.Context, sel ast.SelectionSet, v CursorOut) graphql.Marshaler {
-	return ec._CursorOut(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNCursorOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐCursorOut(ctx context.Context, sel ast.SelectionSet, v *CursorOut) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._CursorOut(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	return graphql.UnmarshalID(v)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNID2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNID2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
-	}
-
-	return ret
-}
-
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	return graphql.UnmarshalInt(v)
 }
@@ -3774,61 +3080,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNNewOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOut(ctx context.Context, sel ast.SelectionSet, v NewOut) graphql.Marshaler {
-	return ec._NewOut(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNNewOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOut(ctx context.Context, sel ast.SelectionSet, v *NewOut) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._NewOut(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNNewOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx context.Context, v interface{}) (NewOutStatus, error) {
-	var res NewOutStatus
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNNewOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐNewOutStatus(ctx context.Context, sel ast.SelectionSet, v NewOutStatus) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) unmarshalNOrderIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐOrderIn(ctx context.Context, v interface{}) (OrderIn, error) {
-	var res OrderIn
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNOrderIn2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐOrderIn(ctx context.Context, sel ast.SelectionSet, v OrderIn) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) marshalNSearchOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOut(ctx context.Context, sel ast.SelectionSet, v SearchOut) graphql.Marshaler {
-	return ec._SearchOut(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSearchOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOut(ctx context.Context, sel ast.SelectionSet, v *SearchOut) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._SearchOut(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNSearchOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx context.Context, v interface{}) (SearchOutStatus, error) {
-	var res SearchOutStatus
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNSearchOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSearchOutStatus(ctx context.Context, sel ast.SelectionSet, v SearchOutStatus) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) marshalNSigninOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v SigninOut) graphql.Marshaler {
@@ -4188,28 +3439,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
-}
-
-func (ec *executionContext) marshalOMsMutation2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsMutation(ctx context.Context, sel ast.SelectionSet, v MsMutation) graphql.Marshaler {
-	return ec._MsMutation(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOMsMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsMutation(ctx context.Context, sel ast.SelectionSet, v *MsMutation) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._MsMutation(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOMsQuery2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsQuery(ctx context.Context, sel ast.SelectionSet, v MsQuery) graphql.Marshaler {
-	return ec._MsQuery(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOMsQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐMsQuery(ctx context.Context, sel ast.SelectionSet, v *MsQuery) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._MsQuery(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) (RoleEnum, error) {

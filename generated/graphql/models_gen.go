@@ -32,25 +32,6 @@ type CursorOut struct {
 	Cursor string `json:"cursor"`
 }
 
-type MsMutation struct {
-	New *NewOut `json:"new"`
-}
-
-type MsQuery struct {
-	Search *SearchOut `json:"search"`
-}
-
-type NewOut struct {
-	Status NewOutStatus `json:"status"`
-	ID     string       `json:"id"`
-}
-
-type SearchOut struct {
-	Status SearchOutStatus `json:"status"`
-	ID     []string        `json:"id"`
-	Cursor *CursorOut      `json:"cursor"`
-}
-
 type SigninOut struct {
 	Status SigninOutStatus `json:"status"`
 	Token  string          `json:"token"`
@@ -65,6 +46,7 @@ type SignupOut struct {
 }
 
 type User struct {
+	ID    int    `json:"id"`
 	Email string `json:"email"`
 }
 
@@ -112,51 +94,6 @@ func (e *AuthenticatedRequestStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AuthenticatedRequestStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type NewOutStatus string
-
-const (
-	NewOutStatusOk                  NewOutStatus = "OK"
-	NewOutStatusForbidden           NewOutStatus = "FORBIDDEN"
-	NewOutStatusBadRequest          NewOutStatus = "BAD_REQUEST"
-	NewOutStatusServerInternalError NewOutStatus = "SERVER_INTERNAL_ERROR"
-)
-
-var AllNewOutStatus = []NewOutStatus{
-	NewOutStatusOk,
-	NewOutStatusForbidden,
-	NewOutStatusBadRequest,
-	NewOutStatusServerInternalError,
-}
-
-func (e NewOutStatus) IsValid() bool {
-	switch e {
-	case NewOutStatusOk, NewOutStatusForbidden, NewOutStatusBadRequest, NewOutStatusServerInternalError:
-		return true
-	}
-	return false
-}
-
-func (e NewOutStatus) String() string {
-	return string(e)
-}
-
-func (e *NewOutStatus) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = NewOutStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid NewOutStatus", str)
-	}
-	return nil
-}
-
-func (e NewOutStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -239,53 +176,6 @@ func (e *RoleEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e RoleEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type SearchOutStatus string
-
-const (
-	SearchOutStatusOk                  SearchOutStatus = "OK"
-	SearchOutStatusForbidden           SearchOutStatus = "FORBIDDEN"
-	SearchOutStatusNotFound            SearchOutStatus = "NOT_FOUND"
-	SearchOutStatusBadRequest          SearchOutStatus = "BAD_REQUEST"
-	SearchOutStatusServerInternalError SearchOutStatus = "SERVER_INTERNAL_ERROR"
-)
-
-var AllSearchOutStatus = []SearchOutStatus{
-	SearchOutStatusOk,
-	SearchOutStatusForbidden,
-	SearchOutStatusNotFound,
-	SearchOutStatusBadRequest,
-	SearchOutStatusServerInternalError,
-}
-
-func (e SearchOutStatus) IsValid() bool {
-	switch e {
-	case SearchOutStatusOk, SearchOutStatusForbidden, SearchOutStatusNotFound, SearchOutStatusBadRequest, SearchOutStatusServerInternalError:
-		return true
-	}
-	return false
-}
-
-func (e SearchOutStatus) String() string {
-	return string(e)
-}
-
-func (e *SearchOutStatus) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = SearchOutStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid SearchOutStatus", str)
-	}
-	return nil
-}
-
-func (e SearchOutStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

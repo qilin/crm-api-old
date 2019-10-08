@@ -1,34 +1,40 @@
 package dispatcher
 
 import (
-	"regexp"
 	"strings"
 
-	"github.com/qilin/crm-api/generated/graphql"
-
-	"github.com/qilin/crm-api/internal/dispatcher/common"
-
 	"github.com/labstack/echo/v4"
+	"github.com/qilin/crm-api/generated/graphql"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 )
 
-var tokenRegex = regexp.MustCompile("Bearer ([A-z0-9_.-]{10,})")
-
 // GetUserDetailsMiddleware
-func (d *Dispatcher) GetUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (d *Dispatcher) graphqlJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		auth := ctx.Request().Header.Get(echo.HeaderAuthorization)
-		if auth == "" {
+		authHeader := ctx.Request().Header.Get(echo.HeaderAuthorization)
+		if authHeader == "" {
 			return next(ctx)
 		}
 
-		_, ok := extractTokenFromAuthHeader(auth)
+		token, ok := ExtractTokenFromAuthHeader(authHeader)
 		if !ok {
 			return next(ctx)
 		}
 
-		// @todo parse jwt and fill
-		ctx.Set("user", common.AuthUser{
-			Id: 1,
+		claims, err := d.appSet.JwtVerifier.Check(token)
+		if err != nil {
+			return next(ctx)
+		}
+
+		email, ok := claims.Set["email"].(string)
+		if !ok {
+			return next(ctx)
+		}
+
+		// create internal session with JWT.id and mapped internal user with ID and roles?
+
+		ctx.Set(common.UserContextKey, common.AuthUser{
+			Email: email,
 			Roles: map[string]bool{
 				graphql.RoleEnumUser.String(): true,
 			},
@@ -40,7 +46,7 @@ func (d *Dispatcher) GetUserDetailsMiddleware(next echo.HandlerFunc) echo.Handle
 
 const bearer = "bearer"
 
-func extractTokenFromAuthHeader(val string) (token string, ok bool) {
+func ExtractTokenFromAuthHeader(val string) (token string, ok bool) {
 	authHeaderParts := strings.Split(val, " ")
 	if len(authHeaderParts) != 2 || !strings.EqualFold(strings.ToLower(authHeaderParts[0]), bearer) {
 		return "", false

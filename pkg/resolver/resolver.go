@@ -14,7 +14,6 @@ import (
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
-	jwtInternal "github.com/qilin/crm-api/internal/jwt"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
 )
 
@@ -41,7 +40,6 @@ func (c *Config) Reload(ctx context.Context) {
 type Resolver struct {
 	ctx      context.Context
 	cfg      *Config
-	jwt      *jwtInternal.Config
 	repo     Repo
 	validate *validator.Validate
 	trx      *trx.Manager
@@ -67,18 +65,18 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 
 // Repo
 type Repo struct {
-	User domain.UserRepo
-	List domain.ListRepo
+	JwtKeys domain.JWTKeysRepo
+	List    domain.ListRepo
+	User    domain.UserRepo
 }
 
 // New returns instance of config graphql resolvers
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, validate *validator.Validate, jwt *jwtInternal.Config) graphql1.Config {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, validate *validator.Validate) graphql1.Config {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
 	c := graphql1.Config{
 		Resolvers: &Resolver{
 			ctx:      ctx,
 			cfg:      cfg,
-			jwt:      jwt,
 			repo:     appSet.Repo,
 			validate: validate,
 			trx:      appSet.Trx,

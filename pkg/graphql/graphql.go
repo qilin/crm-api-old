@@ -31,12 +31,8 @@ type GraphQL struct {
 	provider.LMT
 }
 
-func (g *GraphQL) Middleware() []func(http.Handler) http.Handler {
-	return g.cfg.Middleware
-}
-
 // Routers
-func (g *GraphQL) Routers(echoHttp *echo.Echo) {
+func (g *GraphQL) Routers(grp *echo.Group) {
 	upgrader := websocket.Upgrader{}
 
 	options := []handler.Option{
@@ -66,7 +62,7 @@ func (g *GraphQL) Routers(echoHttp *echo.Echo) {
 	}
 
 	if g.cfg.Debug {
-		echoHttp.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
+		grp.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
@@ -85,8 +81,7 @@ func (g *GraphQL) Routers(echoHttp *echo.Echo) {
 		}))
 	}
 
-	//router.Handle(g.cfg.Route,
-	echoHttp.Any(g.cfg.Route,
+	grp.Any(g.cfg.Route,
 		echo.WrapHandler(handler.GraphQL(
 			graphql.NewExecutableSchema(*g.resolver),
 			options...,
@@ -104,7 +99,6 @@ type PlaygroundCfg struct {
 type Config struct {
 	Debug         bool `fallback:"shared.debug"`
 	Introspection bool
-	Middleware    []func(http.Handler) http.Handler
 	Playground    PlaygroundCfg
 	Route         string
 	invoker       *invoker.Invoker

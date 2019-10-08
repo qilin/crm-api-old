@@ -1,5 +1,5 @@
 local:
   dialect: postgres
-  datasource: postgres://qilin:insecure@postgres:5432?sslmode=disable
+  datasource: postgres://qilin:insecure@postgres:5432/qilin?sslmode=disable
   dir: assets/migrations
   table: migrations

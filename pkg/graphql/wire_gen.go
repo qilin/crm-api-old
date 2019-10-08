@@ -15,7 +15,6 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
-	"github.com/qilin/crm-api/internal/jwt"
 	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/pkg/postgres"
 	"github.com/qilin/crm-api/pkg/resolver"
@@ -101,11 +100,13 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	userRepo := repo.NewUserRepo(db)
+	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	listRepo := repo.NewListRepo(db)
+	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
-		User: userRepo,
-		List: listRepo,
+		JwtKeys: jwtKeysRepo,
+		List:    listRepo,
+		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := resolver.AppSet{
@@ -154,7 +155,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	jwtConfig, cleanup13, err := jwt.Provider(configurator)
+	graphqlConfig, cleanup13, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -170,7 +171,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	graphqlConfig, cleanup14, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate, jwtConfig)
+	config2, cleanup14, err := Cfg(configurator)
 	if err != nil {
 		cleanup13()
 		cleanup12()
@@ -187,27 +188,8 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup15, err := Cfg(configurator)
+	graphQL, cleanup15, err := Provider(ctx, graphqlConfig, awareSet, config2)
 	if err != nil {
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	graphQL, cleanup16, err := Provider(ctx, graphqlConfig, awareSet, config2)
-	if err != nil {
-		cleanup15()
 		cleanup14()
 		cleanup13()
 		cleanup12()
@@ -225,7 +207,6 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		return nil, nil, err
 	}
 	return graphQL, func() {
-		cleanup16()
 		cleanup15()
 		cleanup14()
 		cleanup13()
@@ -310,11 +291,13 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	userRepo := repo.NewUserRepo(db)
+	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	listRepo := repo.NewListRepo(db)
+	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
-		User: userRepo,
-		List: listRepo,
+		JwtKeys: jwtKeysRepo,
+		List:    listRepo,
+		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := resolver.AppSet{
@@ -360,7 +343,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	jwtConfig, cleanup12, err := jwt.Provider(configurator)
+	graphqlConfig, cleanup12, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -375,7 +358,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	graphqlConfig, cleanup13, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate, jwtConfig)
+	config2, cleanup13, err := CfgTest()
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -391,26 +374,8 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup14, err := CfgTest()
+	graphQL, cleanup14, err := Provider(ctx, graphqlConfig, awareSet, config2)
 	if err != nil {
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	graphQL, cleanup15, err := Provider(ctx, graphqlConfig, awareSet, config2)
-	if err != nil {
-		cleanup14()
 		cleanup13()
 		cleanup12()
 		cleanup11()
@@ -427,7 +392,6 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	return graphQL, func() {
-		cleanup15()
 		cleanup14()
 		cleanup13()
 		cleanup12()

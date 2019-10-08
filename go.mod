@@ -1,16 +1,14 @@
 module github.com/qilin/crm-api
 
-go 1.12
+go 1.13
 
 require (
 	cloud.google.com/go v0.46.3 // indirect
 	github.com/99designs/gqlgen v0.9.3
-	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190513203152-1161efaef986
 	github.com/ProtocolONE/go-core/v2 v2.1.0
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
 	github.com/cactus/go-statsd-client/statsd v0.0.0-20190922113730-52b467de415c // indirect
 	github.com/casbin/casbin v1.8.3
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.7.0
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
@@ -25,6 +23,7 @@ require (
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/pascaldekloe/jwt v1.6.0
 	github.com/pelletier/go-toml v1.5.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/qiangmzsx/string-adapter v0.0.0-20180323073508-38f25303bb0c
@@ -42,8 +41,7 @@ require (
 	golang.org/x/net v0.0.0-20191003171128-d98b1b443823 // indirect
 	golang.org/x/sys v0.0.0-20191007092633-5f54ce542709 // indirect
 	google.golang.org/appengine v1.6.4 // indirect
-	google.golang.org/genproto v0.0.0-20191002211648-c459b9ce5143 // indirect
-	google.golang.org/grpc v1.24.0
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.30.0
 	gopkg.in/gorp.v1 v1.7.2 // indirect
 )

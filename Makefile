@@ -125,23 +125,12 @@ docker-image: ## build docker image
 	docker build --cache-from $${DOCKER_IMAGE}:${CACHE_TAG} ${DOCKER_BUILD_ARGS} -t $${DOCKER_IMAGE}:${TAG} ${ROOT_DIR}
 .PHONY: docker-image
 
-docker-protoc-generate: ## generate proto, grpc client & server
-	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
-	docker run --rm \
-	 	-v /${ROOT_DIR}/api:/${ROOT_DIR}/api:${DOCKER_MOUNT_SUFFIX} \
-	 	-v /${ROOT_DIR}/generated:/${ROOT_DIR}/generated:${DOCKER_MOUNT_SUFFIX} \
-	 	-v /${ROOT_DIR}/configs/prototool.yaml:/${ROOT_DIR}/prototool.yaml:${DOCKER_MOUNT_SUFFIX} \
-	 	-w /${ROOT_DIR} \
-	 	$${PROTOTOOL_IMAGE}:$${PROTOTOOL_IMAGE_TAG} \
-	 	prototool generate api/proto
-.PHONY: docker-protoc-generate
-
 docker-push: ## push docker image to registry
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
 	docker push $${DOCKER_IMAGE}:${TAG}
 .PHONY: docker-push
 
-generate: docker-protoc-generate gqlgen-generate go-generate ## execute all generators
+generate: gqlgen-generate go-generate ## execute all generators
 .PHONY: generate
 
 github-build: docker-image docker-push docker-clean ## build application in CI

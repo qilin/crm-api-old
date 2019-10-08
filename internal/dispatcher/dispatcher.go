@@ -3,7 +3,7 @@ package dispatcher
 import (
 	"context"
 
-	jwtverifier "github.com/ProtocolONE/authone-jwt-verifier-golang"
+	"github.com/qilin/crm-api/internal/jwt"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -18,19 +18,13 @@ import (
 type Dispatcher struct {
 	ctx     context.Context
 	cfg     Config
-	authCfg common.AuthConfig
+	authCfg common.OAuth2
 	appSet  AppSet
 	provider.LMT
 }
 
 // dispatch
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
-	// middlewares:
-	for _, h := range d.appSet.GraphQL.Middleware() {
-		echoHttp.Use(echo.WrapMiddleware(h))
-	}
-	// jwt
-	echoHttp.Use(d.GetUserDetailsMiddleware)
 	// middleware#2: recover
 	echoHttp.Use(middleware.Recover())
 	// middleware#1: CORS
@@ -38,22 +32,48 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		echoHttp.Use(middleware.CORS())
 	} else {
 		echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			//AllowOrigins:     d.cfg.Cors.Allowed,
-			AllowMethods:     []string{"HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"},
-			AllowHeaders:     []string{"*"},
+			AllowOrigins:     d.cfg.CORS.Allowed,
+			AllowMethods:     d.cfg.CORS.Methods,
+			AllowHeaders:     d.cfg.CORS.Headers,
 			AllowCredentials: false,
 		}))
 	}
 
-	d.appSet.GraphQL.Routers(echoHttp)
+	// init group routes
+	grp := &common.Groups{
+		Auth:    echoHttp.Group(common.AuthGroupPath),
+		GraphQL: echoHttp.Group(common.GraphQLGroupPath),
+		Common:  echoHttp,
+	}
+
+	d.graphqlGroup(grp.GraphQL)
+	d.commonGroup(grp.Common)
+
+	// init routes
+	for _, handler := range d.appSet.Handlers {
+		handler.Route(grp)
+	}
 
 	return nil
+}
+
+func (d *Dispatcher) graphqlGroup(grp *echo.Group) {
+	// GraphQL JWT Middleware
+	grp.Use(d.graphqlJWTMiddleware)
+	// GraphQL Routes
+	d.appSet.GraphQL.Routers(grp)
+}
+
+func (d *Dispatcher) commonGroup(grp *echo.Echo) {
+	// add static or handlers
 }
 
 // Config
 type Config struct {
 	Debug   bool `fallback:"shared.debug"`
 	WorkDir string
+	OAuth   common.OAuth2
+	CORS    common.CORS
 	invoker *invoker.Invoker
 }
 
@@ -69,17 +89,17 @@ func (c *Config) Reload(ctx context.Context) {
 
 type AppSet struct {
 	GraphQL     *graphql.GraphQL
-	JwtVerifier *jwtverifier.JwtVerifier
+	Handlers    common.Handlers
+	JwtVerifier *jwt.JWTVerefier
 }
 
 // New
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, authCfg *common.AuthConfig) *Dispatcher {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) *Dispatcher {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	return &Dispatcher{
-		ctx:     ctx,
-		cfg:     *cfg,
-		authCfg: *authCfg,
-		appSet:  appSet,
-		LMT:     &set,
+		ctx:    ctx,
+		cfg:    *cfg,
+		appSet: appSet,
+		LMT:    &set,
 	}
 }

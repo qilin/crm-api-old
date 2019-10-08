@@ -3,6 +3,8 @@ package http
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/handlers"
+
 	"github.com/qilin/crm-api/pkg/graphql"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
@@ -39,12 +41,14 @@ var (
 	WireSet = wire.NewSet(
 		Provider,
 		Cfg,
+		handlers.ProviderHandlers,
 		dispatcher.WireSet,
 		graphql.WireSet,
 	)
 	WireTestSet = wire.NewSet(
 		Provider,
 		CfgTest,
+		handlers.ProviderHandlers,
 		dispatcher.WireSet,
 		graphql.WireTestSet,
 	)

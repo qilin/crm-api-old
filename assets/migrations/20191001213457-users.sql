@@ -13,4 +13,4 @@ CREATE TABLE users
 
 -- +migrate Down
 
-DROP TABLE list;
+DROP TABLE users;

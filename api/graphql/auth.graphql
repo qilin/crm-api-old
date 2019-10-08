@@ -9,6 +9,7 @@ type AuthQuery {
 }
 
 type User {
+    id: Int!
     email: String!
 }
 

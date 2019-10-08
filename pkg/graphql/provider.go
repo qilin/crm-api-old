@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
@@ -18,7 +17,6 @@ func Cfg(cfg config.Configurator) (*Config, func(), error) {
 		invoker: invoker.NewInvoker(),
 	}
 	e := cfg.UnmarshalKeyOnReload(UnmarshalKey, c)
-	c.Middleware = []func(http.Handler) http.Handler{}
 	return c, func() {}, e
 }
 

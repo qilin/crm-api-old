@@ -2,14 +2,10 @@ package resolver
 
 import (
 	"context"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/qilin/crm-api/internal/dispatcher/common"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gurukami/typ/v2"
 
 	"github.com/qilin/crm-api/internal/db/domain"
 
@@ -94,13 +90,7 @@ func (r *authQueryResolver) Signin(ctx context.Context, obj *graphql1.AuthQuery,
 		}, nil
 	}
 
-	// gen JWT
-	jwt, e := GenerateJWT(r.jwt.Alg, []byte(r.jwt.Private), map[string]interface{}{})
-	if e != nil {
-		return &graphql1.SigninOut{
-			Status: graphql1.SigninOutStatusServerInternalError,
-		}, e
-	}
+	jwt := "jwt.token"
 
 	//
 	return &graphql1.SigninOut{
@@ -132,62 +122,4 @@ func (r *mutationResolver) Auth(ctx context.Context) (*graphql1.AuthMutation, er
 
 func (r *queryResolver) Auth(ctx context.Context) (*graphql1.AuthQuery, error) {
 	return &graphql1.AuthQuery{}, nil
-}
-
-func GenerateJWT(alg string, privateKey []byte, fields map[string]interface{}) (string, error) {
-	type CustomClaims struct {
-		UserID int64 `json:"user_id"`
-		jwt.StandardClaims
-	}
-
-	claims := &CustomClaims{}
-
-	for k, v := range fields {
-		switch k {
-		case "aud":
-			claims.Audience = typ.Of(v).String().V()
-		case "exp":
-			claims.ExpiresAt = typ.Of(v).Int64().V()
-		case "id":
-			claims.Id = typ.Of(v).String().V()
-		case "iat":
-			claims.IssuedAt = time.Now().Unix()
-		case "iss":
-			claims.Issuer = typ.Of(v).String().V()
-		case "nbf":
-			claims.NotBefore = typ.Of(v).Int64().V()
-		case "sub":
-			claims.Subject = typ.Of(v).String().V()
-		}
-	}
-
-	var (
-		sPrivateKey    interface{}
-		err            error
-		signinigMethod jwt.SigningMethod
-	)
-
-	switch alg {
-	case "ES256":
-		signinigMethod = jwt.SigningMethodES256
-		sPrivateKey, err = jwt.ParseECPrivateKeyFromPEM(privateKey)
-		if err != nil {
-			return "", err
-		}
-	case "RS256":
-		signinigMethod = jwt.SigningMethodRS256
-		sPrivateKey, err = jwt.ParseRSAPrivateKeyFromPEM(privateKey)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	token := jwt.NewWithClaims(signinigMethod, claims)
-	ss, err := token.SignedString(sPrivateKey)
-
-	if err != nil {
-		return "", err
-	}
-
-	return ss, nil
 }
