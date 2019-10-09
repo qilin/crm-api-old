@@ -1,0 +1,31 @@
+version: '3'
+services:
+  hasura-postgres:
+    image: postgres:11.5-alpine
+    restart: always
+    volumes:
+    - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: qilin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: qilin
+    ## uncomment next lines for external access to postgres
+    ## please use docker-compose.override.yml for this
+    # ports:
+    # - 5432:5432
+  graphql-engine:
+    image: hasura/graphql-engine:v1.0.0-beta.6.cli-migrations
+    ports:
+    - 8081:8080
+    depends_on:
+    - hasura-postgres
+    volumes:
+    - ./hasura/migrations:/hasura-migrations
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://qilin:password@hasura-postgres:5432/qilin
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_ADMIN_SECRET: password
+volumes:
+  db_data:

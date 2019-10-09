@@ -1,0 +1,2 @@
+admin_secret: password
+endpoint: http://localhost:8081
