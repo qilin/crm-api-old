@@ -5,7 +5,7 @@ import (
 
 	"github.com/qilin/crm-api/internal/db/domain"
 
-	graphql1 "github.com/qilin/crm-api/generated/graphql"
+	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
 )
 
 type authMutationResolver struct{ *Resolver }

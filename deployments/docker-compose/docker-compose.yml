@@ -8,6 +8,14 @@ services:
       - default
     depends_on:
       - postgres
+  crm-daemon:
+    container_name: qilin-crm-daemon
+    image: p1hub/qilin-crm-api:${TAG}
+    restart: always
+    depends_on:
+      - crm-migration
+    networks:
+      - default
   postgres:
     container_name: qilin-postgres
     image: "postgres:11-alpine"

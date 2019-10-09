@@ -17,7 +17,7 @@ import (
 	"github.com/99designs/gqlgen/handler"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/gorilla/websocket"
-	"github.com/qilin/crm-api/generated/graphql"
+	"github.com/qilin/crm-api/internal/generated/graphql"
 
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
 )

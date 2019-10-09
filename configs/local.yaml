@@ -1,19 +1,3 @@
-metric:
-  statsD:
-    addr: 127.0.0.1:8125
-    prefix: stats
-    flushInterval: 100ms
-    flushBytes: 1440
-    options:
-      sampleRate: 1.0
-  scope:
-    prefix: qilin
-    tags:
-      service: qilin
-  interval: 1s
-tracing:
-  disabled: true
-  serviceName: qilin
 graphql:
   introspection: true
   dataloader:
@@ -29,16 +13,3 @@ postgres:
   maxIdleConns: 3
   connMaxLifetime: 15m
   logLevel: debug
-grpc:
-  services:
-    ms:
-      target: localhost:8081
-      maxConn: 10
-      initConn: 1
-      maxLifeDuration: 5m
-      idleTimeout: 0s
-    keepalive:
-      clientParameters:
-        time: 5m
-        timeout: 10s
-        permitWithoutStream: false

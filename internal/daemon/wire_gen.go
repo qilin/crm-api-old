@@ -15,12 +15,16 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
+	"github.com/qilin/crm-api/internal/dispatcher"
+	"github.com/qilin/crm-api/internal/resolver"
+	"github.com/qilin/crm-api/pkg/graphql"
+	"github.com/qilin/crm-api/pkg/http"
 	"github.com/qilin/crm-api/pkg/postgres"
 )
 
 // Injectors from injector.go:
 
-func Build(ctx context.Context, initial config.Initial, observer invoker.Observer) (*Daemon, func(), error) {
+func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Observer) (*http.HTTP, func(), error) {
 	configurator, cleanup, err := config.Provider(initial, observer)
 	if err != nil {
 		return nil, nil, err
@@ -98,18 +102,18 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	listRepo := repo.NewListRepo(db)
 	userRepo := repo.NewUserRepo(db)
-	daemonRepo := Repo{
-		List: listRepo,
+	listRepo := repo.NewListRepo(db)
+	resolverRepo := resolver.Repo{
 		User: userRepo,
+		List: listRepo,
 	}
 	manager := trx.NewTrxManager(db)
-	appSet := AppSet{
-		Repo: daemonRepo,
+	appSet := resolver.AppSet{
+		Repo: resolverRepo,
 		Trx:  manager,
 	}
-	daemonConfig, cleanup10, err := Cfg(configurator)
+	resolverConfig, cleanup10, err := resolver.Cfg(configurator)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -122,7 +126,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	daemon, cleanup11, err := Provider(ctx, awareSet, appSet, daemonConfig)
+	graphqlConfig, cleanup11, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -136,7 +140,121 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	return daemon, func() {
+	config2, cleanup12, err := graphql.Cfg(configurator)
+	if err != nil {
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	graphQL, cleanup13, err := graphql.Provider(ctx, graphqlConfig, awareSet, config2)
+	if err != nil {
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherAppSet := dispatcher.AppSet{
+		GraphQL: graphQL,
+	}
+	dispatcherConfig, cleanup14, err := dispatcher.ProviderCfg(configurator)
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherDispatcher, cleanup15, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpConfig, cleanup16, err := http.Cfg(configurator)
+	if err != nil {
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpHTTP, cleanup17, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	if err != nil {
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	return httpHTTP, func() {
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
 		cleanup11()
 		cleanup10()
 		cleanup9()
@@ -151,7 +269,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 	}, nil
 }
 
-func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Observer) (*Daemon, func(), error) {
+func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker.Observer) (*http.HTTP, func(), error) {
 	configurator, cleanup, err := config.Provider(initial, observer)
 	if err != nil {
 		return nil, nil, err
@@ -217,18 +335,18 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	listRepo := repo.NewListRepo(db)
 	userRepo := repo.NewUserRepo(db)
-	daemonRepo := Repo{
-		List: listRepo,
+	listRepo := repo.NewListRepo(db)
+	resolverRepo := resolver.Repo{
 		User: userRepo,
+		List: listRepo,
 	}
 	manager := trx.NewTrxManager(db)
-	appSet := AppSet{
-		Repo: daemonRepo,
+	appSet := resolver.AppSet{
+		Repo: resolverRepo,
 		Trx:  manager,
 	}
-	daemonConfig, cleanup9, err := CfgTest()
+	resolverConfig, cleanup9, err := resolver.CfgTest()
 	if err != nil {
 		cleanup8()
 		cleanup7()
@@ -240,7 +358,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	daemon, cleanup10, err := Provider(ctx, awareSet, appSet, daemonConfig)
+	graphqlConfig, cleanup10, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -253,7 +371,115 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	return daemon, func() {
+	config2, cleanup11, err := graphql.CfgTest()
+	if err != nil {
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	graphQL, cleanup12, err := graphql.Provider(ctx, graphqlConfig, awareSet, config2)
+	if err != nil {
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherAppSet := dispatcher.AppSet{
+		GraphQL: graphQL,
+	}
+	dispatcherConfig, cleanup13, err := dispatcher.ProviderCfg(configurator)
+	if err != nil {
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherDispatcher, cleanup14, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpConfig, cleanup15, err := http.CfgTest()
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpHTTP, cleanup16, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	if err != nil {
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	return httpHTTP, func() {
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
 		cleanup10()
 		cleanup9()
 		cleanup8()
