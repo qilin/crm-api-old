@@ -46,7 +46,7 @@ up: clean ## initialize required tools
 	if [ "${DIND}" != "1" ]; then \
 		go get github.com/google/wire/cmd/wire@v0.3.0 && \
 			go get github.com/99designs/gqlgen@v0.9.3 && \
-			go get -u github.com/golangci/golangci-lint/cmd/golangci-lint && \
+			go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.19.1 && \
 			go get github.com/vektah/dataloaden@v0.3.0 ;\
     fi;
 .PHONY: up
