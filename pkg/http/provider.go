@@ -9,7 +9,6 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
-	"github.com/qilin/crm-api/internal/dispatcher"
 )
 
 // Cfg
@@ -39,13 +38,11 @@ var (
 	WireSet = wire.NewSet(
 		Provider,
 		Cfg,
-		dispatcher.WireSet,
 		graphql.WireSet,
 	)
 	WireTestSet = wire.NewSet(
 		Provider,
 		CfgTest,
-		dispatcher.WireSet,
 		graphql.WireTestSet,
 	)
 )

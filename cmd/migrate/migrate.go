@@ -75,6 +75,6 @@ var (
 func init() {
 	Cmd.PersistentFlags().StringVar(&argTable, "table", "migrations", "Table for migration history")
 	Cmd.PersistentFlags().IntVar(&argLimit, "limit", 0, "Limit the number of migrations (0 = unlimited)")
-	Cmd.PersistentFlags().StringVar(&argDsn, "dsn", "postgres://blueprint:insecure@localhost:5567?sslmode=disable", "DSN connection string")
+	Cmd.PersistentFlags().StringVar(&argDsn, "dsn", "postgres://qilin:insecure@localhost:5567/qilin?sslmode=disable", "DSN connection string")
 	Cmd.AddCommand(cmdUp, cmdDown)
 }

@@ -15,8 +15,8 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
+	"github.com/qilin/crm-api/internal/resolver"
 	"github.com/qilin/crm-api/pkg/postgres"
-	"github.com/qilin/crm-api/pkg/resolver"
 )
 
 // Injectors from injector.go:

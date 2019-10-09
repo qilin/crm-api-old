@@ -1,2 +1,2 @@
-admin_secret: password
+admin_secret: insecure
 endpoint: http://localhost:8081
