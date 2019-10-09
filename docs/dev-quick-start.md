@@ -9,7 +9,8 @@ To build and run project:
 
 	docker-compose up
 
-graphql endpoint: `http://localhost:8081/v1/graphql`
+This automatically applies database migrations up to latest version
+GraphQL endpoint: `http://localhost:8081/v1/graphql`
 
 Reset database:
 
