@@ -7,3 +7,192 @@ type Mutation {
     auth: AuthMutation
     ms: MsMutation
 }
+
+
+type All {
+    ptah: <- landings
+    cord: <- launcher, content delivery, storefront, auth
+    thetta: <- DRM, Anti-Cheat
+    payOne: <- payment solutions
+    authOne: <- OIDC, SSO
+    qilin: <- catalog, settings, syncs
+}
+
+type All {
+    auth:
+    dictionary:
+        game:
+            genres:
+            platforms:
+        geographics:
+            countries:
+            regions:
+        i18n:
+            currencies:
+            languages:
+            timeZones:
+            phoneNumber:
+            postalFormat:
+            si:
+    product:
+            game:
+            dlc:
+    settings: { "permission": , "":  }
+}
+
+
+merchant <-> customer <-> enduser
+
+
+opengde -> POST HTTP 1.1
+    Accept-Encoding gzip
+    Content-Encoding gzip
+    x-opengde-version: 1.0
+    Content-Type:
+        application/json
+        application/x-msgpack
+        application/x-protobuf
+
+    DateTime ISO 8601
+    URL RFC 1738
+    UUID v4 RFC 4122
+    Language Tags RFC 5646 <- Dictionary (static JSON)
+    Country Code ISO 3166 + GLOBAL <- Dictionary (static JSON)
+    Currency ISO 4217 <- Dictionary (static JSON)
+    https://protocolone.tpondemand.com/entity/191929-validaciya-dannyh-onbordinga-reserch
+
+Open GDE Data Hub
+->
+
+genre
+platform
+site
+company
+publisher
+price
+image
+video
+availableOn
+releaseDate
+achievement
+gainedAchievement
+videoGame
+systemRequirements
+user
+award
+review
+dLC
+digitalKey
+owningLicense
+
+
+VendorModel
+AchievementModel
+LicenseModel
+    DigitalKey
+
+AccountModel
+
+PackageModel
+    PackageView
+    PackageDiscountPolicy
+    KeyPackage
+
+BundleModel
+    BundleDiscountPolicy
+    StoreBundle
+
+Lootbox
+    LootboxVirtualBundle
+
+UserModel
+    Achievements <-> AchievementModel.ID
+    Library <-> LicenseModel.ID
+    PersonalData
+    LanguagePreference
+    FriendList
+    Account <-> OIDC, OAUTH2 etc. AccountModel.ID
+    WishList
+
+Cart <-> UserModel.ID
+
+Order <-> Licenses.ID
+    PaymentHistory
+
+ProductModel
+    Achievements
+    DLC
+    Game
+    Discounts
+    RegionalPrices
+    RegionalRestrictions
+
+Geographics
+    Regions, Countries
+
+Distributions
+    Channels
+        Platforms, Store, Storefront, QRCode, Website
+    Campaign (conditions)
+
+Integrations
+    PayOneAPIProxy
+    AuthOneAPIProxy
+    ProductImporter
+
+<- Key Streaming ->
+DigitalKeyStream
+KeyList
+PlatformsKeys
+ExrternalProvider
+DigitalKeyStore
+ActivationLog
+AsyncWorker
+ActivityStream
+FeaturedProducts
+Page
+Block
+
+
+
+---
+
+
+Subscriptions
+Product
+Game
+DLC
+Vendor
+Bundle
+Licenses
+Order
+Cart
+PaymentHistory
+WishList
+Refunds
+Keys (Digital)
+Storefront
+Policies
+Lootbox
+Statistics
+
+
+Dashboard
+Money
+Games
+Documents
+Notifications
+Settings
+
+Connections
+Distribution
+Logs
+Support
+Users
+Invites
+Sales
+Prices
+Achievements
+
+Companies
+Requests
