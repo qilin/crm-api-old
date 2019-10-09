@@ -1,45 +1,21 @@
 version: '3.7'
 services:
-  qilin-crm-migrate:
-    depends_on:
-      - postgres
-    restart: on-failure
-    container_name: blueprint-migrate
-    image: p1hub/qilin-crm-api:${TAG}
+  crm-migration:
     command: ["migrate","up","--dsn","postgres://qilin:insecure@postgres:5432/qilin?sslmode=disable"]
     environment:
       - APP_TRACING_DISABLED=true
-    networks:
-      - default
-  qilin-crm-gateway:
-    depends_on:
-      - qilin-crm-migrate
-    container_name: qilin-crm-gateway
-    image: p1hub/qilin-crm-api:${TAG}
-    restart: always
+  hasura:
     ports:
-      - "8080:8080"
-    command: ["gateway","-c","configs/local.yaml","-b",":8080","-d"]
+      - 8081:8080
+    volumes:
+      - ./../../assets/migrations:/hasura-migrations
     environment:
-      - APP_POSTGRES_DSN=postgres://qilin:insecure@postgres:5432?sslmode=disable
-      - APP_GRPC_SERVICES_MS_TARGET=qilin-crm-daemon:8080
-    networks:
-      - default
-  qilin-crm-daemon:
-    depends_on:
-      - qilin-crm-migrate
-    container_name: qilin-crm-daemon
-    image: p1hub/qilin-crm-api:${TAG}
-    restart: always
-    ports:
-      - "8081:8080"
-    command: ["daemon","-c","configs/local.yaml","-b",":8080","-d"]
-    environment:
-      - APP_POSTGRES_DSN=postgres://qilin:insecure@postgres:5432?sslmode=disable
-    networks:
-      - default
+      HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable"
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_ADMIN_SECRET: insecure
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
   postgres:
-    container_name: qilin-postgres
     ports:
       - "5567:5432"
     volumes:
