@@ -15,7 +15,7 @@
 
 ## Endpoints
 GraphQL endpoint: `http://localhost:8081/v1/graphql`  
-Hasura console: `http://localhost:8081/console` (usage only in local env) 
+Hasura console: `http://localhost:8081/console` (usage only as sandbox) 
 
 ## Development
 * For help, run `make`
@@ -23,6 +23,13 @@ Hasura console: `http://localhost:8081/console` (usage only in local env)
 * Generate source files from resource `make generate`
 * Build and run application `make dev-build-up` (also it's usage for rebuild && recreate containers)
 * Hasura CLI for managing projects and migrations ([Install guide](https://docs.hasura.io/1.0/graphql/manual/hasura-cli/install-hasura-cli.html))
+
+## Hasura
+
+* `cd ./assets/hasura`
+* `hasura console`
+* As you use the Hasura console UI to make changes to your schema, migration files are automatically generated in the `./assets/migrations/`
+* [Docs about migration & metadata](https://docs.hasura.io/1.0/graphql/manual/migrations/index.html)
 
 ## Requirements
 * Docker + Docker-Compose
