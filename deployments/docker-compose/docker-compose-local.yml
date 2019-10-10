@@ -19,7 +19,7 @@ services:
     ports:
       - 8081:8080
     volumes:
-      - ./../../assets/migrations:/hasura-migrations
+      - ./../../assets/hasura/migrations:/hasura-migrations
     environment:
       HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable"
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
