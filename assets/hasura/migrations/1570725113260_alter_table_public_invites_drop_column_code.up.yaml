@@ -1,0 +1,3 @@
+- args:
+    sql: ALTER TABLE "public"."invites" DROP COLUMN "code" CASCADE
+  type: run_sql
