@@ -1,0 +1,20 @@
+- args:
+    permission:
+      allow_upsert: true
+      check: {}
+      columns:
+      - id
+      - tenant_id
+      - name
+      - role
+      - created_at
+      - updated_at
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: developer
+    table:
+      name: groups
+      schema: public
+  type: create_insert_permission

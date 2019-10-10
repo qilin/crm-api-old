@@ -1,0 +1,8 @@
+- args:
+    permission:
+      filter: {}
+    role: developer
+    table:
+      name: users
+      schema: public
+  type: create_delete_permission
