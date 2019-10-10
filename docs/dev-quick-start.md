@@ -28,7 +28,7 @@ Hasura console: `http://localhost:8081/console` (usage only as sandbox)
 
 * `cd ./assets/hasura`
 * `hasura console`
-* As you use the Hasura console UI to make changes to your schema, migration files are automatically generated in the `./assets/migrations/`
+* As you use the Hasura console UI to make changes to your schema, migration files are automatically generated in the `./assets/hasura/migrations/`
 * [Docs about migration & metadata](https://docs.hasura.io/1.0/graphql/manual/migrations/index.html)
 
 ## Requirements

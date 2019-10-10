@@ -84,7 +84,7 @@ dev-docker-compose-down: ## stop and remove containers, networks, images, and vo
 
 dev-docker-compose-up: ## create and start containers
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
-	(docker network inspect $${DOCKER_NETWORK} &>/dev/null && echo "Docker network \"$${DOCKER_NETWORK}\" already created") || \
+	(docker network inspect $${DOCKER_NETWORK} >/dev/null && echo "Docker network \"$${DOCKER_NETWORK}\" already created") || \
 	(echo "Create docker network \"$${DOCKER_NETWORK}\"" && docker network create $${DOCKER_NETWORK})  ;\
 	TAG=${TAG} DOCKER_NETWORK=$${DOCKER_NETWORK} docker-compose -p $${PROJECT_NAME} ${DOCKER_COMPOSE_ARGS} up -d
 .PHONY: dev-docker-compose-up
