@@ -2,11 +2,12 @@ package daemon
 
 import (
 	"context"
+	"github.com/qilin/crm-api/pkg/http"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/cmd"
-	"github.com/qilin/crm-api/pkg/http"
+	"github.com/qilin/crm-api/internal/daemon"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +37,7 @@ var (
 					log.Info("catch reload in %s, debug: %v, ok: %v", logger.Args(Prefix, initial.WorkDir, ok))
 				})
 				initial, _ := entrypoint.CtxExtractInitial(ctx)
-				s, c, e = http.Build(ctx, initial, cmd.Observer)
+				s, c, e = daemon.BuildHTTP(ctx, initial, cmd.Observer)
 				if e != nil {
 					return e
 				}
@@ -53,5 +54,5 @@ var (
 
 func init() {
 	// pflags
-	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":8080", "bind address")
+	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":8081", "bind address")
 }

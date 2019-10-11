@@ -5,7 +5,7 @@ import (
 
 	"github.com/gurukami/typ/v2"
 	"github.com/jinzhu/gorm"
-	graphql1 "github.com/qilin/crm-api/generated/graphql"
+	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
 )
 
 // Cursor represent pagination info
