@@ -14,7 +14,10 @@ CREATE TABLE jwt_keys
 
 -- +migrate StatementBegin
 
-INSERT INTO jwt_keys (alg, iss, key_type, key) VALUES('ES256','P1','pem', '-----BEGIN PUBLIC KEY-----\n      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEa9fBxVOSbv7iQ3UC0xMwzdqK3QGU\n      1uGDpgNhuOGdNVdleb5iYfGyYqvXPWN02gwFBePLWYBKEPslgeUQEpJ0GQ==\n      -----END PUBLIC KEY-----');
+INSERT INTO jwt_keys (alg, iss, key_type, key) VALUES('ES256','P1','pem', '-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEVs/o5+uQbTjL3chynL4wXgUg2R9
+q9UU8I5mEovUf86QZ7kOBIjJwqnzD1omageEHWwHdBO6B+dFabmdT9POxg==
+-----END PUBLIC KEY-----');
 
 -- +migrate StatementEnd
 

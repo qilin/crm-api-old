@@ -1,8 +1,10 @@
 package jwt
 
 import (
-	"context"
 	"strings"
+	"time"
+
+	"golang.org/x/net/context"
 
 	"github.com/pascaldekloe/jwt"
 	"github.com/qilin/crm-api/internal/db/domain"
@@ -27,18 +29,14 @@ func (j *JWTVerefier) LoadKeys() error {
 	if err != nil {
 		return err
 	}
-
 	for i := range keys {
 		switch strings.ToLower(keys[i].KeyType) {
 		case "pem":
-			println("Loaded PEM")
 			j.keyRegister.LoadPEM([]byte(keys[i].Key), []byte(""))
 		case "jwk":
-			println("Loaded JWK")
 			j.keyRegister.LoadJWK([]byte(keys[i].Key))
 		}
 	}
-
 	return nil
 }
 
@@ -46,6 +44,8 @@ func NewJWTVerifier(repo domain.JWTKeysRepo) *JWTVerefier {
 	j := &JWTVerefier{
 		repo: repo,
 	}
+	// todo: migrate ends later than we start
+	time.Sleep(5 * time.Second)
 	j.LoadKeys()
 	return j
 }

@@ -4,6 +4,7 @@ package daemon
 
 import (
 	"context"
+
 	"github.com/qilin/crm-api/pkg/http"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
@@ -18,7 +19,6 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 	panic(wire.Build(
 		provider.Set,
 		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
-		dispatcher.WireSet,
 		wire.Struct(new(provider.AwareSet), "*"),
 		http.WireSet,
 	))
@@ -29,7 +29,6 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 	panic(wire.Build(
 		provider.Set,
 		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
-		dispatcher.WireTestSet,
 		wire.Struct(new(provider.AwareSet), "*"),
 		http.WireTestSet,
 	))
