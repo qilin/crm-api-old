@@ -14,10 +14,9 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
-	"github.com/qilin/crm-api/generated/graphql"
-	"github.com/vektah/gqlparser/gqlerror"
-
+	"github.com/qilin/crm-api/internal/generated/graphql"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
 var errInternalServer = errors.New("internal server error")

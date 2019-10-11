@@ -5,8 +5,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	domain2 "github.com/qilin/crm-api/internal/db/domain"
-	trx2 "github.com/qilin/crm-api/internal/db/trx"
+	"github.com/qilin/crm-api/internal/db/domain"
+	"github.com/qilin/crm-api/internal/db/trx"
 
 	"github.com/jinzhu/gorm"
 )
@@ -16,8 +16,8 @@ type UserRepo struct {
 }
 
 // Create
-func (a *UserRepo) Create(ctx context.Context, model *domain2.UserItem) error {
-	db := trx2.Inject(ctx, a.db)
+func (a *UserRepo) Create(ctx context.Context, model *domain.UserItem) error {
+	db := trx.Inject(ctx, a.db)
 	pwd, e := hashPassword(model.Password)
 	if e != nil {
 		return e
@@ -27,20 +27,20 @@ func (a *UserRepo) Create(ctx context.Context, model *domain2.UserItem) error {
 }
 
 // List
-func (a *UserRepo) GetByEmail(ctx context.Context, email string) (*domain2.UserItem, error) {
-	db := trx2.Inject(ctx, a.db)
+func (a *UserRepo) GetByEmail(ctx context.Context, email string) (*domain.UserItem, error) {
+	db := trx.Inject(ctx, a.db)
 	var (
-		out = &domain2.UserItem{}
+		out = &domain.UserItem{}
 		e   error
 	)
 	e = db.Where("email=?", email).First(out).Error
 	return out, e
 }
 
-func (a *UserRepo) Get(ctx context.Context, id int) (*domain2.UserItem, error) {
-	db := trx2.Inject(ctx, a.db)
+func (a *UserRepo) Get(ctx context.Context, id int) (*domain.UserItem, error) {
+	db := trx.Inject(ctx, a.db)
 	var (
-		out = &domain2.UserItem{}
+		out = &domain.UserItem{}
 		e   error
 	)
 	e = db.Where("id=?", id).First(out).Error
@@ -49,15 +49,15 @@ func (a *UserRepo) Get(ctx context.Context, id int) (*domain2.UserItem, error) {
 
 func (a *UserRepo) IsExistsEmail(ctx context.Context, email string) (bool, error) {
 	var count int
-	db := trx2.Inject(ctx, a.db)
-	e := db.Model(&domain2.UserItem{}).Where("email=?", email).Count(&count).Error
+	db := trx.Inject(ctx, a.db)
+	e := db.Model(&domain.UserItem{}).Where("email=?", email).Count(&count).Error
 	if e != nil {
 		return false, e
 	}
 	return count > 0, nil
 }
 
-func NewUserRepo(db *gorm.DB) domain2.UserRepo {
+func NewUserRepo(db *gorm.DB) domain.UserRepo {
 	return &UserRepo{db: db}
 }
 

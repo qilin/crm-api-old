@@ -1,10 +1,35 @@
 version: '3.7'
 services:
+  crm-migration:
+    container_name: qilin-crm-migration
+    image: p1hub/qilin-crm-api:${TAG}
+    restart: on-failure
+    networks:
+      - default
+    depends_on:
+      - postgres
+  crm-daemon:
+    container_name: qilin-crm-daemon
+    image: p1hub/qilin-crm-api:${TAG}
+    restart: always
+    depends_on:
+      - crm-migration
+    networks:
+      - default
   postgres:
+    container_name: qilin-postgres
     image: "postgres:11-alpine"
     restart: always
     networks:
       - default
+  hasura:
+    container_name: qilin-hasura
+    image: hasura/graphql-engine:v1.0.0-beta.6.cli-migrations
+    restart: always
+    networks:
+      - default
+    depends_on:
+      - postgres
 networks:
   default:
     name: ${DOCKER_NETWORK}
