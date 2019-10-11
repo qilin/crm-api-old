@@ -27,17 +27,23 @@ func (a *UserRepo) Create(ctx context.Context, model *domain.UserItem) error {
 }
 
 // List
-func (a *UserRepo) Get(ctx context.Context, email string, password string) (*domain.UserItem, error) {
+func (a *UserRepo) GetByEmail(ctx context.Context, email string) (*domain.UserItem, error) {
 	db := trx.Inject(ctx, a.db)
 	var (
-		out *domain.UserItem
+		out = &domain.UserItem{}
 		e   error
 	)
-	pwd, e := hashPassword(password)
-	if e != nil {
-		return out, e
-	}
-	e = db.Where("email=? AND password=?", email, pwd).First(out).Error
+	e = db.Where("email=?", email).First(out).Error
+	return out, e
+}
+
+func (a *UserRepo) Get(ctx context.Context, id int) (*domain.UserItem, error) {
+	db := trx.Inject(ctx, a.db)
+	var (
+		out = &domain.UserItem{}
+		e   error
+	)
+	e = db.Where("id=?", id).First(out).Error
 	return out, e
 }
 

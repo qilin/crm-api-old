@@ -16,6 +16,7 @@ import (
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/generated/graphql"
+	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/pkg/postgres"
 )
 
@@ -99,11 +100,13 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	userRepo := repo.NewUserRepo(db)
+	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	listRepo := repo.NewListRepo(db)
+	userRepo := repo.NewUserRepo(db)
 	resolverRepo := Repo{
-		User: userRepo,
-		List: listRepo,
+		JwtKeys: jwtKeysRepo,
+		List:    listRepo,
+		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
@@ -123,7 +126,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	graphqlConfig, cleanup11, err := Provider(ctx, awareSet, appSet, resolverConfig)
+	validatorSet, cleanup11, err := validators.Provider()
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -137,7 +140,40 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
+	validate, cleanup12, err := validators.ProviderValidators(validatorSet)
+	if err != nil {
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
+	graphqlConfig, cleanup13, err := Provider(ctx, awareSet, appSet, resolverConfig, validate)
+	if err != nil {
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
 	return graphqlConfig, func() {
+		cleanup13()
+		cleanup12()
 		cleanup11()
 		cleanup10()
 		cleanup9()
@@ -218,11 +254,13 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	userRepo := repo.NewUserRepo(db)
+	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	listRepo := repo.NewListRepo(db)
+	userRepo := repo.NewUserRepo(db)
 	resolverRepo := Repo{
-		User: userRepo,
-		List: listRepo,
+		JwtKeys: jwtKeysRepo,
+		List:    listRepo,
+		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
@@ -241,7 +279,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	graphqlConfig, cleanup10, err := Provider(ctx, awareSet, appSet, resolverConfig)
+	validatorSet, cleanup10, err := validators.Provider()
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -254,7 +292,38 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
+	validate, cleanup11, err := validators.ProviderValidators(validatorSet)
+	if err != nil {
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
+	graphqlConfig, cleanup12, err := Provider(ctx, awareSet, appSet, resolverConfig, validate)
+	if err != nil {
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
 	return graphqlConfig, func() {
+		cleanup12()
+		cleanup11()
 		cleanup10()
 		cleanup9()
 		cleanup8()

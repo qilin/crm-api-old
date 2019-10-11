@@ -6,23 +6,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-
-	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
-	"github.com/ProtocolONE/go-core/v2/pkg/provider"
-	"github.com/pkg/errors"
-	"github.com/vektah/gqlparser/gqlerror"
-
 	gqlgen "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/gorilla/websocket"
+	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"github.com/qilin/crm-api/internal/generated/graphql"
-
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
-var errInternalServer = errors.New("internal server error")
+var (
+	ErrInternalServer = errors.New("internal server error")
+	ErrAccessDenied   = errors.New("access denied")
+)
 
 // GraphQL
 type GraphQL struct {
@@ -32,12 +32,8 @@ type GraphQL struct {
 	provider.LMT
 }
 
-func (g *GraphQL) Middleware() []func(http.Handler) http.Handler {
-	return g.cfg.Middleware
-}
-
 // Routers
-func (g *GraphQL) Routers(echoHttp *echo.Echo) {
+func (g *GraphQL) Routers(grp *echo.Group) {
 	upgrader := websocket.Upgrader{}
 
 	options := []handler.Option{
@@ -51,23 +47,23 @@ func (g *GraphQL) Routers(echoHttp *echo.Echo) {
 			return nil
 		}),
 		handler.ErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
-			// panic error
-			if _, ok := e.(*gqErrs.PanicErr); ok {
+			switch e.(type) {
+			case *gqErrs.PanicErr:
 				g.L().Alert("recover on middleware, err: %v", logger.Args(e))
-				goto done
+			case *gqErrs.AccessDeniedErr:
+				g.L().Info("internal server error, err: %v", logger.Args(e))
+			case *gqErrs.ClientErr:
+				g.L().Error("internal server error, err: %v", logger.Args(e))
+			default:
+				g.L().Error("internal server error, err: %v", logger.Args(e))
+				e = ErrInternalServer
 			}
-			// client error
-			g.L().Error("internal server error, err: %v", logger.Args(e))
-			if _, ok := e.(*gqErrs.ClientErr); !ok {
-				e = errInternalServer
-			}
-		done:
 			return gqlgen.DefaultErrorPresenter(ctx, e)
 		}),
 	}
 
 	if g.cfg.Debug {
-		echoHttp.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
+		grp.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
@@ -86,8 +82,7 @@ func (g *GraphQL) Routers(echoHttp *echo.Echo) {
 		}))
 	}
 
-	//router.Handle(g.cfg.Route,
-	echoHttp.Any(g.cfg.Route,
+	grp.Any(g.cfg.Route,
 		echo.WrapHandler(handler.GraphQL(
 			graphql.NewExecutableSchema(*g.resolver),
 			options...,
@@ -105,7 +100,6 @@ type PlaygroundCfg struct {
 type Config struct {
 	Debug         bool `fallback:"shared.debug"`
 	Introspection bool
-	Middleware    []func(http.Handler) http.Handler
 	Playground    PlaygroundCfg
 	Route         string
 	invoker       *invoker.Invoker

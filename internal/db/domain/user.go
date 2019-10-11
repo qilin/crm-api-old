@@ -20,6 +20,7 @@ func (UserItem) TableName() string {
 
 type UserRepo interface {
 	Create(ctx context.Context, model *UserItem) error
-	Get(ctx context.Context, email string, password string) (*UserItem, error)
+	Get(ctx context.Context, id int) (*UserItem, error)
+	GetByEmail(ctx context.Context, email string) (*UserItem, error)
 	IsExistsEmail(ctx context.Context, email string) (bool, error)
 }

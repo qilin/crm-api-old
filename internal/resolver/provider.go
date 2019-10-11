@@ -3,15 +3,15 @@ package resolver
 import (
 	"context"
 
-	"github.com/qilin/crm-api/internal/validators"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/generated/graphql"
+	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/pkg/postgres"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // Cfg
@@ -28,13 +28,12 @@ func CfgTest() (*Config, func(), error) {
 
 type AppSet struct {
 	Repo Repo
-	//Validate validator.Validate
-	Trx *trx.Manager
+	Trx  *trx.Manager
 }
 
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) (graphql.Config, func(), error) {
-	c := New(ctx, set, appSet, cfg)
+func Provider(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, validate *validator.Validate) (graphql.Config, func(), error) {
+	c := New(ctx, set, appSet, cfg, validate)
 	return c, func() {}, nil
 }
 
@@ -42,6 +41,7 @@ var (
 	ProviderRepo = wire.NewSet(
 		repo.NewListRepo,
 		repo.NewUserRepo,
+		repo.NewJwtKeysRepo,
 		trx.NewTrxManager,
 	)
 	ProviderRepoProduction = wire.NewSet(
@@ -54,17 +54,28 @@ var (
 		wire.Struct(new(Repo), "*"),
 		postgres.WireTestSet,
 	)
+
+	ValidatorsProduction = wire.NewSet(
+		validators.Provider,
+		validators.ProviderValidators,
+	)
+	ValidatorsTest = wire.NewSet(
+		validators.Provider,
+		validators.ProviderValidators,
+	)
+
 	WireSet = wire.NewSet(
 		Provider,
 		Cfg,
 		ProviderRepoProduction,
+		ValidatorsProduction,
 		wire.Struct(new(AppSet), "*"),
 	)
 	WireTestSet = wire.NewSet(
 		Provider,
 		CfgTest,
 		ProviderTestRepo,
-		validators.WireTestSet,
+		ValidatorsTest,
 		wire.Struct(new(AppSet), "*"),
 	)
 )
