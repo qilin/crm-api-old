@@ -28,7 +28,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	// middleware#2: recover
 	echoHttp.Use(middleware.Recover())
 	// middleware#1: CORS
-	if d.cfg.Debug {
+	/*if d.cfg.Debug {
 		echoHttp.Use(middleware.CORS())
 	} else {
 		echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -37,7 +37,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			AllowHeaders:     d.cfg.CORS.Headers,
 			AllowCredentials: false,
 		}))
-	}
+	}*/
 
 	// init group routes
 	grp := &common.Groups{

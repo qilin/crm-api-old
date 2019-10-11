@@ -19,8 +19,10 @@ import (
 	"github.com/vektah/gqlparser/gqlerror"
 )
 
-var errInternalServer = errors.New("internal server error")
-var errAccessDenied = errors.New("access denied")
+var (
+	ErrInternalServer = errors.New("internal server error")
+	ErrAccessDenied   = errors.New("access denied")
+)
 
 // GraphQL
 type GraphQL struct {
@@ -54,7 +56,7 @@ func (g *GraphQL) Routers(grp *echo.Group) {
 				g.L().Error("internal server error, err: %v", logger.Args(e))
 			default:
 				g.L().Error("internal server error, err: %v", logger.Args(e))
-				e = errInternalServer
+				e = ErrInternalServer
 			}
 			return gqlgen.DefaultErrorPresenter(ctx, e)
 		}),

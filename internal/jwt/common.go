@@ -23,6 +23,7 @@ func (j *JWTVerefier) Check(token string) (*jwt.Claims, error) {
 }
 
 func (j *JWTVerefier) LoadKeys() error {
+
 	keys, err := j.repo.All(context.Background())
 	if err != nil {
 		return err

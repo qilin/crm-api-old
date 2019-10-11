@@ -3,8 +3,8 @@ package repo
 import (
 	"context"
 
-	domain2 "github.com/qilin/crm-api/internal/db/domain"
-	trx2 "github.com/qilin/crm-api/internal/db/trx"
+	"github.com/qilin/crm-api/internal/db/domain"
+	"github.com/qilin/crm-api/internal/db/trx"
 
 	"github.com/jinzhu/gorm"
 )
@@ -14,27 +14,27 @@ type JWTKeysRepo struct {
 }
 
 // Get All Keys
-func (a *JWTKeysRepo) All(ctx context.Context) ([]domain2.JWTKeysItem, error) {
+func (a *JWTKeysRepo) All(ctx context.Context) ([]domain.JWTKeysItem, error) {
 	var (
-		out []domain2.JWTKeysItem
+		out []domain.JWTKeysItem
 		e   error
 	)
-	db := trx2.Inject(ctx, a.db)
-	e = db.Find(out).Error
+	db := trx.Inject(ctx, a.db)
+	e = db.Find(&out).Error
 	return out, e
 }
 
 // Create
-func (a *JWTKeysRepo) Create(ctx context.Context, model *domain2.JWTKeysItem) error {
-	db := trx2.Inject(ctx, a.db)
+func (a *JWTKeysRepo) Create(ctx context.Context, model *domain.JWTKeysItem) error {
+	db := trx.Inject(ctx, a.db)
 	return db.Save(model).Error
 }
 
 // Get
-func (a *JWTKeysRepo) Get(ctx context.Context, alg, iss string) (*domain2.JWTKeysItem, error) {
-	db := trx2.Inject(ctx, a.db)
+func (a *JWTKeysRepo) Get(ctx context.Context, alg, iss string) (*domain.JWTKeysItem, error) {
+	db := trx.Inject(ctx, a.db)
 	var (
-		out = &domain2.JWTKeysItem{}
+		out = &domain.JWTKeysItem{}
 		e   error
 	)
 	e = db.Where("alg=? AND iss=?", alg, iss).First(out).Error
@@ -42,11 +42,11 @@ func (a *JWTKeysRepo) Get(ctx context.Context, alg, iss string) (*domain2.JWTKey
 }
 
 // Delete
-func (a *JWTKeysRepo) Delete(ctx context.Context, item *domain2.JWTKeysItem) error {
-	db := trx2.Inject(ctx, a.db)
+func (a *JWTKeysRepo) Delete(ctx context.Context, item *domain.JWTKeysItem) error {
+	db := trx.Inject(ctx, a.db)
 	return db.Unscoped().Delete(item).Error
 }
 
-func NewJwtKeysRepo(db *gorm.DB) domain2.JWTKeysRepo {
+func NewJwtKeysRepo(db *gorm.DB) domain.JWTKeysRepo {
 	return &JWTKeysRepo{db: db}
 }
