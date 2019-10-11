@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"context"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"net/http"
 	"strings"
 	"time"
@@ -32,8 +33,8 @@ type GraphQL struct {
 	provider.LMT
 }
 
-// Routers
-func (g *GraphQL) Routers(grp *echo.Group) {
+// Route
+func (g *GraphQL) Route(groups *common.Groups) {
 	upgrader := websocket.Upgrader{}
 
 	options := []handler.Option{
@@ -63,7 +64,7 @@ func (g *GraphQL) Routers(grp *echo.Group) {
 	}
 
 	if g.cfg.Debug {
-		grp.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
+		groups.GraphQL.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
@@ -82,7 +83,7 @@ func (g *GraphQL) Routers(grp *echo.Group) {
 		}))
 	}
 
-	grp.Any(g.cfg.Route,
+	groups.GraphQL.Any(g.cfg.Route,
 		echo.WrapHandler(handler.GraphQL(
 			graphql.NewExecutableSchema(*g.resolver),
 			options...,

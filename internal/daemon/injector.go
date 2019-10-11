@@ -4,6 +4,7 @@ package daemon
 
 import (
 	"context"
+	"github.com/qilin/crm-api/internal/webhooks"
 	"github.com/qilin/crm-api/pkg/http"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
@@ -20,6 +21,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
 		wire.Struct(new(provider.AwareSet), "*"),
 		http.WireSet,
+		webhooks.WireSet,
 	))
 }
 
@@ -30,5 +32,6 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
 		wire.Struct(new(provider.AwareSet), "*"),
 		http.WireTestSet,
+		webhooks.WireTestSet,
 	))
 }

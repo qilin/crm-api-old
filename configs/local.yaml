@@ -5,8 +5,7 @@ graphql:
   playground:
     route: /client
     name: local
-    endpoint: /query
-  route: /query
+    endpoint: /v1/graphql
 postgres:
   dsn: postgres://qilin:insecure@localhost:5567/qilin?sslmode=disable
   maxOpenConns: 5
@@ -35,3 +34,5 @@ dispatcher:
       auth: "/"
       callback: "/callback"
       logout: "/logout"
+webhooks:
+  secret: insecure

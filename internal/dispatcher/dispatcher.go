@@ -2,7 +2,6 @@ package dispatcher
 
 import (
 	"context"
-
 	"github.com/qilin/crm-api/internal/jwt"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
@@ -28,7 +27,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	// middleware#2: recover
 	echoHttp.Use(middleware.Recover())
 	// middleware#1: CORS
-	/*if d.cfg.Debug {
+	if d.cfg.Debug {
 		echoHttp.Use(middleware.CORS())
 	} else {
 		echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -37,13 +36,14 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			AllowHeaders:     d.cfg.CORS.Headers,
 			AllowCredentials: false,
 		}))
-	}*/
+	}
 
 	// init group routes
 	grp := &common.Groups{
 		Auth:    echoHttp.Group(common.AuthGroupPath),
 		GraphQL: echoHttp.Group(common.GraphQLGroupPath),
 		Common:  echoHttp,
+		V1:      echoHttp.Group(common.V1Path),
 	}
 
 	d.graphqlGroup(grp.GraphQL)
@@ -60,8 +60,6 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 func (d *Dispatcher) graphqlGroup(grp *echo.Group) {
 	// GraphQL JWT Middleware
 	grp.Use(d.graphqlJWTMiddleware)
-	// GraphQL Routes
-	d.appSet.GraphQL.Routers(grp)
 }
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {

@@ -1,0 +1,3 @@
+- args:
+    name: invites
+  type: delete_event_trigger
