@@ -15,7 +15,8 @@ const (
 
 	// routes
 	AuthGroupPath    = "/auth"
-	GraphQLGroupPath = ""
+	GraphQLGroupPath = "/v1/graphql"
+	V1Path           = "/v1"
 )
 
 func ExtractUserContext(ctx context.Context) *AuthUser {
