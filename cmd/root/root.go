@@ -186,7 +186,7 @@ var rootCmd = &cobra.Command{
 
 		if e = ep.Serve(preRun); e != nil {
 			_ = preRun()
-			//log.Error(e.Error())
+			log.Error(e.Error())
 			ep.Shutdown(context.Background(), 1)
 		}
 	},

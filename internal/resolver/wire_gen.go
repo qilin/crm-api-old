@@ -13,10 +13,10 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/metric"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
-	"github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
-	"github.com/qilin/crm-api/internal/validators"
+	"github.com/qilin/crm-api/internal/generated/graphql"
+    "github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/pkg/postgres"
 )
 

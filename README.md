@@ -1,66 +1,48 @@
+# Qilin Management API
 
-## How to start on Windows
-* Install **MSYS2** https://www.msys2.org/ and append `msys64\usr\bin` directory of MSYS2 to the `PATH` environment variable
-* Launch **msys2.exe** application from msys64 folder
-* Execute command `pacman -S make mingw64/mingw-w64-x86_64-gcc`, then you can close console and use your preffered terminal
-* Install `docker`
-* Install `go` and see **Development** section below
+Qilin is an open source tool facilitating creation, distribution and activation of licenses for game content. 
 
-## How to start on Mac, Linux
-* Install `make`, `docker`
-* Install `go` and see **Development** section below
+The mission of Qilin n is to enable developers, publishers, platforms and stores to distribute games,
+reducing their efforts on concluding and drafting contracts and exchanging documentation to a
+minimum, and providing them with comprehensive statistics in real time.
 
-## Development
-* For help, run `make`
-* Init local env `make up` should run only once
-* Download dependencies `make vendor`
-* Generate source files from resource `make generate`
-* Build and run application `make dev-build-up` (also it's usage for rebuild && recreate containers)
-* Navigate to http://localhost:8080/client in your browser and paste queries below from "Usage" section
+Our solution is a part of Protocol One IAAS, it is actively used in Storefront constructor. Qilin
+can be installed as a component on an existing P1-independent system, employing its own
+hardware or cloud platform.
 
-## Usage
-Create new item  
-```
-mutation{
-  ms {
-    new(name: "item1") {
-      status
-      id
-    }
-  }
-}
-```
+## Features
 
-Search items by query  
-```
-query{
-  ms {
-    search(query: "item1", cursor: {limit: 10, offset: 0, cursor:""}, order: ASC) {
-      status
-      id
-      cursor {
-        count
-        limit
-        offset
-        cursor
-      }
-    }
-  }
-}
-```
+ * Sales Growth. ​Individual pricing, cross-platform and cross-shop data create an
+individual feature list and price offers for each user, increasing sales conversions and
+their quantity.
+ * New Games. ​Using e-sign in the Qilin agreement is all you have to do to access the
+listing of games within the Protocol One ecosystem.
+ * All-platform release.​ Games and developers using Qilin can have a release on all
+platforms and stores within the ecosystem stores with a single click.
+ * Quick withdrawal of funds.​ Qilin can credit the end stores — now you can withdraw
+funds whenever you wish, ignoring payment conditions of the end stores (minimum
+amount threshold, monthly or quarterly payments).
+ * Settings. ​Real time regional price changes and planning the discounts on all
+platforms and stores without restrictions.
+ * Statistics.​ Timely information on the amount of keys sold, the geography of sales,
+final prices and VAT updated in real time.
+ * Key Streaming​. Create keys in Qinin without restrictions, in real time, for every
+purchase. For the distribution of 3rd party keys, a single set of keys is used to
+distribute to any number of end platforms.
+2
+ * Advanced regional restrictions system.​ A key coming from a “cheaper” region can
+either be prevented from activation, or the user can be offered to pay the difference.
+ * Royalty reports.​ Embedded legally verifiable royalty reports for an arbitrary period of
+time, including cumulative figures across all platforms and stores.
+ * Unified SDK.​ Qilin SDK used in the game can achieve unified integration with
+Steam, Gog, Kartridge and other platforms to manage authorization, achievements,
+payments and cloud saves. A single build can be used across all platforms
 
-## Migration
-* new: `./scripts/sql-migrate.sh new -env="local" {name}`
-* up: `./scripts/sql-migrate.sh up -env="local"`
-* down: `./scripts/sql-migrate.sh down -env="local"`
-* redo: `./scripts/sql-migrate.sh redo -env="local"`
-* skip: `./scripts/sql-migrate.sh skip -env="local"`
-* status: `./scripts/sql-migrate.sh status -env="local"`
+## Quick Start
 
-## Requirements
-* GoLang 1.12+
-* PostgreSQL 11+
+[Development Quick Start](./docs/dev-quick-start.md)
 
-## ENV
-* APP_WD - work directory, default: application directory 
-* APP_POSTGRES_DSN - example `postgres://qilin:insecure@localhost:5567?sslmode=disable`
+## Contributing
+Please feel free to submit issues, fork the repository and send pull requests!
+
+When submitting an issue, we ask that you please include a complete test function that demonstrates the issue. Extra credit for those using Testify to write the test code that demonstrates it.

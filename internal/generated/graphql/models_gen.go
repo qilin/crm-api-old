@@ -13,9 +13,7 @@ type AuthMutation struct {
 }
 
 type AuthQuery struct {
-	Signin  *SigninOut  `json:"signin"`
-	Me      *User       `json:"me"`
-	Signout *SignoutOut `json:"signout"`
+	Signin *SigninOut `json:"signin"`
 }
 
 type CursorIn struct {
@@ -37,64 +35,8 @@ type SigninOut struct {
 	Token  string          `json:"token"`
 }
 
-type SignoutOut struct {
-	Status AuthenticatedRequestStatus `json:"status"`
-}
-
 type SignupOut struct {
 	Status SignupOutStatus `json:"status"`
-}
-
-type User struct {
-	ID    int    `json:"id"`
-	Email string `json:"email"`
-}
-
-type AuthenticatedRequestStatus string
-
-const (
-	AuthenticatedRequestStatusOk                  AuthenticatedRequestStatus = "OK"
-	AuthenticatedRequestStatusForbidden           AuthenticatedRequestStatus = "FORBIDDEN"
-	AuthenticatedRequestStatusNotFound            AuthenticatedRequestStatus = "NOT_FOUND"
-	AuthenticatedRequestStatusBadRequest          AuthenticatedRequestStatus = "BAD_REQUEST"
-	AuthenticatedRequestStatusServerInternalError AuthenticatedRequestStatus = "SERVER_INTERNAL_ERROR"
-)
-
-var AllAuthenticatedRequestStatus = []AuthenticatedRequestStatus{
-	AuthenticatedRequestStatusOk,
-	AuthenticatedRequestStatusForbidden,
-	AuthenticatedRequestStatusNotFound,
-	AuthenticatedRequestStatusBadRequest,
-	AuthenticatedRequestStatusServerInternalError,
-}
-
-func (e AuthenticatedRequestStatus) IsValid() bool {
-	switch e {
-	case AuthenticatedRequestStatusOk, AuthenticatedRequestStatusForbidden, AuthenticatedRequestStatusNotFound, AuthenticatedRequestStatusBadRequest, AuthenticatedRequestStatusServerInternalError:
-		return true
-	}
-	return false
-}
-
-func (e AuthenticatedRequestStatus) String() string {
-	return string(e)
-}
-
-func (e *AuthenticatedRequestStatus) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = AuthenticatedRequestStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid AuthenticatedRequestStatus", str)
-	}
-	return nil
-}
-
-func (e AuthenticatedRequestStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type OrderIn string
@@ -135,47 +77,6 @@ func (e *OrderIn) UnmarshalGQL(v interface{}) error {
 }
 
 func (e OrderIn) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type RoleEnum string
-
-const (
-	RoleEnumAdmin RoleEnum = "ADMIN"
-	RoleEnumUser  RoleEnum = "USER"
-)
-
-var AllRoleEnum = []RoleEnum{
-	RoleEnumAdmin,
-	RoleEnumUser,
-}
-
-func (e RoleEnum) IsValid() bool {
-	switch e {
-	case RoleEnumAdmin, RoleEnumUser:
-		return true
-	}
-	return false
-}
-
-func (e RoleEnum) String() string {
-	return string(e)
-}
-
-func (e *RoleEnum) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = RoleEnum(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid RoleEnum", str)
-	}
-	return nil
-}
-
-func (e RoleEnum) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
