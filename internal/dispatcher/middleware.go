@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
+	"github.com/qilin/crm-api/internal/generated/graphql"
 )
 
 // GetUserDetailsMiddleware

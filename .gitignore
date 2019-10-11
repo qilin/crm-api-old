@@ -22,3 +22,5 @@ vendor
 .idea/
 
 .tmp/
+
+docker-compose.override.yml

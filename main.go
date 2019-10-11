@@ -8,5 +8,5 @@ import (
 )
 
 func main() {
-	root.Execute(daemon.Cmd, version.Cmd, migrate.Cmd, daemon.Cmd)
+	root.Execute(version.Cmd, migrate.Cmd, daemon.Cmd)
 }

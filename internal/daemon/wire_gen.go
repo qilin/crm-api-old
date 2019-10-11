@@ -3,7 +3,7 @@
 //go:generate wire
 //+build !wireinject
 
-package http
+package daemon
 
 import (
 	"context"
@@ -18,15 +18,16 @@ import (
 	"github.com/qilin/crm-api/internal/dispatcher"
 	"github.com/qilin/crm-api/internal/handlers"
 	"github.com/qilin/crm-api/internal/jwt"
+	"github.com/qilin/crm-api/internal/resolver"
 	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/pkg/graphql"
+	"github.com/qilin/crm-api/pkg/http"
 	"github.com/qilin/crm-api/pkg/postgres"
-	"github.com/qilin/crm-api/pkg/resolver"
 )
 
 // Injectors from injector.go:
 
-func Build(ctx context.Context, initial config.Initial, observer invoker.Observer) (*HTTP, func(), error) {
+func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Observer) (*http.HTTP, func(), error) {
 	configurator, cleanup, err := config.Provider(initial, observer)
 	if err != nil {
 		return nil, nil, err
@@ -276,7 +277,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup19, err := Cfg(configurator)
+	httpConfig, cleanup19, err := http.Cfg(configurator)
 	if err != nil {
 		cleanup18()
 		cleanup17()
@@ -298,7 +299,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	http, cleanup20, err := Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	httpHTTP, cleanup20, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
 		cleanup19()
 		cleanup18()
@@ -321,7 +322,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	return http, func() {
+	return httpHTTP, func() {
 		cleanup20()
 		cleanup19()
 		cleanup18()
@@ -345,7 +346,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 	}, nil
 }
 
-func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Observer) (*HTTP, func(), error) {
+func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker.Observer) (*http.HTTP, func(), error) {
 	configurator, cleanup, err := config.Provider(initial, observer)
 	if err != nil {
 		return nil, nil, err
@@ -574,7 +575,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup18, err := CfgTest()
+	httpConfig, cleanup18, err := http.CfgTest()
 	if err != nil {
 		cleanup17()
 		cleanup16()
@@ -595,7 +596,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	http, cleanup19, err := Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	httpHTTP, cleanup19, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
 		cleanup18()
 		cleanup17()
@@ -617,7 +618,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	return http, func() {
+	return httpHTTP, func() {
 		cleanup19()
 		cleanup18()
 		cleanup17()

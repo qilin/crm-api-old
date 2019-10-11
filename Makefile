@@ -6,7 +6,7 @@ override CURRENT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 override DOCKER_MOUNT_SUFFIX ?= consistent
 override DOCKER_COMPOSE_ARGS ?= -f deployments/docker-compose/docker-compose.yml -f deployments/docker-compose/docker-compose-local.yml
 override DOCKER_BUILD_ARGS ?= -f ${ROOT_DIR}/build/docker/app/Dockerfile
-override GO_PATH = $(shell echo "$(GOPATH)" | cut -d';' -f1 | sed -e "s~^\(.\):~/\1~g" -e "s~\\\~/~g" )
+override GO_PATH = $(shell echo "$(GOPATH)" | cut -d';' -f1 | sed -e "s~^\(.\):~/\1~g" -e "s~\\\~/~g" -e "s~^/go:~~g" )
 
 
 TAG ?= latest
@@ -34,6 +34,7 @@ define go_docker
 		-v /${ROOT_DIR}:/${ROOT_DIR}:${DOCKER_MOUNT_SUFFIX} \
         $${VOLUME_PKG_MOD} \
 		-w /${ROOT_DIR} \
+		-e GO111MODULE=on \
 		-e GOPATH=/${GO_PATH}:/go \
 		$${GO_IMAGE}:$${GO_IMAGE_TAG} \
 		sh -c 'GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=${CGO_ENABLED} TAG=${TAG} $(subst ",,${1}); if [ "${DIND_UID}" != "0" ]; then chown -R ${DIND_UID}:${DIND_GUID} ${ROOT_DIR}; fi'
@@ -41,20 +42,15 @@ endef
 
 up: clean ## initialize required tools
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
-	(docker network inspect $${DOCKER_NETWORK} &>/dev/null && echo "Docker network \"$${DOCKER_NETWORK}\" already created") || \
-	(echo "Create docker network \"$${DOCKER_NETWORK}\"" && docker network create $${DOCKER_NETWORK})
 	if [ "${DIND}" != "1" ]; then \
 		go get github.com/google/wire/cmd/wire@v0.3.0 && \
 			go get github.com/99designs/gqlgen@v0.9.3 && \
-			go get -u github.com/golangci/golangci-lint/cmd/golangci-lint && \
+			go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.19.1 && \
 			go get github.com/vektah/dataloaden@v0.3.0 ;\
     fi;
 .PHONY: up
 
 down: dev-docker-compose-down clean ## reset to zero setting
-	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
-	(docker network inspect $${DOCKER_NETWORK} &>/dev/null && \
-	(echo "Delete docker network" && docker network rm $${DOCKER_NETWORK}) || echo "Docker network \"$${DOCKER_NETWORK}\" already deleted")
 .PHONY: down
 
 build: ## build application
@@ -81,11 +77,15 @@ dev-build-up: build docker-image-cache dev-docker-compose-up ## create new build
 
 dev-docker-compose-down: ## stop and remove containers, networks, images, and volumes
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
-	TAG=${TAG} DOCKER_NETWORK=$${DOCKER_NETWORK} docker-compose -p $${PROJECT_NAME} ${DOCKER_COMPOSE_ARGS} down -v
+	TAG=${TAG} DOCKER_NETWORK=$${DOCKER_NETWORK} docker-compose -p $${PROJECT_NAME} ${DOCKER_COMPOSE_ARGS} down -v  ;\
+	(docker network inspect $${DOCKER_NETWORK} &>/dev/null && \
+	(echo "Delete docker network" && docker network rm $${DOCKER_NETWORK}) || echo "Docker network \"$${DOCKER_NETWORK}\" already deleted")
 .PHONY: dev-docker-compose-down
 
 dev-docker-compose-up: ## create and start containers
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
+	(docker network inspect $${DOCKER_NETWORK} >/dev/null && echo "Docker network \"$${DOCKER_NETWORK}\" already created") || \
+	(echo "Create docker network \"$${DOCKER_NETWORK}\"" && docker network create $${DOCKER_NETWORK})  ;\
 	TAG=${TAG} DOCKER_NETWORK=$${DOCKER_NETWORK} docker-compose -p $${PROJECT_NAME} ${DOCKER_COMPOSE_ARGS} up -d
 .PHONY: dev-docker-compose-up
 
@@ -130,7 +130,7 @@ docker-push: ## push docker image to registry
 	docker push $${DOCKER_IMAGE}:${TAG}
 .PHONY: docker-push
 
-generate: gqlgen-generate go-generate ## execute all generators
+generate: init gqlgen-generate go-generate ## execute all generators
 .PHONY: generate
 
 github-build: docker-image docker-push docker-clean ## build application in CI
@@ -148,7 +148,7 @@ go-depends: ## view final versions that will be used in a build for all direct a
     fi;
 .PHONY: go-depends
 
-go-generate: ## go generate
+go-generate: init ## go generate
 	if [ "${DIND}" = "1" ]; then \
 		$(call go_docker,"make go-generate") ;\
     else \
@@ -222,6 +222,10 @@ go-download-deps: ## download dependencies
     	go get -d ./... ;\
     fi;
 .PHONY: go-download-deps
+
+init:
+	mkdir -p $(ROOT_DIR)/internal/generated
+.PHONY: init
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

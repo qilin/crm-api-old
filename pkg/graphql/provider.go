@@ -7,8 +7,8 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
-	"github.com/qilin/crm-api/generated/graphql"
-	"github.com/qilin/crm-api/pkg/resolver"
+	"github.com/qilin/crm-api/internal/generated/graphql"
+	"github.com/qilin/crm-api/internal/resolver"
 )
 
 // Cfg
