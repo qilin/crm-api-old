@@ -12,6 +12,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/db/trx"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
 )

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/qilin/crm-api/internal/dispatcher/common"
+
 	"github.com/labstack/echo/v4"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
@@ -18,7 +20,6 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/gorilla/websocket"
 	"github.com/qilin/crm-api/internal/generated/graphql"
-    "github.com/labstack/echo/v4"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
 )
 
@@ -83,12 +84,18 @@ func (g *GraphQL) Routers(grp *echo.Group) {
 		}))
 	}
 
-	grp.Any(g.cfg.Route,
-		echo.WrapHandler(handler.GraphQL(
-			graphql.NewExecutableSchema(*g.resolver),
-			options...,
-		)),
+	h := handler.GraphQL(
+		graphql.NewExecutableSchema(*g.resolver),
+		options...,
 	)
+	grp.Any(g.cfg.Route, func(c echo.Context) error {
+		h.ServeHTTP(c.Response(), c.Request().WithContext(
+			context.WithValue(c.Request().Context(),
+				common.UserContextKey, c.Get(common.UserContextKey)),
+		),
+		)
+		return nil
+	})
 }
 
 type PlaygroundCfg struct {

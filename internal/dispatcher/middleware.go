@@ -4,37 +4,36 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/qilin/crm-api/generated/graphql"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
+	"github.com/qilin/crm-api/internal/generated/graphql"
 )
 
 // GetUserDetailsMiddleware
 func (d *Dispatcher) graphqlJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		authHeader := ctx.Request().Header.Get(echo.HeaderAuthorization)
-		if authHeader == "" {
-			return next(ctx)
-		}
-
-		token, ok := ExtractTokenFromAuthHeader(authHeader)
-		if !ok {
+		token := ctx.Request().Header.Get(echo.HeaderAuthorization)
+		if token == "" {
+			d.L().Debug("Can't get Authorization Header")
 			return next(ctx)
 		}
 
 		claims, err := d.appSet.JwtVerifier.Check(token)
 		if err != nil {
+			d.L().Debug("JWT Check: " + err.Error())
 			return next(ctx)
 		}
 
 		email, ok := claims.Set["email"].(string)
 		if !ok {
+			d.L().Info("can't get email from jwt")
 			return next(ctx)
 		}
 
 		// create internal session with JWT.id and mapped internal user with ID and roles?
 
-		ctx.Set(common.UserContextKey, common.AuthUser{
+		ctx.Set(common.UserContextKey, &common.AuthUser{
 			Email: email,
+			// todo: extract roles from somewhere
 			Roles: map[string]bool{
 				graphql.RoleEnumUser.String(): true,
 			},

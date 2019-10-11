@@ -426,7 +426,7 @@ func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[st
 	args := map[string]interface{}{}
 	var arg0 []*RoleEnum
 	if tmp, ok := rawArgs["role"]; ok {
-		arg0, err = ec.unmarshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, tmp)
+		arg0, err = ec.unmarshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -570,7 +570,7 @@ func (ec *executionContext) _AuthMutation_signup(ctx context.Context, field grap
 	res := resTmp.(*SignupOut)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOut(ctx, field.Selections, res)
+	return ec.marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AuthQuery_signin(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
@@ -614,7 +614,7 @@ func (ec *executionContext) _AuthQuery_signin(ctx context.Context, field graphql
 	res := resTmp.(*SigninOut)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOut(ctx, field.Selections, res)
+	return ec.marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AuthQuery_me(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
@@ -640,7 +640,7 @@ func (ec *executionContext) _AuthQuery_me(ctx context.Context, field graphql.Col
 			return ec.resolvers.AuthQuery().Me(rctx, obj)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			role, err := ec.unmarshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, []interface{}{"USER", "ADMIN"})
+			role, err := ec.unmarshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, []interface{}{"USER", "ADMIN"})
 			if err != nil {
 				return nil, err
 			}
@@ -656,7 +656,7 @@ func (ec *executionContext) _AuthQuery_me(ctx context.Context, field graphql.Col
 		} else if tmp == nil {
 			return nil, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/qilin/crm-api/generated/graphql.User`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/qilin/crm-api/internal/generated/graphql.User`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -671,7 +671,7 @@ func (ec *executionContext) _AuthQuery_me(ctx context.Context, field graphql.Col
 	res := resTmp.(*User)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AuthQuery_signout(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
@@ -709,7 +709,7 @@ func (ec *executionContext) _AuthQuery_signout(ctx context.Context, field graphq
 		} else if tmp == nil {
 			return nil, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/qilin/crm-api/generated/graphql.SignoutOut`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/qilin/crm-api/internal/generated/graphql.SignoutOut`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -724,7 +724,7 @@ func (ec *executionContext) _AuthQuery_signout(ctx context.Context, field graphq
 	res := resTmp.(*SignoutOut)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignoutOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignoutOut(ctx, field.Selections, res)
+	return ec.marshalNSignoutOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignoutOut(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CursorOut_count(ctx context.Context, field graphql.CollectedField, obj *CursorOut) (ret graphql.Marshaler) {
@@ -943,7 +943,7 @@ func (ec *executionContext) _Mutation_auth(ctx context.Context, field graphql.Co
 	res := resTmp.(*AuthMutation)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthMutation(ctx, field.Selections, res)
+	return ec.marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthMutation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_auth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -977,7 +977,7 @@ func (ec *executionContext) _Query_auth(ctx context.Context, field graphql.Colle
 	res := resTmp.(*AuthQuery)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthQuery(ctx, field.Selections, res)
+	return ec.marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthQuery(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1089,7 +1089,7 @@ func (ec *executionContext) _SigninOut_status(ctx context.Context, field graphql
 	res := resTmp.(SigninOutStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx, field.Selections, res)
+	return ec.marshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SigninOut_token(ctx context.Context, field graphql.CollectedField, obj *SigninOut) (ret graphql.Marshaler) {
@@ -1163,7 +1163,7 @@ func (ec *executionContext) _SignoutOut_status(ctx context.Context, field graphq
 	res := resTmp.(AuthenticatedRequestStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx, field.Selections, res)
+	return ec.marshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SignupOut_status(ctx context.Context, field graphql.CollectedField, obj *SignupOut) (ret graphql.Marshaler) {
@@ -1200,7 +1200,7 @@ func (ec *executionContext) _SignupOut_status(ctx context.Context, field graphql
 	res := resTmp.(SignupOutStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx, field.Selections, res)
+	return ec.marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -3045,12 +3045,12 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, v interface{}) (AuthenticatedRequestStatus, error) {
+func (ec *executionContext) unmarshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, v interface{}) (AuthenticatedRequestStatus, error) {
 	var res AuthenticatedRequestStatus
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, sel ast.SelectionSet, v AuthenticatedRequestStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx context.Context, sel ast.SelectionSet, v AuthenticatedRequestStatus) graphql.Marshaler {
 	return v
 }
 
@@ -3082,11 +3082,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNSigninOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v SigninOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSigninOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v SigninOut) graphql.Marshaler {
 	return ec._SigninOut(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v *SigninOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v *SigninOut) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3096,20 +3096,20 @@ func (ec *executionContext) marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑap
 	return ec._SigninOut(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, v interface{}) (SigninOutStatus, error) {
+func (ec *executionContext) unmarshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, v interface{}) (SigninOutStatus, error) {
 	var res SigninOutStatus
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, sel ast.SelectionSet, v SigninOutStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, sel ast.SelectionSet, v SigninOutStatus) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNSignoutOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignoutOut(ctx context.Context, sel ast.SelectionSet, v SignoutOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSignoutOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignoutOut(ctx context.Context, sel ast.SelectionSet, v SignoutOut) graphql.Marshaler {
 	return ec._SignoutOut(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSignoutOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignoutOut(ctx context.Context, sel ast.SelectionSet, v *SignoutOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSignoutOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignoutOut(ctx context.Context, sel ast.SelectionSet, v *SignoutOut) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3119,11 +3119,11 @@ func (ec *executionContext) marshalNSignoutOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑa
 	return ec._SignoutOut(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSignupOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v SignupOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSignupOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v SignupOut) graphql.Marshaler {
 	return ec._SignupOut(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v *SignupOut) graphql.Marshaler {
+func (ec *executionContext) marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v *SignupOut) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3133,12 +3133,12 @@ func (ec *executionContext) marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑap
 	return ec._SignupOut(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, v interface{}) (SignupOutStatus, error) {
+func (ec *executionContext) unmarshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, v interface{}) (SignupOutStatus, error) {
 	var res SignupOutStatus
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, sel ast.SelectionSet, v SignupOutStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, sel ast.SelectionSet, v SignupOutStatus) graphql.Marshaler {
 	return v
 }
 
@@ -3156,11 +3156,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3396,22 +3396,22 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAuthMutation2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthMutation(ctx context.Context, sel ast.SelectionSet, v AuthMutation) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthMutation2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthMutation(ctx context.Context, sel ast.SelectionSet, v AuthMutation) graphql.Marshaler {
 	return ec._AuthMutation(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthMutation(ctx context.Context, sel ast.SelectionSet, v *AuthMutation) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthMutation(ctx context.Context, sel ast.SelectionSet, v *AuthMutation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._AuthMutation(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAuthQuery2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthQuery(ctx context.Context, sel ast.SelectionSet, v AuthQuery) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthQuery2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthQuery(ctx context.Context, sel ast.SelectionSet, v AuthQuery) graphql.Marshaler {
 	return ec._AuthQuery(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐAuthQuery(ctx context.Context, sel ast.SelectionSet, v *AuthQuery) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthQuery(ctx context.Context, sel ast.SelectionSet, v *AuthQuery) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3441,16 +3441,16 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) (RoleEnum, error) {
+func (ec *executionContext) unmarshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) (RoleEnum, error) {
 	var res RoleEnum
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, sel ast.SelectionSet, v RoleEnum) graphql.Marshaler {
+func (ec *executionContext) marshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, sel ast.SelectionSet, v RoleEnum) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) ([]*RoleEnum, error) {
+func (ec *executionContext) unmarshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) ([]*RoleEnum, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -3462,7 +3462,7 @@ func (ec *executionContext) unmarshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrm�
 	var err error
 	res := make([]*RoleEnum, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, vSlice[i])
+		res[i], err = ec.unmarshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -3470,7 +3470,7 @@ func (ec *executionContext) unmarshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrm�
 	return res, nil
 }
 
-func (ec *executionContext) marshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, sel ast.SelectionSet, v []*RoleEnum) graphql.Marshaler {
+func (ec *executionContext) marshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, sel ast.SelectionSet, v []*RoleEnum) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3497,7 +3497,7 @@ func (ec *executionContext) marshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, sel, v[i])
+			ret[i] = ec.marshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3510,15 +3510,15 @@ func (ec *executionContext) marshalORoleEnum2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑ
 	return ret
 }
 
-func (ec *executionContext) unmarshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) (*RoleEnum, error) {
+func (ec *executionContext) unmarshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) (*RoleEnum, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, v)
+	res, err := ec.unmarshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) marshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, sel ast.SelectionSet, v *RoleEnum) graphql.Marshaler {
+func (ec *executionContext) marshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, sel ast.SelectionSet, v *RoleEnum) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
