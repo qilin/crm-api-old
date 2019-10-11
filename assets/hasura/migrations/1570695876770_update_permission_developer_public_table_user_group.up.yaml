@@ -1,0 +1,13 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - group_id
+      - user_id
+      filter: {}
+      limit: null
+    role: developer
+    table:
+      name: user_group
+      schema: public
+  type: create_select_permission

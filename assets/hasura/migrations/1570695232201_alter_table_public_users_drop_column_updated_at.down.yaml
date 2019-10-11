@@ -1,0 +1,9 @@
+- args:
+    sql: ALTER TABLE "public"."users" ADD COLUMN "updated_at" timestamptz
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."users" ALTER COLUMN "updated_at" DROP NOT NULL
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."users" ALTER COLUMN "updated_at" SET DEFAULT now()
+  type: run_sql

@@ -1,0 +1,10 @@
+- args:
+    cascade: false
+    sql: |-
+      INSERT INTO group_role VALUES
+          ('owner',''),
+          ('admin',''),
+          ('merchant',''),
+          ('developer',''),
+          ('supporter','');
+  type: run_sql

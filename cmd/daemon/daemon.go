@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/qilin/crm-api/internal/daemon"
 	"github.com/qilin/crm-api/pkg/http"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/cmd"

@@ -1,0 +1,17 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - tenant_id
+      - role
+      - created_at
+      - updated_at
+      - name
+      filter: {}
+      limit: null
+    role: developer
+    table:
+      name: groups
+      schema: public
+  type: create_select_permission
