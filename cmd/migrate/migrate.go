@@ -3,11 +3,12 @@ package migrate
 import (
 	"database/sql"
 	"fmt"
+	"os"
+
 	_ "github.com/lib/pq"
 	global "github.com/qilin/crm-api/cmd"
 	"github.com/rubenv/sql-migrate"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var (

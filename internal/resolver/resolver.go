@@ -12,6 +12,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/db/trx"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
 )
@@ -40,7 +41,7 @@ type Resolver struct {
 	ctx      context.Context
 	cfg      *Config
 	repo     Repo
-	validate validator.Validate
+	validate *validator.Validate
 	trx      *trx.Manager
 	provider.LMT
 }
@@ -64,22 +65,43 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 
 // Repo
 type Repo struct {
-	User domain.UserRepo
-	List domain.ListRepo
+	JwtKeys domain.JWTKeysRepo
+	List    domain.ListRepo
+	User    domain.UserRepo
 }
 
 // New returns instance of config graphql resolvers
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) graphql1.Config {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, validate *validator.Validate) graphql1.Config {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
 	c := graphql1.Config{
 		Resolvers: &Resolver{
-			ctx:  ctx,
-			cfg:  cfg,
-			repo: appSet.Repo,
-			//validate: appSet.Validate,
-			trx: appSet.Trx,
-			LMT: &set,
+			ctx:      ctx,
+			cfg:      cfg,
+			repo:     appSet.Repo,
+			validate: validate,
+			trx:      appSet.Trx,
+			LMT:      &set,
 		},
+	}
+	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role []*graphql1.RoleEnum) (res interface{}, err error) {
+		user := common.ExtractUserContext(ctx)
+		if user.IsEmpty() {
+			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
+		}
+
+		for _, r := range role {
+			if _, ok := user.Roles[r.String()]; ok {
+				return next(ctx)
+			}
+		}
+		return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
+	}
+	c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+		user := common.ExtractUserContext(ctx)
+		if user.IsEmpty() {
+			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
+		}
+		return next(ctx)
 	}
 	return c
 }

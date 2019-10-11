@@ -9,8 +9,8 @@ type ValidatorSet struct {
 }
 
 // Email validator
-func (v *ValidatorSet) EmailValidator(email string) bool {
-	return false
+func (v *ValidatorSet) PasswordValidator(fl validator.FieldLevel) bool {
+	return len(fl.Field().String()) > 4
 }
 
 func New() *ValidatorSet {

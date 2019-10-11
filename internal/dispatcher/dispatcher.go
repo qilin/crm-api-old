@@ -3,6 +3,8 @@ package dispatcher
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/jwt"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -14,41 +16,64 @@ import (
 
 // Dispatcher
 type Dispatcher struct {
-	ctx    context.Context
-	cfg    Config
-	appSet AppSet
+	ctx     context.Context
+	cfg     Config
+	authCfg common.OAuth2
+	appSet  AppSet
 	provider.LMT
 }
 
 // dispatch
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
-	// middlewares:
-	for _, h := range d.appSet.GraphQL.Middleware() {
-		echoHttp.Use(echo.WrapMiddleware(h))
-	}
 	// middleware#2: recover
 	echoHttp.Use(middleware.Recover())
 	// middleware#1: CORS
-	if d.cfg.Debug {
+	/*if d.cfg.Debug {
 		echoHttp.Use(middleware.CORS())
 	} else {
 		echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			//AllowOrigins:     d.cfg.Cors.Allowed,
-			AllowMethods:     []string{"HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"},
-			AllowHeaders:     []string{"*"},
+			AllowOrigins:     d.cfg.CORS.Allowed,
+			AllowMethods:     d.cfg.CORS.Methods,
+			AllowHeaders:     d.cfg.CORS.Headers,
 			AllowCredentials: false,
 		}))
+	}*/
+
+	// init group routes
+	grp := &common.Groups{
+		Auth:    echoHttp.Group(common.AuthGroupPath),
+		GraphQL: echoHttp.Group(common.GraphQLGroupPath),
+		Common:  echoHttp,
 	}
 
-	d.appSet.GraphQL.Routers(echoHttp)
+	d.graphqlGroup(grp.GraphQL)
+	d.commonGroup(grp.Common)
+
+	// init routes
+	for _, handler := range d.appSet.Handlers {
+		handler.Route(grp)
+	}
 
 	return nil
+}
+
+func (d *Dispatcher) graphqlGroup(grp *echo.Group) {
+	// GraphQL JWT Middleware
+	grp.Use(d.graphqlJWTMiddleware)
+	// GraphQL Routes
+	d.appSet.GraphQL.Routers(grp)
+}
+
+func (d *Dispatcher) commonGroup(grp *echo.Echo) {
+	// add static or handlers
 }
 
 // Config
 type Config struct {
 	Debug   bool `fallback:"shared.debug"`
 	WorkDir string
+	OAuth   common.OAuth2
+	CORS    common.CORS
 	invoker *invoker.Invoker
 }
 
@@ -63,7 +88,9 @@ func (c *Config) Reload(ctx context.Context) {
 }
 
 type AppSet struct {
-	GraphQL *graphql.GraphQL
+	GraphQL     *graphql.GraphQL
+	Handlers    common.Handlers
+	JwtVerifier *jwt.JWTVerefier
 }
 
 // New

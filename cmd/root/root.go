@@ -3,14 +3,15 @@ package root
 import (
 	"context"
 	"fmt"
-	"github.com/alexeyco/simpletable"
-	"github.com/gurukami/typ/v2"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/alexeyco/simpletable"
+	"github.com/gurukami/typ/v2"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"

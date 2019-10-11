@@ -13,3 +13,25 @@ postgres:
   maxIdleConns: 3
   connMaxLifetime: 15m
   logLevel: debug
+dispatcher:
+  cors:
+    allowed:
+      - "*"
+    methods:
+      - "HEAD"
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+    headers:
+      - "*"
+  oauth:
+    clientId: "unknown"
+    clientSecret: "unknown"
+    redirectUrl: "unknown"
+    group: "/auth"
+    routes:
+      auth: "/"
+      callback: "/callback"
+      logout: "/logout"
