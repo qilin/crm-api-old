@@ -1,0 +1,12 @@
+- args:
+    sql: CREATE TABLE "public"."invites"("id" serial NOT NULL, "tenant_id" integer
+      NOT NULL, "user_id" integer NOT NULL, "expiration" timestamptz NOT NULL, "email"
+      varchar NOT NULL, "first_name" varchar NOT NULL, "last_name" varchar NOT NULL,
+      "code" text NOT NULL, "accepted" boolean NOT NULL DEFAULT false, PRIMARY KEY
+      ("id") , FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON UPDATE
+      cascade ON DELETE cascade, UNIQUE ("code"));
+  type: run_sql
+- args:
+    name: invites
+    schema: public
+  type: add_existing_table_or_view

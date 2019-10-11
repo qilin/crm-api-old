@@ -1,0 +1,26 @@
+- args:
+    role: owner
+    table:
+      name: groups
+      schema: public
+  type: drop_update_permission
+- args:
+    permission:
+      columns:
+      - created_at
+      - id
+      - name
+      - role
+      - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: groups
+      schema: public
+  type: create_update_permission

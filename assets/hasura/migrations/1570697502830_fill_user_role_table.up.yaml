@@ -1,0 +1,10 @@
+- args:
+    cascade: false
+    sql: |-
+      INSERT INTO user_role (name,comment) VALUES
+          ('owner',''),
+          ('admin',''),
+          ('merchant',''),
+          ('developer',''),
+          ('supporter','');
+  type: run_sql

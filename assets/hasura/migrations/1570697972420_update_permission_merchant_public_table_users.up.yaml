@@ -1,0 +1,25 @@
+- args:
+    role: merchant
+    table:
+      name: users
+      schema: public
+  type: drop_update_permission
+- args:
+    permission:
+      columns:
+      - email
+      - first_name
+      - last_name
+      - picture
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: merchant
+    table:
+      name: users
+      schema: public
+  type: create_update_permission

@@ -1,0 +1,9 @@
+- args:
+    sql: ALTER TABLE "public"."invites" ALTER COLUMN "email" TYPE varchar;
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."invites" ALTER COLUMN "email" DROP NOT NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."invites"."email" IS E''
+  type: run_sql

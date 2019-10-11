@@ -1,0 +1,19 @@
+- args:
+    permission:
+      columns:
+      - id
+      - tenant_id
+      - role
+      - created_at
+      - updated_at
+      - name
+      filter: {}
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: developer
+    table:
+      name: groups
+      schema: public
+  type: create_update_permission
