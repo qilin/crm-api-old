@@ -35,5 +35,12 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
       - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+  natss:
+    ports:
+      - "4223:4222"
+    volumes:
+      - natss:/datastore
+    command: ["-store","sql","--sql_driver","postgres", "--sql_source","postgres://natss:insecure@postgres:5432/natss?sslmode=disable"]
 volumes:
   postgres:
+  natss:
