@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"strings"
-	"time"
 
 	"golang.org/x/net/context"
 
@@ -45,8 +44,6 @@ func NewJWTVerifier(repo domain.JWTKeysRepo) *JWTVerefier {
 	j := &JWTVerefier{
 		repo: repo,
 	}
-	// todo: migrate ends later than we start
-	time.Sleep(5 * time.Second)
 	j.LoadKeys()
 	return j
 }
