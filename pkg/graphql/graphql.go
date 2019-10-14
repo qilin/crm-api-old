@@ -88,7 +88,7 @@ func (g *GraphQL) Route(groups *common.Groups) {
 		graphql.NewExecutableSchema(*g.resolver),
 		options...,
 	)
-	g.L().Info("Route: " + g.cfg.Route)
+
 	groups.GraphQL.Any(g.cfg.Route, func(c echo.Context) error {
 		h.ServeHTTP(c.Response(), c.Request().WithContext(
 			context.WithValue(c.Request().Context(),

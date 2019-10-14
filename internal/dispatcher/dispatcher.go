@@ -61,8 +61,6 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 func (d *Dispatcher) graphqlGroup(group *common.Groups) {
 	// GraphQL JWT Middleware
 	group.GraphQL.Use(d.graphqlJWTMiddleware)
-	// GraphQL Routes
-	d.appSet.GraphQL.Route(group)
 }
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {
