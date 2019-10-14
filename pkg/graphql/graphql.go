@@ -8,23 +8,23 @@ import (
 
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 
-	"github.com/labstack/echo/v4"
-
-	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
-	"github.com/ProtocolONE/go-core/v2/pkg/provider"
-	"github.com/pkg/errors"
-	"github.com/vektah/gqlparser/gqlerror"
-
 	gqlgen "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/gorilla/websocket"
+	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"github.com/qilin/crm-api/internal/generated/graphql"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
+	"github.com/vektah/gqlparser/gqlerror"
 )
 
-var errInternalServer = errors.New("internal server error")
-var errAccessDenied = errors.New("access denied")
+var (
+	ErrInternalServer = errors.New("internal server error")
+	ErrAccessDenied   = errors.New("access denied")
+)
 
 // GraphQL
 type GraphQL struct {
@@ -34,8 +34,8 @@ type GraphQL struct {
 	provider.LMT
 }
 
-// Routers
-func (g *GraphQL) Routers(grp *echo.Group) {
+// Route
+func (g *GraphQL) Route(groups *common.Groups) {
 	upgrader := websocket.Upgrader{}
 
 	options := []handler.Option{
@@ -58,14 +58,14 @@ func (g *GraphQL) Routers(grp *echo.Group) {
 				g.L().Error("internal server error, err: %v", logger.Args(e))
 			default:
 				g.L().Error("internal server error, err: %v", logger.Args(e))
-				e = errInternalServer
+				e = ErrInternalServer
 			}
 			return gqlgen.DefaultErrorPresenter(ctx, e)
 		}),
 	}
 
 	if g.cfg.Debug {
-		grp.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
+		groups.GraphQL.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
@@ -88,7 +88,8 @@ func (g *GraphQL) Routers(grp *echo.Group) {
 		graphql.NewExecutableSchema(*g.resolver),
 		options...,
 	)
-	grp.Any(g.cfg.Route, func(c echo.Context) error {
+	g.L().Info("Route: " + g.cfg.Route)
+	groups.GraphQL.Any(g.cfg.Route, func(c echo.Context) error {
 		h.ServeHTTP(c.Response(), c.Request().WithContext(
 			context.WithValue(c.Request().Context(),
 				common.UserContextKey, c.Get(common.UserContextKey)),

@@ -1,0 +1,9 @@
+- args:
+    sql: ALTER TABLE "public"."invites" ADD COLUMN "code" text
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."invites" ALTER COLUMN "code" DROP NOT NULL
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."invites" ADD CONSTRAINT invites_code_key UNIQUE (code)
+  type: run_sql

@@ -3,12 +3,13 @@ package common
 import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type Groups struct {
 	Auth    *echo.Group
 	GraphQL *echo.Group
+	V1      *echo.Group
 	Common  *echo.Echo
 }
 

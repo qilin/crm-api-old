@@ -1,0 +1,18 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - id
+      - name
+      - role
+      - updated_at
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Org-Id
+      limit: null
+    role: owner
+    table:
+      name: groups
+      schema: public
+  type: create_select_permission

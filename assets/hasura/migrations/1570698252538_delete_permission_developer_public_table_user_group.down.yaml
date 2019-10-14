@@ -1,0 +1,15 @@
+- args:
+    permission:
+      columns:
+      - group_id
+      - user_id
+      filter: {}
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: developer
+    table:
+      name: user_group
+      schema: public
+  type: create_update_permission

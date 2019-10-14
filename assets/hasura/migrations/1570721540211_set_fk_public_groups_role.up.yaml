@@ -1,0 +1,6 @@
+- args:
+    sql: "\n             alter table \"public\".\"groups\" drop constraint \"groups_name_fkey\",\n
+      \            add constraint \"groups_role_fkey\" \n             foreign key
+      (\"role\") \n             references \"public\".\"group_role\"\n             (\"name\")
+      on update restrict on delete restrict;\n      "
+  type: run_sql

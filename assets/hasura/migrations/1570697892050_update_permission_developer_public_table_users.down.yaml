@@ -1,0 +1,25 @@
+- args:
+    role: developer
+    table:
+      name: users
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - tenant_id
+      - status
+      - email
+      - picture
+      - first_name
+      - last_name
+      - role
+      - created_at
+      filter: {}
+    role: developer
+    table:
+      name: users
+      schema: public
+  type: create_select_permission

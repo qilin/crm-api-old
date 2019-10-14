@@ -86,7 +86,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role []*graphql1.RoleEnum) (res interface{}, err error) {
 		user := common.ExtractUserContext(ctx)
 		if user.IsEmpty() {
-			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("Access denied"))
+			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 		}
 
 		for _, r := range role {
@@ -94,12 +94,12 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 				return next(ctx)
 			}
 		}
-		return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("Access denied"))
+		return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 	}
 	c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
 		user := common.ExtractUserContext(ctx)
 		if user.IsEmpty() {
-			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("Access denied"))
+			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 		}
 		return next(ctx)
 	}
