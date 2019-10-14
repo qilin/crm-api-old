@@ -44,9 +44,10 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		Auth:    echoHttp.Group(common.AuthGroupPath),
 		GraphQL: echoHttp.Group(common.GraphQLGroupPath),
 		Common:  echoHttp,
+		V1:      echoHttp.Group(common.V1Path),
 	}
 
-	d.graphqlGroup(grp.GraphQL)
+	d.graphqlGroup(grp)
 	d.commonGroup(grp.Common)
 
 	// init routes
@@ -57,11 +58,11 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	return nil
 }
 
-func (d *Dispatcher) graphqlGroup(grp *echo.Group) {
+func (d *Dispatcher) graphqlGroup(group *common.Groups) {
 	// GraphQL JWT Middleware
-	grp.Use(d.graphqlJWTMiddleware)
+	group.GraphQL.Use(d.graphqlJWTMiddleware)
 	// GraphQL Routes
-	d.appSet.GraphQL.Routers(grp)
+	d.appSet.GraphQL.Route(group)
 }
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {

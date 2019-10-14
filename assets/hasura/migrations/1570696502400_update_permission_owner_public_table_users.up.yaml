@@ -1,0 +1,10 @@
+- args:
+    permission:
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+    role: owner
+    table:
+      name: users
+      schema: public
+  type: create_delete_permission

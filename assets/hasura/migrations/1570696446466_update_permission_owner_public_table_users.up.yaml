@@ -1,0 +1,25 @@
+- args:
+    permission:
+      allow_upsert: true
+      check: {}
+      columns:
+      - created_at
+      - email
+      - first_name
+      - id
+      - last_name
+      - picture
+      - role
+      - status
+      localPresets:
+      - key: tenant_id
+        value: x-hasura-Tenant-Id
+      - key: ""
+        value: ""
+      set:
+        tenant_id: x-hasura-Tenant-Id
+    role: owner
+    table:
+      name: users
+      schema: public
+  type: create_insert_permission

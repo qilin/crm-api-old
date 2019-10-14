@@ -1,0 +1,26 @@
+- args:
+    role: merchant
+    table:
+      name: users
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - email
+      - first_name
+      - id
+      - last_name
+      - picture
+      - role
+      - status
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+    role: merchant
+    table:
+      name: users
+      schema: public
+  type: create_select_permission

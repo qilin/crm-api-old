@@ -1,0 +1,29 @@
+- args:
+    delete:
+      columns: '*'
+    enable_manual: true
+    headers:
+    - name: X-Qilin-Secret
+      value_from_env: QILIN_CRM_WEBHOOKS_SECRET
+    insert:
+      columns: '*'
+    name: invites
+    retry_conf:
+      interval_sec: 10
+      num_retries: 0
+      timeout_sec: 60
+    table:
+      name: invites
+      schema: public
+    update:
+      columns:
+      - accepted
+      - id
+      - tenant_id
+      - user_id
+      - expiration
+      - email
+      - first_name
+      - last_name
+    webhook_from_env: QILIN_CRM_WEBHOOKS_ENDPOINT
+  type: create_event_trigger

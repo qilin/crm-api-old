@@ -2,12 +2,11 @@ package daemon
 
 import (
 	"context"
+	"github.com/qilin/crm-api/internal/daemon"
 	"github.com/qilin/crm-api/pkg/http"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/cmd"
-	"github.com/qilin/crm-api/internal/daemon"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +15,7 @@ const Prefix = "cmd.daemon"
 var (
 	Cmd = &cobra.Command{
 		Use:           "daemon",
-		Short:         "Gateway API daemon",
+		Short:         "GraphQL API daemon",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Run: func(_ *cobra.Command, _ []string) {

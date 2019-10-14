@@ -1,0 +1,15 @@
+- args:
+    permission:
+      check: {}
+      columns:
+      - group_id
+      - user_id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: developer
+    table:
+      name: user_group
+      schema: public
+  type: create_insert_permission
