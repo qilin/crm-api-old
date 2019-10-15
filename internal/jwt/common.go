@@ -3,6 +3,8 @@ package jwt
 import (
 	"strings"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+
 	"golang.org/x/net/context"
 
 	"github.com/pascaldekloe/jwt"
@@ -24,7 +26,6 @@ func (j *JWTVerefier) Check(token string) (*jwt.Claims, error) {
 }
 
 func (j *JWTVerefier) LoadKeys() error {
-
 	keys, err := j.repo.All(context.Background())
 	if err != nil {
 		return err
@@ -40,10 +41,12 @@ func (j *JWTVerefier) LoadKeys() error {
 	return nil
 }
 
-func NewJWTVerifier(repo domain.JWTKeysRepo) *JWTVerefier {
+func NewJWTVerifier(repo domain.JWTKeysRepo, set provider.AwareSet) *JWTVerefier {
 	j := &JWTVerefier{
 		repo: repo,
 	}
-	j.LoadKeys()
+	if j.LoadKeys() != nil {
+		set.L().Emergency("can't load jwt keys")
+	}
 	return j
 }

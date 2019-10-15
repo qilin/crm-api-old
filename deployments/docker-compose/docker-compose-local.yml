@@ -13,7 +13,6 @@ services:
     command: ["daemon","-c","configs/local.yaml","-b",":8080","-d"]
     environment:
       - APP_POSTGRES_DSN=postgres://qilin:insecure@postgres:5432/qilin?sslmode=disable
-      - SLEEP_BEFORE_START=5
     networks:
       - default
   hasura:
