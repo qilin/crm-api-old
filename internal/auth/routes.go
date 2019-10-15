@@ -19,7 +19,7 @@ type Auth struct {
 
 func New() *Auth {
 	var keys jwt.KeyRegister
-	n, err := keys.LoadJWK([]byte(`
+	_, err := keys.LoadJWK([]byte(`
 {
     "keys": [
         {
