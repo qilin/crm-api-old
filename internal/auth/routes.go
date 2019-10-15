@@ -85,7 +85,7 @@ func (a *Auth) checkAuthorized(c echo.Context) (string, bool) {
 func (a *Auth) login(c echo.Context) error {
 	_, ok := a.checkAuthorized(c)
 	if ok {
-		return a.returnToApp(c)
+		return a.authSuccess(c)
 	}
 
 	var url = a.oauth2.AuthCodeURL("some long state")
@@ -101,7 +101,7 @@ func (a *Auth) logout(c echo.Context) error {
 		Secure:   false, // TODO
 	})
 
-	return a.returnToApp(c)
+	return c.Redirect(http.StatusFound, "http://localhost:3000/")
 }
 
 func (a *Auth) callback(c echo.Context) error {
@@ -156,7 +156,7 @@ func (a *Auth) callback(c echo.Context) error {
 		Secure:   false, // TODO
 	})
 
-	return a.returnToApp(c)
+	return a.authSuccess(c)
 }
 
 func (a *Auth) jwt(c echo.Context) error {
@@ -169,6 +169,6 @@ func (a *Auth) jwt(c echo.Context) error {
 	return c.JSON(http.StatusUnauthorized, map[string]interface{}{})
 }
 
-func (a *Auth) returnToApp(c echo.Context) error {
+func (a *Auth) authSuccess(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "http://localhost:3000/auth_success")
 }
