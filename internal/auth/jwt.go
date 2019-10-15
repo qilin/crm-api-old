@@ -36,7 +36,7 @@ func GenerateJWT(userId string) (string, error) {
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    "qilin.protocol.one",
 			IssuedAt:  now.Unix(),
-			ExpiresAt: now.Add(1 * time.Minute).Unix(),
+			ExpiresAt: now.Add(30 * time.Minute).Unix(),
 			Subject:   userId,
 		},
 	}
