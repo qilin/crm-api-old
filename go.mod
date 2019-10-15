@@ -7,7 +7,7 @@ require (
 	github.com/99designs/gqlgen v0.9.3
 	github.com/ProtocolONE/go-core/v2 v2.1.0
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
-	github.com/cactus/go-statsd-client/statsd v0.0.0-20190922113730-52b467de415c // indirect
+	github.com/carlescere/goback v0.0.0-20150314180917-ebe10501f4c4
 	github.com/casbin/casbin v1.8.3
 	github.com/fatih/color v1.7.0
 	github.com/go-playground/locales v0.12.1 // indirect
@@ -23,6 +23,7 @@ require (
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/nats-io/stan.go v0.5.0
 	github.com/pascaldekloe/jwt v1.6.0
 	github.com/pelletier/go-toml v1.5.0 // indirect
 	github.com/pkg/errors v0.8.1
@@ -31,8 +32,6 @@ require (
 	github.com/rubenv/sql-migrate v0.0.0-20190902133344-8926f37f0bc1
 	github.com/selvatico/go-mocket v1.0.7
 	github.com/spf13/cobra v0.0.5
-	github.com/uber-go/tally v3.3.12+incompatible // indirect
-	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect
 	github.com/vektah/gqlparser v1.1.2
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	go.uber.org/automaxprocs v1.2.0

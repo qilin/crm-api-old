@@ -2,13 +2,14 @@ package webhooks
 
 import (
 	"context"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
-	"io/ioutil"
-	"net/http"
 )
 
 type WebHooks struct {
@@ -27,6 +28,11 @@ func (h *WebHooks) handler(ctx echo.Context) error {
 		return ctx.JSON(http.StatusForbidden, nil)
 	}
 	b, _ := ioutil.ReadAll(ctx.Request().Body)
+
+	// process webhook
+	// send it to service
+	// go webhookProcessing()
+
 	return ctx.JSON(http.StatusOK, map[string]string{"body": string(b), "secret": ctx.Request().Header.Get("X-Qilin-Secret")})
 }
 
