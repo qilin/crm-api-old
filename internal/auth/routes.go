@@ -3,7 +3,6 @@ package auth
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -61,20 +60,32 @@ func (a *Auth) RegisterAPIGroup(ctx *echo.Echo) {
 	g.GET("/login", a.login)
 	g.GET("/callback", a.callback)
 	g.GET("/logout", a.logout)
+	g.GET("/jwt", a.jwt)
+}
+
+func (a *Auth) checkAuthorized(c echo.Context) (string, bool) {
+	cssid, err := c.Cookie("ssid")
+	if err != nil {
+		fmt.Println("error", err)
+		return "", false
+	}
+
+	fmt.Println("cookie:", cssid.Value)
+
+	if !ValidateJWT(cssid.Value) {
+		fmt.Println("cookie not valid")
+		return "", false
+	}
+
+	fmt.Println("cookie valid")
+
+	return cssid.Value, true
 }
 
 func (a *Auth) login(c echo.Context) error {
-	cssid, err := c.Cookie("ssid")
-	if err == nil {
-		fmt.Println("cookie:", cssid.Value)
-		if ValidateJWT(cssid.Value) {
-			fmt.Println("cookie valid")
-			q := url.Values{}
-			q.Add("auth_token", cssid.Value)
-
-			return c.Redirect(http.StatusFound, "http://localhost:8080?"+q.Encode())
-		}
-		fmt.Println("cookie not valid")
+	_, ok := a.checkAuthorized(c)
+	if ok {
+		return a.returnToApp(c)
 	}
 
 	var url = a.oauth2.AuthCodeURL("some long state")
@@ -90,10 +101,7 @@ func (a *Auth) logout(c echo.Context) error {
 		Secure:   false, // TODO
 	})
 
-	q := url.Values{}
-	q.Add("auth_token", "")
-
-	return c.Redirect(http.StatusFound, "http://localhost:8080?"+q.Encode())
+	return a.returnToApp(c)
 }
 
 func (a *Auth) callback(c echo.Context) error {
@@ -136,6 +144,9 @@ func (a *Auth) callback(c echo.Context) error {
 	fmt.Println("User ID:", claims.Subject)
 
 	jwt, err := GenerateJWT(claims.Subject)
+	if err != nil {
+		return err
+	}
 
 	c.SetCookie(&http.Cookie{
 		Name:     "ssid",
@@ -145,8 +156,19 @@ func (a *Auth) callback(c echo.Context) error {
 		Secure:   false, // TODO
 	})
 
-	q := url.Values{}
-	q.Add("auth_token", jwt)
+	return a.returnToApp(c)
+}
 
-	return c.Redirect(http.StatusFound, "http://localhost:8080?"+q.Encode())
+func (a *Auth) jwt(c echo.Context) error {
+	if jwt, ok := a.checkAuthorized(c); ok {
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"jwt": jwt,
+		})
+	}
+
+	return c.JSON(http.StatusUnauthorized, map[string]interface{}{})
+}
+
+func (a *Auth) returnToApp(c echo.Context) error {
+	return c.Redirect(http.StatusFound, "http://localhost:3000/auth_success")
 }
