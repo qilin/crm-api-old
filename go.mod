@@ -16,6 +16,7 @@ require (
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/gobuffalo/packr v1.30.1 // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
+	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
 	github.com/gorilla/websocket v1.4.1
 	github.com/gurukami/typ/v2 v2.0.1

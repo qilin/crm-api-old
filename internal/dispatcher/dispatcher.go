@@ -30,8 +30,6 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	// middleware#2: recover
 	echoHttp.Use(middleware.Recover())
 
-	auth.New().RegisterAPIGroup(echoHttp)
-
 	// middleware#1: CORS
 	if d.cfg.Debug {
 		echoHttp.Use(middleware.CORS())
@@ -43,6 +41,8 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			AllowCredentials: false,
 		}))
 	}
+
+	auth.New(d.LMT).RegisterAPIGroup(echoHttp)
 
 	// init group routes
 	grp := &common.Groups{
