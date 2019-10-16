@@ -59,7 +59,7 @@ func (h *WebHooks) handler(ctx echo.Context) error {
 		Accepted:   false,
 	}
 	go func() {
-		e := h.eb.Invites().Publish(inv, 0)
+		e := h.eb.Publish(inv)
 		if e != nil {
 			h.L().Error(e.Error())
 		}
