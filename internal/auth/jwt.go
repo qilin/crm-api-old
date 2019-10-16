@@ -17,11 +17,11 @@ func NewKeyPair(public crypto.PublicKey, private crypto.PrivateKey) KeyPair {
 }
 
 func NewKeyPairFromPEM(public, private string) (KeyPair, error) {
-	privateKey, err := jwt.ParseECPrivateKeyFromPEM([]byte(private))
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(private))
 	if err != nil {
 		return KeyPair{}, err
 	}
-	publicKey, err := jwt.ParseECPublicKeyFromPEM([]byte(public))
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(public))
 	if err != nil {
 		return KeyPair{}, err
 	}
