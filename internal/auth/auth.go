@@ -16,7 +16,6 @@ import (
 )
 
 type Auth struct {
-	issuer   string
 	oauth2   *oauth2.Config
 	log      logger.Logger
 	verifier *oidc.IDTokenVerifier
@@ -29,7 +28,6 @@ func New(appCtx provider.LMT) *Auth {
 	keys := oidc.NewRemoteKeySet(context.Background(), issuer+".well-known/jwks.json")
 
 	return &Auth{
-		issuer: issuer,
 		oauth2: &oauth2.Config{
 			RedirectURL:  "http://localhost:8082/auth/v1/callback",
 			ClientID:     "5da4ec412b13220001efe179",
