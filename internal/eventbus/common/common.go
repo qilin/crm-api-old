@@ -32,7 +32,9 @@ type Subscriber interface {
 type Subscribers []Subscriber
 
 type Publisher interface {
-	Publish(msg Payloader, attempt int)
+	Init(subs Subjects, conn stan.Conn, log logger.Logger)
+	Name() string
+	Publish(msg Payloader) error
 	PublishEvent(evt Event) error
 }
 

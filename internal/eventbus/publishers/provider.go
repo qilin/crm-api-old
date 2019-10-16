@@ -7,6 +7,6 @@ import (
 // ProviderPublishers
 func ProviderPublishers() (common.Publishers, func(), error) {
 	return []common.Publisher{
-		//
+		NewInvitesPublisher(),
 	}, func() {}, nil
 }

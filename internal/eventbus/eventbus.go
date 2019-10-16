@@ -19,9 +19,8 @@ type EventBus struct {
 	stan *stan2.Stan
 	conn stan.Conn
 	provider.LMT
-	pubs    map[string]*Publisher
-	invites *Publisher
-	subs    common.Subscribers
+	pubs map[string]common.Publisher
+	subs common.Subscribers
 }
 
 func (a *EventBus) Run() error {
@@ -34,6 +33,11 @@ func (a *EventBus) Run() error {
 		return e
 	}
 
+	for _, p := range a.pubs {
+		p.Init(a.cfg.Subjects, a.conn, a.L().WithFields(logger.Fields{"publisher": p.Name()}))
+		a.pubs[p.Name()] = p
+	}
+
 	for _, s := range a.subs {
 		e := s.Subscribe(a.conn, a, a.cfg.Subjects, a.L().WithFields(logger.Fields{"subscriber": s.Name()}))
 		if e != nil {
@@ -43,24 +47,25 @@ func (a *EventBus) Run() error {
 		}
 	}
 
-	m := common.NewJSONMarshaller()
-	a.invites = NewPublisher(a.conn, a.L().WithFields(logger.Fields{
-		"publisher": "invites",
-	}), a.cfg.Subjects.InvitesOut, common.NewJSONMarshaller(), common.NewJsonWrapper(m))
-
 	return nil
 }
 
 func (a *EventBus) Publish(msg common.Payloader) error {
-	return nil
+	p, ok := a.pubs[msg.Name()]
+	if !ok {
+		a.L().Error("Publisher not found " + msg.Name())
+		return nil
+	}
+	return p.Publish(msg)
 }
 
 func (a *EventBus) PublishEvent(evt common.Event) error {
-	return nil
-}
-
-func (a *EventBus) Invites() *Publisher {
-	return a.invites
+	p, ok := a.pubs[evt.Name]
+	if !ok {
+		a.L().Error("Publisher not found %s", logger.Args(evt.Name))
+		return nil
+	}
+	return p.PublishEvent(evt)
 }
 
 func (a *EventBus) Stop() error {
@@ -86,11 +91,15 @@ func (c *Config) Reload(ctx context.Context) {
 
 func New(ctx context.Context, set provider.AwareSet, stan *stan2.Stan, pubs common.Publishers, subs common.Subscribers, cfg *Config) *EventBus {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
+	publishers := map[string]common.Publisher{}
+	for _, p := range pubs {
+		publishers[p.Name()] = p
+	}
 	return &EventBus{
 		ctx:  ctx,
 		cfg:  cfg,
 		stan: stan,
-		//publishers: pubs,
+		pubs: publishers,
 		subs: subs,
 		LMT:  &set,
 	}
