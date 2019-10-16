@@ -12,6 +12,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var empty = map[string]interface{}{}
+
 func (a *Auth) RegisterAPIGroup(ctx *echo.Echo) {
 	var g = ctx.Group("/auth/v1")
 
@@ -36,7 +38,7 @@ func (a *Auth) login(c echo.Context) error {
 
 func (a *Auth) logout(c echo.Context) error {
 	a.removeSession(c)
-	return c.Redirect(http.StatusFound, "http://localhost:3000/")
+	return c.JSON(http.StatusOK, empty)
 }
 
 func (a *Auth) callback(c echo.Context) error {
@@ -85,7 +87,7 @@ func (a *Auth) jwt(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusUnauthorized, map[string]interface{}{})
+	return c.JSON(http.StatusUnauthorized, empty)
 }
 
 func (a *Auth) authSuccess(c echo.Context) error {
