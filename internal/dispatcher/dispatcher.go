@@ -26,10 +26,9 @@ type Dispatcher struct {
 // dispatch
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
-	// middleware#2: recover
+	echoHttp.Use(middleware.Logger())
 	echoHttp.Use(middleware.Recover())
 
-	// middleware#1: CORS
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     d.cfg.CORS.Allowed,
 		AllowMethods:     d.cfg.CORS.Methods,
@@ -37,11 +36,15 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AllowCredentials: true,
 	}))
 
-	auth.New(d.LMT, &d.cfg.Auth).RegisterAPIGroup(echoHttp)
+	// authorization
+	auth, err := auth.New(d.LMT, &d.cfg.Auth)
+	if err != nil {
+		return err
+	}
+	auth.RegisterAPIGroup(echoHttp)
 
 	// init group routes
 	grp := &common.Groups{
-		Auth:    echoHttp.Group(common.AuthGroupPath),
 		GraphQL: echoHttp.Group(common.GraphQLGroupPath),
 		Common:  echoHttp,
 		V1:      echoHttp.Group(common.V1Path),

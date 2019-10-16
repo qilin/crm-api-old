@@ -14,7 +14,6 @@ const (
 	UserContextKey = "user"
 
 	// routes
-	AuthGroupPath    = "/auth"
 	GraphQLGroupPath = "/v1/graphql"
 	V1Path           = "/v1"
 )

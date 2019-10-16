@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
@@ -71,12 +72,13 @@ func (a *Auth) callback(c echo.Context) error {
 
 	a.log.Debug("user id: %s", logger.Args(idtoken.Subject))
 
-	jwt, err := GenerateJWT(idtoken.Subject)
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, NewClaims(idtoken.Subject))
+	signed, err := token.SignedString(a.jwtKeys.Private)
 	if err != nil {
 		return err
 	}
 
-	a.setSession(c, jwt)
+	a.setSession(c, signed)
 	return c.Redirect(http.StatusFound, a.cfg.SuccessRedirectURL)
 }
 
