@@ -3,6 +3,8 @@ package eventbus
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/stan"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -27,9 +29,13 @@ func CfgTest() (*Config, func(), error) {
 }
 
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, cfg *Config) (*EventBus, func(), error) {
-	g := New(ctx, set, cfg)
-	return g, func() {}, nil
+func Provider(ctx context.Context, set provider.AwareSet, stan *stan.Stan, cfg *Config) (*EventBus, func(), error) {
+	g := New(ctx, set, stan, cfg)
+	err := g.Run()
+	cleanup := func() {
+		g.Stop()
+	}
+	return g, cleanup, err
 }
 
 var (

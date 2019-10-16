@@ -2,10 +2,12 @@ package webhooks
 
 import (
 	"context"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
+	"github.com/qilin/crm-api/internal/eventbus"
 )
 
 // Cfg
@@ -26,8 +28,8 @@ func CfgTest() (*Config, func(), error) {
 }
 
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, cfg *Config) (*WebHooks, func(), error) {
-	g := New(ctx, set, cfg)
+func Provider(ctx context.Context, set provider.AwareSet, eb *eventbus.EventBus, cfg *Config) (*WebHooks, func(), error) {
+	g := New(ctx, set, eb, cfg)
 	return g, func() {}, nil
 }
 
