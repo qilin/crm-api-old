@@ -17,10 +17,9 @@ import (
 
 // Dispatcher
 type Dispatcher struct {
-	ctx     context.Context
-	cfg     Config
-	authCfg common.OAuth2
-	appSet  AppSet
+	ctx    context.Context
+	cfg    Config
+	appSet AppSet
 	provider.LMT
 }
 
@@ -38,7 +37,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AllowCredentials: true,
 	}))
 
-	auth.New(d.LMT).RegisterAPIGroup(echoHttp)
+	auth.New(d.LMT, &d.cfg.Auth).RegisterAPIGroup(echoHttp)
 
 	// init group routes
 	grp := &common.Groups{
@@ -71,7 +70,7 @@ func (d *Dispatcher) commonGroup(grp *echo.Echo) {
 // Config
 type Config struct {
 	WorkDir string
-	OAuth   common.OAuth2
+	Auth    auth.Config
 	CORS    common.CORS
 	invoker *invoker.Invoker
 }

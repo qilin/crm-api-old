@@ -25,14 +25,12 @@ dispatcher:
       - "DELETE"
     headers:
       - "*"
-  oauth:
-    clientId: "unknown"
-    clientSecret: "unknown"
-    redirectUrl: "unknown"
-    group: "/auth"
-    routes:
-      auth: "/"
-      callback: "/callback"
-      logout: "/logout"
+  auth:
+    oauth2:
+      clientId: "5da4ec412b13220001efe179"
+      clientSecret: "w9JkFlYOa7Hr6QY4OwMv4CWUl3rkJJkwkBjEdkGFE6SQILaM3Hpzxsvs5REdMFNV"
+      redirectUrl: "http://localhost:8082/auth/v1/callback"
+    secret: secretkey
+    successRedirectURL: http://localhost:3000/auth_success
 webhooks:
   secret: insecure
