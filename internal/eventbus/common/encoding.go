@@ -1,9 +1,10 @@
-package eventbus
+package common
 
 import "encoding/json"
 
 type Wrapper interface {
 	Wrap(payload Payloader, attempt int) (Event, error)
+	UnWrap(data []byte) (Event, error)
 }
 
 type Marshaller interface {
@@ -34,6 +35,12 @@ func (w jsonWrapper) Wrap(payload Payloader, attempt int) (Event, error) {
 		Payload: msg,
 		Version: EventVersion,
 	}, nil
+}
+
+func (w jsonWrapper) UnWrap(data []byte) (Event, error) {
+	var evt Event
+	err := w.marshaller.UnMarshall(data, &evt)
+	return evt, err
 }
 
 // Marshaller

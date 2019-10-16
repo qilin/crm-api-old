@@ -3,12 +3,16 @@ package eventbus
 import (
 	"context"
 
-	"github.com/qilin/crm-api/internal/stan"
+	"github.com/qilin/crm-api/internal/eventbus/common"
+
+	"github.com/qilin/crm-api/internal/eventbus/subscribers"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
+	"github.com/qilin/crm-api/internal/eventbus/publishers"
+	"github.com/qilin/crm-api/internal/stan"
 )
 
 // Cfg
@@ -29,8 +33,8 @@ func CfgTest() (*Config, func(), error) {
 }
 
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, stan *stan.Stan, cfg *Config) (*EventBus, func(), error) {
-	g := New(ctx, set, stan, cfg)
+func Provider(ctx context.Context, set provider.AwareSet, pubs common.Publishers, subs common.Subscribers, stan *stan.Stan, cfg *Config) (*EventBus, func(), error) {
+	g := New(ctx, set, stan, pubs, subs, cfg)
 	err := g.Run()
 	cleanup := func() {
 		g.Stop()
@@ -39,6 +43,16 @@ func Provider(ctx context.Context, set provider.AwareSet, stan *stan.Stan, cfg *
 }
 
 var (
-	WireSet     = wire.NewSet(Provider, Cfg)
-	WireTestSet = wire.NewSet(Provider, CfgTest)
+	WireSet = wire.NewSet(
+		Provider,
+		publishers.ProviderPublishers,
+		subscribers.ProviderSubscribers,
+		Cfg,
+	)
+	WireTestSet = wire.NewSet(
+		Provider,
+		publishers.ProviderPublishers,
+		subscribers.ProviderSubscribers,
+		CfgTest,
+	)
 )
