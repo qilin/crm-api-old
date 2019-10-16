@@ -32,5 +32,21 @@ dispatcher:
       redirectUrl: "http://localhost:8082/auth/v1/callback"
     secret: secretkey
     successRedirectURL: http://localhost:3000/auth_success
+    jwt:
+      publicKey: |
+        -----BEGIN PUBLIC KEY-----
+        MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJdLA2Q1fMTdr6a1mg3oCjwxJnj6w
+        i5eiweQa2c7oBqF0RIrsNzAepS47rxHaOQl7REVI1btuJ+fITxhGY5r2wA==
+        -----END PUBLIC KEY-----
+
+
+      privateKey: |
+        -----BEGIN EC PRIVATE KEY-----
+        MHcCAQEEIDgMLiKqAZ1l3sNvFTXph9opUsoijGqItCUP8K6lLp9KoAoGCCqGSM49
+        AwEHoUQDQgAEJdLA2Q1fMTdr6a1mg3oCjwxJnj6wi5eiweQa2c7oBqF0RIrsNzAe
+        pS47rxHaOQl7REVI1btuJ+fITxhGY5r2wA==
+        -----END EC PRIVATE KEY-----      
+
+
 webhooks:
   secret: insecure

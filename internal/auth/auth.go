@@ -11,6 +11,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/coreos/go-oidc"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 )
@@ -23,21 +24,33 @@ type Config struct {
 	}
 	Secret             string
 	SuccessRedirectURL string
+	JWT                struct {
+		PublicKey  string
+		PrivateKey string
+	}
 }
 
 type Auth struct {
 	cfg      *Config
 	oauth2   *oauth2.Config
-	log      logger.Logger
 	verifier *oidc.IDTokenVerifier
+	jwtKeys  KeyPair
 
 	stateSecret []byte
+
+	log logger.Logger
 }
 
-func New(appCtx provider.LMT, cfg *Config) *Auth {
-	var issuer = "https://auth1.tst.protocol.one/"
-	keys := oidc.NewRemoteKeySet(context.Background(), issuer+".well-known/jwks.json")
+func New(appCtx provider.LMT, cfg *Config) (*Auth, error) {
+	var (
+		issuer = "https://auth1.tst.protocol.one/"
+		keys   = oidc.NewRemoteKeySet(context.Background(), issuer+".well-known/jwks.json")
+	)
 
+	jwtKeys, err := NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
 	return &Auth{
 		cfg: cfg,
 		oauth2: &oauth2.Config{
@@ -56,9 +69,11 @@ func New(appCtx provider.LMT, cfg *Config) *Auth {
 			ClientID: cfg.OAuth2.ClientId,
 		}),
 
+		jwtKeys: jwtKeys,
+
 		stateSecret: []byte(cfg.Secret),
 		log:         appCtx.L().WithFields(logger.Fields{"service": "auth"}),
-	}
+	}, nil
 }
 
 // Session ====================================================================
@@ -76,8 +91,11 @@ func (a *Auth) checkAuthorized(c echo.Context) (string, bool) {
 
 	a.log.Debug("session cookie: %s", logger.Args(cssid.Value))
 
-	if !ValidateJWT(cssid.Value) {
-		a.log.Debug("session token expired or invalid")
+	// validate jwt token
+	if _, err := jwt.Parse(cssid.Value, func(*jwt.Token) (interface{}, error) {
+		return a.jwtKeys.Public, nil
+	}); err != nil {
+		a.log.Debug("invalid session token: %v", logger.Args(err))
 		return "", false
 	}
 
