@@ -36,3 +36,12 @@ dispatcher:
       logout: "/logout"
 webhooks:
   secret: insecure
+stan:
+    stanClusterId: "test-cluster"
+    stanClientId: "qilin-daemon-client-id"
+    stanOptions:
+      natsURL: nats://natss:4222
+eventbus:
+  subjects:
+    invitesOut: "invitesout"
+    invitesIn: "invitesin"

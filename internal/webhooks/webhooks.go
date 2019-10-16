@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/qilin/crm-api/internal/eventbus/events"
+
 	"github.com/gurukami/typ/v2"
 
 	"github.com/qilin/crm-api/internal/eventbus"
@@ -46,8 +48,7 @@ func (h *WebHooks) handler(ctx echo.Context) error {
 	}
 
 	exp, _ := time.Parse("2000-01-31T11:00:00+00:00", typ.Of(hook.Event.Data.New["expiration"]).String().V())
-
-	inv := eventbus.Invite{
+	inv := events.Invite{
 		Id:         typ.Of(hook.Event.Data.New["id"]).Int(0).V(),
 		TenantId:   typ.Of(hook.Event.Data.New["tenant_id"]).Int(0).V(),
 		UserId:     typ.Of(hook.Event.Data.New["user_id"]).Int(0).V(),
@@ -58,7 +59,10 @@ func (h *WebHooks) handler(ctx echo.Context) error {
 		Accepted:   false,
 	}
 	go func() {
-		h.eb.Invites().Publish(inv, 0)
+		e := h.eb.Invites().Publish(inv, 0)
+		if e != nil {
+			h.L().Error(e.Error())
+		}
 	}()
 
 	return ctx.JSON(http.StatusOK, map[string]string{"body": string(b), "secret": ctx.Request().Header.Get("X-Qilin-Secret")})
