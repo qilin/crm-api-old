@@ -72,7 +72,7 @@ func (a *Auth) callback(c echo.Context) error {
 
 	a.log.Debug("user id: %s", logger.Args(idtoken.Subject))
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, NewClaims(idtoken.Subject))
+	token := jwt.NewWithClaims(jwt.SigningMethodRS512, NewClaims(idtoken.Subject))
 	signed, err := token.SignedString(a.jwtKeys.Private)
 	if err != nil {
 		return err
