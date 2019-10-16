@@ -26,7 +26,7 @@ func (a *Auth) RegisterAPIGroup(ctx *echo.Echo) {
 func (a *Auth) login(c echo.Context) error {
 	_, ok := a.checkAuthorized(c)
 	if ok {
-		return a.authSuccess(c)
+		return c.Redirect(http.StatusFound, a.cfg.SuccessRedirectURL)
 	}
 
 	var state = uuid.New().String()
@@ -77,7 +77,7 @@ func (a *Auth) callback(c echo.Context) error {
 	}
 
 	a.setSession(c, jwt)
-	return a.authSuccess(c)
+	return c.Redirect(http.StatusFound, a.cfg.SuccessRedirectURL)
 }
 
 func (a *Auth) jwt(c echo.Context) error {
@@ -88,8 +88,4 @@ func (a *Auth) jwt(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusUnauthorized, empty)
-}
-
-func (a *Auth) authSuccess(c echo.Context) error {
-	return c.Redirect(http.StatusFound, "http://localhost:3000/auth_success")
 }

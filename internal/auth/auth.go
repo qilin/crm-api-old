@@ -15,7 +15,18 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type Config struct {
+	OAuth2 struct {
+		ClientId     string `required:"true"`
+		ClientSecret string `required:"true"`
+		RedirectUrl  string `required:"true"`
+	}
+	Secret             string
+	SuccessRedirectURL string
+}
+
 type Auth struct {
+	cfg      *Config
 	oauth2   *oauth2.Config
 	log      logger.Logger
 	verifier *oidc.IDTokenVerifier
@@ -23,15 +34,16 @@ type Auth struct {
 	stateSecret []byte
 }
 
-func New(appCtx provider.LMT) *Auth {
+func New(appCtx provider.LMT, cfg *Config) *Auth {
 	var issuer = "https://auth1.tst.protocol.one/"
 	keys := oidc.NewRemoteKeySet(context.Background(), issuer+".well-known/jwks.json")
 
 	return &Auth{
+		cfg: cfg,
 		oauth2: &oauth2.Config{
-			RedirectURL:  "http://localhost:8082/auth/v1/callback",
-			ClientID:     "5da4ec412b13220001efe179",
-			ClientSecret: "w9JkFlYOa7Hr6QY4OwMv4CWUl3rkJJkwkBjEdkGFE6SQILaM3Hpzxsvs5REdMFNV",
+			RedirectURL:  cfg.OAuth2.RedirectUrl,
+			ClientID:     cfg.OAuth2.ClientId,
+			ClientSecret: cfg.OAuth2.ClientSecret,
 			Scopes:       []string{"openid"},
 			Endpoint: oauth2.Endpoint{
 				AuthURL:   "https://auth1.tst.protocol.one/oauth2/auth",
@@ -40,12 +52,12 @@ func New(appCtx provider.LMT) *Auth {
 			},
 		},
 
-		log: appCtx.L().WithFields(logger.Fields{"service": "auth"}),
 		verifier: oidc.NewVerifier(issuer, keys, &oidc.Config{
-			ClientID: "5da4ec412b13220001efe179",
+			ClientID: cfg.OAuth2.ClientId,
 		}),
 
-		stateSecret: []byte("some secret"), // TODO config
+		stateSecret: []byte(cfg.Secret),
+		log:         appCtx.L().WithFields(logger.Fields{"service": "auth"}),
 	}
 }
 
