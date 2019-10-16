@@ -29,7 +29,7 @@ func NewKeyPairFromPEM(public, private string) (KeyPair, error) {
 }
 
 type TokenClaims struct {
-	Hasura jwt.MapClaims `json:"https://hasura.io/jwt/claims"`
+	Hasura jwt.MapClaims `json:"https://qilin.protocol.one/claims"`
 	jwt.StandardClaims
 }
 
@@ -41,7 +41,7 @@ func NewClaims(userId string) *TokenClaims {
 			"x-hasura-allowed-roles": []string{"owner", "admin", "merchant", "developer", "supporter"},
 		},
 		StandardClaims: jwt.StandardClaims{
-			Issuer:    "qilin.protocol.one",
+			Issuer:    "https://qilin.protocol.one",
 			IssuedAt:  now.Unix(),
 			ExpiresAt: now.Add(30 * time.Minute).Unix(),
 			Subject:   userId,
