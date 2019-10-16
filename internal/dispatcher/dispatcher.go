@@ -31,16 +31,12 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	echoHttp.Use(middleware.Recover())
 
 	// middleware#1: CORS
-	if d.cfg.Debug {
-		echoHttp.Use(middleware.CORS())
-	} else {
-		echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     d.cfg.CORS.Allowed,
-			AllowMethods:     d.cfg.CORS.Methods,
-			AllowHeaders:     d.cfg.CORS.Headers,
-			AllowCredentials: false,
-		}))
-	}
+	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     d.cfg.CORS.Allowed,
+		AllowMethods:     d.cfg.CORS.Methods,
+		AllowHeaders:     d.cfg.CORS.Headers,
+		AllowCredentials: true,
+	}))
 
 	auth.New(d.LMT).RegisterAPIGroup(echoHttp)
 
@@ -74,7 +70,6 @@ func (d *Dispatcher) commonGroup(grp *echo.Echo) {
 
 // Config
 type Config struct {
-	Debug   bool `fallback:"shared.debug"`
 	WorkDir string
 	OAuth   common.OAuth2
 	CORS    common.CORS
