@@ -2,12 +2,12 @@ package http
 
 import (
 	"context"
-	"github.com/qilin/crm-api/internal/dispatcher"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
+	"github.com/qilin/crm-api/internal/dispatcher"
 	"github.com/qilin/crm-api/internal/handlers"
 	"github.com/qilin/crm-api/pkg/graphql"
 )

@@ -23,6 +23,8 @@ require (
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/nats-io/nats-server/v2 v2.1.0 // indirect
+	github.com/nats-io/nats-streaming-server v0.16.2 // indirect
 	github.com/nats-io/stan.go v0.5.0
 	github.com/pascaldekloe/jwt v1.6.0
 	github.com/pelletier/go-toml v1.5.0 // indirect
@@ -32,6 +34,7 @@ require (
 	github.com/rubenv/sql-migrate v0.0.0-20190902133344-8926f37f0bc1
 	github.com/selvatico/go-mocket v1.0.7
 	github.com/spf13/cobra v0.0.5
+	github.com/stretchr/testify v1.4.0
 	github.com/vektah/gqlparser v1.1.2
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	go.uber.org/automaxprocs v1.2.0
