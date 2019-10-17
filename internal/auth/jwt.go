@@ -9,6 +9,8 @@ import (
 	"github.com/qilin/crm-api/internal/db/domain"
 )
 
+// Keys =======================================================================
+
 type KeyPair struct {
 	Public  crypto.PublicKey
 	Private crypto.PrivateKey
@@ -29,6 +31,8 @@ func NewKeyPairFromPEM(public, private string) (KeyPair, error) {
 	}
 	return NewKeyPair(publicKey, privateKey), nil
 }
+
+// Claims =====================================================================
 
 type SessionClaims struct {
 	// required by hasura

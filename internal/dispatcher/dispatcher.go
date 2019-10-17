@@ -5,7 +5,6 @@ import (
 
 	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/db/domain"
-	"github.com/qilin/crm-api/internal/jwt"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -81,10 +80,9 @@ func (c *Config) Reload(ctx context.Context) {
 }
 
 type AppSet struct {
-	GraphQL     *graphql.GraphQL
-	Handlers    common.Handlers
-	JwtVerifier *jwt.JWTVerefier
-	Users       domain.UserRepo
+	GraphQL  *graphql.GraphQL
+	Handlers common.Handlers
+	Users    domain.UserRepo
 }
 
 // New
