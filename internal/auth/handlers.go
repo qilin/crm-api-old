@@ -67,14 +67,14 @@ func (a *Auth) callback(c echo.Context) error {
 		return fmt.Errorf("id_token not provided")
 	}
 
-	idtoken, err := a.verifier.Verify(ctx, rawIDToken)
+	idToken, err := a.verifier.Verify(ctx, rawIDToken)
 	if err != nil {
 		return errors.Wrap(err, "failed to verify id token")
 	}
 
-	a.log.Debug("user id: %s", logger.Args(idtoken.Subject))
+	a.log.Debug("user id: %s", logger.Args(idToken.Subject))
 
-	u, err := a.users.FindByExternalID(context.TODO(), idtoken.Subject)
+	u, err := a.users.FindByExternalID(context.TODO(), idToken.Subject)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
 			a.log.Debug("%v", logger.Args(err))
@@ -86,16 +86,24 @@ func (a *Auth) callback(c echo.Context) error {
 			return errors.New("not registered")
 		}
 
+		var claims struct {
+			Email         string `json:"email"`
+			EmailVerified bool   `json:"email_verified"`
+		}
+		if err := idToken.Claims(&claims); err != nil {
+			return err
+		}
+
 		a.log.Debug("user not found, create new one")
 		if err := a.users.Create(ctx, &domain.UserItem{
-			ExternalID: idtoken.Subject,
-			Email:      idtoken.Subject + "@qilin",
+			ExternalID: idToken.Subject,
+			Email:      claims.Email,
 			Role:       "owner",
 		}); err != nil {
 			a.log.Debug("%v", logger.Args(err))
 			return err
 		}
-		u, err = a.users.FindByExternalID(ctx, idtoken.Subject)
+		u, err = a.users.FindByExternalID(ctx, idToken.Subject)
 		if err != nil {
 			a.log.Debug("%v", logger.Args(err))
 			return err

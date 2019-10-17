@@ -48,6 +48,7 @@ func NewClaims(user *domain.UserItem) *TokenClaims {
 			IssuedAt:  now.Unix(),
 			ExpiresAt: now.Add(30 * time.Minute).Unix(),
 			Subject:   user.ExternalID,
+			Audience:  "some",
 		},
 	}
 }
