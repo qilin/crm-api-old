@@ -15,7 +15,6 @@ import (
 // ProviderCfg
 func ProviderCfg(cfg config.Configurator) (*Config, func(), error) {
 	c := &Config{
-		WorkDir: cfg.WorkDir(),
 		invoker: invoker.NewInvoker(),
 	}
 	e := cfg.UnmarshalKeyOnReload(common.UnmarshalKey, c)

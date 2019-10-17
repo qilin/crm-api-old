@@ -2,10 +2,11 @@ package graphql
 
 import (
 	"context"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 
 	gqlgen "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"

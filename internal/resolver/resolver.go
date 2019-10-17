@@ -10,9 +10,9 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/db/trx"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
 )
@@ -83,7 +83,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 		},
 	}
 	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role []*graphql1.RoleEnum) (res interface{}, err error) {
-		user := common.ExtractUserContext(ctx)
+		user := auth.ExtractUserContext(ctx)
 		if user.IsEmpty() {
 			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 		}
@@ -96,7 +96,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 		return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 	}
 	c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-		user := common.ExtractUserContext(ctx)
+		user := auth.ExtractUserContext(ctx)
 		if user.IsEmpty() {
 			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 		}

@@ -30,23 +30,31 @@ func NewKeyPairFromPEM(public, private string) (KeyPair, error) {
 	return NewKeyPair(publicKey, privateKey), nil
 }
 
+type SessionClaims struct {
+	// required by hasura
+	DefaultRole  string   `json:"x-hasura-default-role"`
+	AllowedRoles []string `json:"x-hasura-allowed-roles"`
+	// custom, all must be strings
+	UserID string `json:"x-hasura-user-id,omitempty"`
+}
+
 type TokenClaims struct {
-	Hasura jwt.MapClaims `json:"https://qilin.protocol.one/claims"`
+	SessionClaims `json:"https://qilin.protocol.one/claims"`
 	jwt.StandardClaims
 }
 
 func NewClaims(user *domain.UserItem) *TokenClaims {
 	var now = time.Now()
 	return &TokenClaims{
-		Hasura: map[string]interface{}{
-			"x-hasura-default-role":  "owner",
-			"x-hasura-allowed-roles": []string{"owner", "admin", "merchant", "developer", "supporter"},
-			"x-hasura-user-id":       strconv.Itoa(user.ID),
+		SessionClaims: SessionClaims{
+			DefaultRole:  "owner",
+			AllowedRoles: []string{"owner", "admin", "merchant", "developer", "supporter"},
+			UserID:       strconv.Itoa(user.ID),
 		},
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    "https://qilin.protocol.one",
 			IssuedAt:  now.Unix(),
-			ExpiresAt: now.Add(30 * time.Minute).Unix(),
+			ExpiresAt: now.Add(time.Hour).Unix(),
 			Subject:   user.ExternalID,
 			Audience:  "some",
 		},
