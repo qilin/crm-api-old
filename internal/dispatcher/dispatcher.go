@@ -2,6 +2,7 @@ package dispatcher
 
 import (
 	"context"
+
 	"github.com/qilin/crm-api/internal/jwt"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
@@ -46,7 +47,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		V1:      echoHttp.Group(common.V1Path),
 	}
 
-	d.graphqlGroup(grp.GraphQL)
+	d.graphqlGroup(grp)
 	d.commonGroup(grp.Common)
 
 	// init routes
@@ -57,9 +58,9 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	return nil
 }
 
-func (d *Dispatcher) graphqlGroup(grp *echo.Group) {
+func (d *Dispatcher) graphqlGroup(group *common.Groups) {
 	// GraphQL JWT Middleware
-	grp.Use(d.graphqlJWTMiddleware)
+	group.GraphQL.Use(d.graphqlJWTMiddleware)
 }
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {

@@ -38,7 +38,7 @@ require (
 	go.uber.org/automaxprocs v1.2.0
 	go.uber.org/multierr v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
-	golang.org/x/net v0.0.0-20191003171128-d98b1b443823 // indirect
+	golang.org/x/net v0.0.0-20191003171128-d98b1b443823
 	golang.org/x/sys v0.0.0-20191007092633-5f54ce542709 // indirect
 	google.golang.org/appengine v1.6.4 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
