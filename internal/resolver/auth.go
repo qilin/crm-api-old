@@ -78,7 +78,7 @@ func (r *authQueryResolver) Signin(ctx context.Context, obj *graphql1.AuthQuery,
 	}
 
 	// get user
-	user, e := r.repo.User.GetByEmail(ctx, email)
+	user, e := r.repo.User.FindByEmail(ctx, email)
 	if e != nil {
 		return &graphql1.SigninOut{
 			Status: graphql1.SigninOutStatusServerInternalError,

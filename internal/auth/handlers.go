@@ -9,8 +9,10 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
+	"github.com/qilin/crm-api/internal/db/domain"
 )
 
 var empty = map[string]interface{}{}
@@ -72,7 +74,37 @@ func (a *Auth) callback(c echo.Context) error {
 
 	a.log.Debug("user id: %s", logger.Args(idtoken.Subject))
 
-	token := jwt.NewWithClaims(jwt.SigningMethodRS512, NewClaims(idtoken.Subject))
+	u, err := a.users.FindByExternalID(context.TODO(), idtoken.Subject)
+	if err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			a.log.Debug("%v", logger.Args(err))
+			return err
+		}
+
+		if !a.cfg.AutoSignIn {
+			a.log.Debug("user, not registered")
+			return errors.New("not registered")
+		}
+
+		a.log.Debug("user not found, create new one")
+		if err := a.users.Create(ctx, &domain.UserItem{
+			ExternalID: idtoken.Subject,
+			Email:      idtoken.Subject + "@qilin",
+			Role:       "owner",
+		}); err != nil {
+			a.log.Debug("%v", logger.Args(err))
+			return err
+		}
+		u, err = a.users.FindByExternalID(ctx, idtoken.Subject)
+		if err != nil {
+			a.log.Debug("%v", logger.Args(err))
+			return err
+		}
+	}
+
+	a.log.Info("user logged in %d", logger.Args(u.ID))
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS512, NewClaims(u))
 	signed, err := token.SignedString(a.jwtKeys.Private)
 	if err != nil {
 		return err

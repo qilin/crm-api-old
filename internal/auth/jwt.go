@@ -2,9 +2,11 @@ package auth
 
 import (
 	"crypto"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/qilin/crm-api/internal/db/domain"
 )
 
 type KeyPair struct {
@@ -33,18 +35,19 @@ type TokenClaims struct {
 	jwt.StandardClaims
 }
 
-func NewClaims(userId string) *TokenClaims {
+func NewClaims(user *domain.UserItem) *TokenClaims {
 	var now = time.Now()
 	return &TokenClaims{
 		Hasura: map[string]interface{}{
 			"x-hasura-default-role":  "owner",
 			"x-hasura-allowed-roles": []string{"owner", "admin", "merchant", "developer", "supporter"},
+			"x-hasura-user-id":       strconv.Itoa(user.ID),
 		},
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    "https://qilin.protocol.one",
 			IssuedAt:  now.Unix(),
 			ExpiresAt: now.Add(30 * time.Minute).Unix(),
-			Subject:   userId,
+			Subject:   user.ExternalID,
 		},
 	}
 }

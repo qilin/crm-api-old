@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   crm-migration:
-    command: ["migrate","up","--dsn","postgres://qilin:insecure@postgres:5432/qilin?sslmode=disable"]
+    command: ["migrate","up","--dsn","postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable"]
   crm-daemon:
     container_name: qilin-crm-daemon
     image: p1hub/qilin-crm-api:${TAG}
@@ -12,7 +12,7 @@ services:
       - 8082:8080
     command: ["daemon","-c","configs/local.yaml","-b",":8080","-d"]
     environment:
-      - APP_POSTGRES_DSN=postgres://qilin:insecure@postgres:5432/qilin?sslmode=disable
+      - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
     networks:
       - default
   hasura:
