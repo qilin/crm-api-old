@@ -3,8 +3,6 @@ package dispatcher
 import (
 	"context"
 
-	"github.com/qilin/crm-api/internal/jwt"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -31,14 +29,12 @@ var (
 	WireSet = wire.NewSet(
 		ProviderDispatcher,
 		ProviderCfg,
-		jwt.ProviderJwtVerifier,
 		wire.Struct(new(AppSet), "*"),
 	)
 
 	WireTestSet = wire.NewSet(
 		ProviderDispatcher,
 		ProviderCfg,
-		jwt.ProviderJwtVerifier,
 		wire.Struct(new(AppSet), "*"),
 	)
 )

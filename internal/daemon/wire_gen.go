@@ -17,7 +17,6 @@ import (
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/dispatcher"
 	"github.com/qilin/crm-api/internal/handlers"
-	"github.com/qilin/crm-api/internal/jwt"
 	"github.com/qilin/crm-api/internal/resolver"
 	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/internal/webhooks"
@@ -270,12 +269,10 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo)
 	dispatcherAppSet := dispatcher.AppSet{
-		GraphQL:     graphQL,
-		Handlers:    commonHandlers,
-		JwtVerifier: jwtVerefier,
-		Users:       userRepo,
+		GraphQL:  graphQL,
+		Handlers: commonHandlers,
+		Users:    userRepo,
 	}
 	dispatcherConfig, cleanup19, err := dispatcher.ProviderCfg(configurator)
 	if err != nil {
@@ -618,12 +615,10 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo)
 	dispatcherAppSet := dispatcher.AppSet{
-		GraphQL:     graphQL,
-		Handlers:    commonHandlers,
-		JwtVerifier: jwtVerefier,
-		Users:       userRepo,
+		GraphQL:  graphQL,
+		Handlers: commonHandlers,
+		Users:    userRepo,
 	}
 	dispatcherConfig, cleanup18, err := dispatcher.ProviderCfg(configurator)
 	if err != nil {
