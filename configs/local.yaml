@@ -7,7 +7,7 @@ graphql:
     name: local
     endpoint: /v1/graphql
 postgres:
-  dsn: postgres://qilin:insecure@localhost:5567/qilin?sslmode=disable
+  dsn: postgres://qilin:insecure@localhost:5567/qilin-hasura?sslmode=disable
   maxOpenConns: 5
   maxIdleConns: 3
   connMaxLifetime: 15m
@@ -31,6 +31,7 @@ dispatcher:
       clientSecret: "w9JkFlYOa7Hr6QY4OwMv4CWUl3rkJJkwkBjEdkGFE6SQILaM3Hpzxsvs5REdMFNV"
       redirectUrl: "http://localhost:8082/auth/v1/callback"
     secret: secretkey
+    autoSignIn: true
     successRedirectURL: http://localhost:3000/auth_success
     jwt:
       publicKey: |

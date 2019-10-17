@@ -66,7 +66,6 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 // Repo
 type Repo struct {
 	JwtKeys domain.JWTKeysRepo
-	List    domain.ListRepo
 	User    domain.UserRepo
 }
 

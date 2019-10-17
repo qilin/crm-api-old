@@ -13,6 +13,7 @@ import (
 	"github.com/coreos/go-oidc"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
+	"github.com/qilin/crm-api/internal/db/domain"
 	"golang.org/x/oauth2"
 )
 
@@ -22,6 +23,7 @@ type Config struct {
 		ClientSecret string `required:"true"`
 		RedirectUrl  string `required:"true"`
 	}
+	AutoSignIn         bool
 	Secret             string
 	SuccessRedirectURL string
 	JWT                struct {
@@ -39,9 +41,11 @@ type Auth struct {
 	stateSecret []byte
 
 	log logger.Logger
+
+	users domain.UserRepo
 }
 
-func New(appCtx provider.LMT, cfg *Config) (*Auth, error) {
+func New(appCtx provider.LMT, cfg *Config, users domain.UserRepo) (*Auth, error) {
 	var (
 		issuer = "https://auth1.tst.protocol.one/"
 		keys   = oidc.NewRemoteKeySet(context.Background(), issuer+".well-known/jwks.json")
@@ -70,6 +74,8 @@ func New(appCtx provider.LMT, cfg *Config) (*Auth, error) {
 		}),
 
 		jwtKeys: jwtKeys,
+
+		users: users,
 
 		stateSecret: []byte(cfg.Secret),
 		log:         appCtx.L().WithFields(logger.Fields{"service": "auth"}),

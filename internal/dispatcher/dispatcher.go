@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/qilin/crm-api/internal/auth"
+	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/jwt"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
@@ -37,7 +38,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	}))
 
 	// authorization
-	auth, err := auth.New(d.LMT, &d.cfg.Auth)
+	auth, err := auth.New(d.LMT, &d.cfg.Auth, d.appSet.Users)
 	if err != nil {
 		return err
 	}
@@ -92,6 +93,7 @@ type AppSet struct {
 	GraphQL     *graphql.GraphQL
 	Handlers    common.Handlers
 	JwtVerifier *jwt.JWTVerefier
+	Users       domain.UserRepo
 }
 
 // New

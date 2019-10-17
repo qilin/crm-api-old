@@ -32,10 +32,8 @@ func (j *JWTVerefier) LoadKeys() error {
 	for i := range keys {
 		switch strings.ToLower(keys[i].KeyType) {
 		case "pem":
-			println("Loaded PEM")
 			j.keyRegister.LoadPEM([]byte(keys[i].Key), []byte(""))
 		case "jwk":
-			println("Loaded JWK")
 			j.keyRegister.LoadJWK([]byte(keys[i].Key))
 		}
 	}

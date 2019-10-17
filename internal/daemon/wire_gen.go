@@ -107,11 +107,9 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	jwtKeysRepo := repo.NewJwtKeysRepo(db)
-	listRepo := repo.NewListRepo(db)
 	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
 		JwtKeys: jwtKeysRepo,
-		List:    listRepo,
 		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
@@ -277,6 +275,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		GraphQL:     graphQL,
 		Handlers:    commonHandlers,
 		JwtVerifier: jwtVerefier,
+		Users:       userRepo,
 	}
 	dispatcherConfig, cleanup19, err := dispatcher.ProviderCfg(configurator)
 	if err != nil {
@@ -465,11 +464,9 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		return nil, nil, err
 	}
 	jwtKeysRepo := repo.NewJwtKeysRepo(db)
-	listRepo := repo.NewListRepo(db)
 	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
 		JwtKeys: jwtKeysRepo,
-		List:    listRepo,
 		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
@@ -626,6 +623,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		GraphQL:     graphQL,
 		Handlers:    commonHandlers,
 		JwtVerifier: jwtVerefier,
+		Users:       userRepo,
 	}
 	dispatcherConfig, cleanup18, err := dispatcher.ProviderCfg(configurator)
 	if err != nil {
