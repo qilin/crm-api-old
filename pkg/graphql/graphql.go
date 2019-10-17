@@ -84,12 +84,12 @@ func (g *GraphQL) Route(groups *common.Groups) {
 		}))
 	}
 
-	groups.GraphQL.Any(g.cfg.Route,
-		echo.WrapHandler(handler.GraphQL(
-			graphql.NewExecutableSchema(*g.resolver),
-			options...,
-		)),
+	h := handler.GraphQL(
+		graphql.NewExecutableSchema(*g.resolver),
+		options...,
 	)
+
+	groups.GraphQL.Any(g.cfg.Route, echo.WrapHandler(h))
 }
 
 type PlaygroundCfg struct {

@@ -54,12 +54,23 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		V1:      echoHttp.Group(common.V1Path),
 	}
 
+	d.graphqlGroup(grp)
+	d.commonGroup(grp.Common)
+
 	// init routes
 	for _, handler := range d.appSet.Handlers {
 		handler.Route(grp)
 	}
 
 	return nil
+}
+
+func (d *Dispatcher) graphqlGroup(group *common.Groups) {
+	// add graphql handlers
+}
+
+func (d *Dispatcher) commonGroup(grp *echo.Echo) {
+	// add static or handlers
 }
 
 // Config
