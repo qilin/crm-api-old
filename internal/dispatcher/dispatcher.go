@@ -42,17 +42,18 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	if err != nil {
 		return err
 	}
-	auth.RegisterAPIGroup(echoHttp)
+	auth.RegisterHandlers(echoHttp)
+
+	// configure graphql group
+	var gql = echoHttp.Group(common.GraphQLGroupPath)
+	gql.Use(auth.Middleware)
 
 	// init group routes
 	grp := &common.Groups{
-		GraphQL: echoHttp.Group(common.GraphQLGroupPath),
+		GraphQL: gql,
 		Common:  echoHttp,
 		V1:      echoHttp.Group(common.V1Path),
 	}
-
-	d.graphqlGroup(grp.GraphQL)
-	d.commonGroup(grp.Common)
 
 	// init routes
 	for _, handler := range d.appSet.Handlers {
@@ -62,18 +63,8 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	return nil
 }
 
-func (d *Dispatcher) graphqlGroup(grp *echo.Group) {
-	// GraphQL JWT Middleware
-	grp.Use(d.graphqlJWTMiddleware)
-}
-
-func (d *Dispatcher) commonGroup(grp *echo.Echo) {
-	// add static or handlers
-}
-
 // Config
 type Config struct {
-	WorkDir string
 	Auth    auth.Config
 	CORS    common.CORS
 	invoker *invoker.Invoker

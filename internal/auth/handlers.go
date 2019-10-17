@@ -17,7 +17,7 @@ import (
 
 var empty = map[string]interface{}{}
 
-func (a *Auth) RegisterAPIGroup(ctx *echo.Echo) {
+func (a *Auth) RegisterHandlers(ctx *echo.Echo) {
 	var g = ctx.Group("/auth/v1")
 
 	g.GET("/login", a.login)
