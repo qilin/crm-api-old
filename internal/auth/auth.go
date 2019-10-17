@@ -19,6 +19,7 @@ import (
 
 type Config struct {
 	OAuth2 struct {
+		Provider     string `required:true`
 		ClientId     string `required:"true"`
 		ClientSecret string `required:"true"`
 		RedirectUrl  string `required:"true"`
@@ -46,10 +47,7 @@ type Auth struct {
 }
 
 func New(appCtx provider.LMT, cfg *Config, users domain.UserRepo) (*Auth, error) {
-	var (
-		issuer = "https://auth1.tst.protocol.one/"
-		keys   = oidc.NewRemoteKeySet(context.Background(), issuer+".well-known/jwks.json")
-	)
+	var keys = oidc.NewRemoteKeySet(context.Background(), cfg.OAuth2.Provider+".well-known/jwks.json")
 
 	jwtKeys, err := NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
 	if err != nil {
@@ -63,13 +61,13 @@ func New(appCtx provider.LMT, cfg *Config, users domain.UserRepo) (*Auth, error)
 			ClientSecret: cfg.OAuth2.ClientSecret,
 			Scopes:       []string{"openid"},
 			Endpoint: oauth2.Endpoint{
-				AuthURL:   "https://auth1.tst.protocol.one/oauth2/auth",
-				TokenURL:  "https://auth1.tst.protocol.one/oauth2/token",
+				AuthURL:   cfg.OAuth2.Provider + "oauth2/auth",
+				TokenURL:  cfg.OAuth2.Provider + "oauth2/token",
 				AuthStyle: oauth2.AuthStyleInHeader,
 			},
 		},
 
-		verifier: oidc.NewVerifier(issuer, keys, &oidc.Config{
+		verifier: oidc.NewVerifier(cfg.OAuth2.Provider, keys, &oidc.Config{
 			ClientID: cfg.OAuth2.ClientId,
 		}),
 

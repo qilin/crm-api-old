@@ -26,7 +26,6 @@ require (
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/mattn/go-colorable v0.1.4 // indirect
-	github.com/pascaldekloe/jwt v1.6.0
 	github.com/pelletier/go-toml v1.5.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
