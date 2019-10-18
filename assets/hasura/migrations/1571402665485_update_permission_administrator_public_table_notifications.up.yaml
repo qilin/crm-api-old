@@ -1,0 +1,15 @@
+- args:
+    permission:
+      allow_upsert: true
+      check: {}
+      columns:
+      - text
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: administrator
+    table:
+      name: notifications
+      schema: public
+  type: create_insert_permission

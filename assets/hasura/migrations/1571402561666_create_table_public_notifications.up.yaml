@@ -1,0 +1,9 @@
+- args:
+    sql: CREATE TABLE "public"."notifications"("id" serial NOT NULL, "tenant_id" integer
+      NOT NULL, "timestamp" timestamptz NOT NULL DEFAULT now(), "viewed" boolean NOT
+      NULL DEFAULT false, "text" text NOT NULL, PRIMARY KEY ("id") );
+  type: run_sql
+- args:
+    name: notifications
+    schema: public
+  type: add_existing_table_or_view
