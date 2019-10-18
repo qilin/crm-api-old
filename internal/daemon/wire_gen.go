@@ -423,7 +423,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo)
+	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo, awareSet)
 	dispatcherAppSet := dispatcher.AppSet{
 		GraphQL:     graphQL,
 		Handlers:    commonHandlers,
@@ -943,7 +943,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo)
+	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo, awareSet)
 	dispatcherAppSet := dispatcher.AppSet{
 		GraphQL:     graphQL,
 		Handlers:    commonHandlers,
