@@ -1,0 +1,17 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - accepted
+      - email
+      - expiration
+      - first_name
+      - id
+      - last_name
+      filter: {}
+      limit: null
+    role: owner
+    table:
+      name: invites
+      schema: public
+  type: create_select_permission
