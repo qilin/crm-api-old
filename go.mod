@@ -34,7 +34,6 @@ require (
 	github.com/rubenv/sql-migrate v0.0.0-20190902133344-8926f37f0bc1
 	github.com/selvatico/go-mocket v1.0.7
 	github.com/spf13/cobra v0.0.5
-	github.com/stretchr/testify v1.4.0
 	github.com/vektah/gqlparser v1.1.2
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	go.uber.org/automaxprocs v1.2.0
