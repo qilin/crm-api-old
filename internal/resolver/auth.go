@@ -101,12 +101,8 @@ func (r *authQueryResolver) Signin(ctx context.Context, obj *graphql1.AuthQuery,
 
 func (r *authQueryResolver) Me(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.User, error) {
 	u := common.ExtractUserContext(ctx)
-	user, e := r.repo.User.Get(ctx, u.Id)
-	if e != nil {
-		return nil, e
-	}
 	return &graphql1.User{
-		Email: user.Email,
+		Email: u.Email,
 	}, nil
 }
 

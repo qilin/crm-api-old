@@ -2,10 +2,11 @@ package graphql
 
 import (
 	"context"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 
 	gqlgen "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
@@ -83,12 +84,19 @@ func (g *GraphQL) Route(groups *common.Groups) {
 		}))
 	}
 
-	groups.GraphQL.Any(g.cfg.Route,
-		echo.WrapHandler(handler.GraphQL(
-			graphql.NewExecutableSchema(*g.resolver),
-			options...,
-		)),
+	h := handler.GraphQL(
+		graphql.NewExecutableSchema(*g.resolver),
+		options...,
 	)
+
+	groups.GraphQL.Any(g.cfg.Route, func(c echo.Context) error {
+		h.ServeHTTP(c.Response(), c.Request().WithContext(
+			context.WithValue(c.Request().Context(),
+				common.UserContextKey, c.Get(common.UserContextKey)),
+		),
+		)
+		return nil
+	})
 }
 
 type PlaygroundCfg struct {

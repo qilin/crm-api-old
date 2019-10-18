@@ -11,7 +11,7 @@ const (
 	UnmarshalKey = "dispatcher"
 
 	// context keys
-	UserContextKey = "user"
+	UserContextKey = "dispatcher.ctx.user"
 
 	// routes
 	AuthGroupPath    = "/auth"
