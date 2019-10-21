@@ -7,7 +7,6 @@ package mailer
 
 import (
 	"context"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -17,6 +16,7 @@ import (
 	"github.com/qilin/crm-api/internal/eventbus"
 	"github.com/qilin/crm-api/internal/eventbus/publishers"
 	"github.com/qilin/crm-api/internal/eventbus/subscribers"
+	"github.com/qilin/crm-api/internal/eventbus/subscribers/invites"
 	"github.com/qilin/crm-api/internal/stan"
 )
 
@@ -88,7 +88,7 @@ func BuildMailer(ctx context.Context, initial config.Initial, observer invoker.O
 		cleanup()
 		return nil, nil, err
 	}
-	commonSubscribers, cleanup9, err := subscribers.ProviderSubscribers()
+	invitesConfig, cleanup9, err := invites.Cfg(configurator)
 	if err != nil {
 		cleanup8()
 		cleanup7()
@@ -100,7 +100,7 @@ func BuildMailer(ctx context.Context, initial config.Initial, observer invoker.O
 		cleanup()
 		return nil, nil, err
 	}
-	stanConfig, cleanup10, err := stan.Cfg(configurator)
+	inviteSubscriber, cleanup10, err := invites.Provider(invitesConfig)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -113,7 +113,7 @@ func BuildMailer(ctx context.Context, initial config.Initial, observer invoker.O
 		cleanup()
 		return nil, nil, err
 	}
-	stanStan, cleanup11, err := stan.Provider(ctx, awareSet, stanConfig)
+	commonSubscribers, cleanup11, err := subscribers.ProviderSubscribers(inviteSubscriber)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -127,7 +127,7 @@ func BuildMailer(ctx context.Context, initial config.Initial, observer invoker.O
 		cleanup()
 		return nil, nil, err
 	}
-	eventbusConfig, cleanup12, err := eventbus.Cfg(configurator)
+	stanConfig, cleanup12, err := stan.Cfg(configurator)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -142,7 +142,7 @@ func BuildMailer(ctx context.Context, initial config.Initial, observer invoker.O
 		cleanup()
 		return nil, nil, err
 	}
-	eventBus, cleanup13, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
+	stanStan, cleanup13, err := stan.Provider(ctx, awareSet, stanConfig)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -158,7 +158,44 @@ func BuildMailer(ctx context.Context, initial config.Initial, observer invoker.O
 		cleanup()
 		return nil, nil, err
 	}
+	eventbusConfig, cleanup14, err := eventbus.Cfg(configurator)
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	eventBus, cleanup15, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return eventBus, func() {
+		cleanup15()
+		cleanup14()
 		cleanup13()
 		cleanup12()
 		cleanup11()
@@ -241,7 +278,7 @@ func BuildMailerTest(ctx context.Context, initial config.Initial, observer invok
 		cleanup()
 		return nil, nil, err
 	}
-	commonSubscribers, cleanup9, err := subscribers.ProviderSubscribers()
+	invitesConfig, cleanup9, err := invites.CfgTest()
 	if err != nil {
 		cleanup8()
 		cleanup7()
@@ -253,7 +290,7 @@ func BuildMailerTest(ctx context.Context, initial config.Initial, observer invok
 		cleanup()
 		return nil, nil, err
 	}
-	stanConfig, cleanup10, err := stan.CfgTest()
+	inviteSubscriber, cleanup10, err := invites.Provider(invitesConfig)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -266,7 +303,7 @@ func BuildMailerTest(ctx context.Context, initial config.Initial, observer invok
 		cleanup()
 		return nil, nil, err
 	}
-	stanStan, cleanup11, err := stan.Provider(ctx, awareSet, stanConfig)
+	commonSubscribers, cleanup11, err := subscribers.ProviderSubscribers(inviteSubscriber)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -280,7 +317,7 @@ func BuildMailerTest(ctx context.Context, initial config.Initial, observer invok
 		cleanup()
 		return nil, nil, err
 	}
-	eventbusConfig, cleanup12, err := eventbus.CfgTest()
+	stanConfig, cleanup12, err := stan.CfgTest()
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -295,7 +332,7 @@ func BuildMailerTest(ctx context.Context, initial config.Initial, observer invok
 		cleanup()
 		return nil, nil, err
 	}
-	eventBus, cleanup13, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
+	stanStan, cleanup13, err := stan.Provider(ctx, awareSet, stanConfig)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -311,7 +348,44 @@ func BuildMailerTest(ctx context.Context, initial config.Initial, observer invok
 		cleanup()
 		return nil, nil, err
 	}
+	eventbusConfig, cleanup14, err := eventbus.CfgTest()
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	eventBus, cleanup15, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return eventBus, func() {
+		cleanup15()
+		cleanup14()
 		cleanup13()
 		cleanup12()
 		cleanup11()

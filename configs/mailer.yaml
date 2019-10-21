@@ -1,10 +1,16 @@
 stan:
   stanClusterId: "test-cluster"
-  stanClientId: "qilin-mailer-client-id"
+  stanClientId: "qilin-mailer2-client-id"
   stanOptions:
-    natsURL: nats://natss:4223
+    natsURL: nats://natss:4222
+eventbus:
+  subjects:
+    invitesOut: "invites"
+    invitesIn: "invites"
+  subscribers:
+    - "invites"
 mailer:
-  subject: "invites"
+  subject: "You have new invite"
   MaxAttempts: 5
   mailer:
     host: "localhost"

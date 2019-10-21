@@ -5,8 +5,6 @@ import (
 
 	"github.com/qilin/crm-api/internal/mailer"
 
-	"github.com/qilin/crm-api/internal/eventbus"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/cmd"
@@ -24,7 +22,7 @@ var (
 		Run: func(_ *cobra.Command, _ []string) {
 			log := cmd.Slave.Logger().WithFields(logger.Fields{"service": Prefix})
 			var (
-				s *eventbus.EventBus
+				//s *eventbus.EventBus
 				c func()
 				e error
 			)
@@ -39,13 +37,12 @@ var (
 					log.Info("catch reload in %s, debug: %v, ok: %v", logger.Args(Prefix, initial.WorkDir, ok))
 				})
 				initial, _ := entrypoint.CtxExtractInitial(ctx)
-				s, c, e = mailer.BuildMailer(ctx, initial, cmd.Observer)
+				_, c, e = mailer.BuildMailer(ctx, initial, cmd.Observer)
 				if e != nil {
 					return e
 				}
 				return nil
 			}, func(ctx context.Context) error {
-				s.Run()
 				<-ctx.Done()
 				return nil
 			})
