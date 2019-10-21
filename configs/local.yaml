@@ -7,7 +7,7 @@ graphql:
     name: local
     endpoint: /v1/graphql
 postgres:
-  dsn: postgres://qilin:insecure@localhost:5567/qilin?sslmode=disable
+  dsn: postgres://qilin:insecure@localhost:5567/qilin-hasura?sslmode=disable
   maxOpenConns: 5
   maxIdleConns: 3
   connMaxLifetime: 15m
@@ -15,7 +15,7 @@ postgres:
 dispatcher:
   cors:
     allowed:
-      - "*"
+      - "http://localhost:3000"
     methods:
       - "HEAD"
       - "GET"
@@ -25,14 +25,86 @@ dispatcher:
       - "DELETE"
     headers:
       - "*"
-  oauth:
-    clientId: "unknown"
-    clientSecret: "unknown"
-    redirectUrl: "unknown"
-    group: "/auth"
-    routes:
-      auth: "/"
-      callback: "/callback"
-      logout: "/logout"
+  auth:
+    oauth2:
+      provider: "https://auth1.tst.protocol.one/"
+      clientId: "5da4ec412b13220001efe179"
+      clientSecret: "w9JkFlYOa7Hr6QY4OwMv4CWUl3rkJJkwkBjEdkGFE6SQILaM3Hpzxsvs5REdMFNV"
+      redirectUrl: "http://localhost:8082/auth/v1/callback"
+    secret: secretkey
+    autoSignIn: true
+    successRedirectURL: http://localhost:3000/auth_success
+    jwt:
+      publicKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA1cGV3FeyHS6zzCfbS/G/
+        Wrpae9jdj7WozCUbIG5Yxg5Mnvxt+WkAHQloL2z13QX1FZ66pUvqa3c6ZPOn9KEi
+        KgjQaHH84AwdpqMNK8adpmhfPYLOql0Kk28lJFlGhbZ8FSM1OHnyK2H2RikZGJv1
+        J5w9qMUFQIlKJGxSPbovwpMSzhcv6aG8PzGlz6K5Fhiy+CUGENuesmLfcpCM7mvr
+        MJmDi6frGA4K3A6djCdUFoMtGtuA1v/a2c+EMvovG8FjEzynOxD1mnNJn9k77BwA
+        ABUqXnw2Rm+Usdmk+8wajVp3k4pdKM0kyuV5ttuoEIxzepVV1IpMIZ7XCx80awgw
+        vyn+txj9QFtrP3iU4cKAuVYyvDD/50KlJgklGximGsNhFo4p5uOsM8DFsyXdCCRd
+        x46p+4Hawj5LxqQObw0QVGAZbNe1S3cGcKvP4DA7J/n2e02/FgoXevHh9S7i4LpG
+        ekErTHOjsTaqMO+dpqpthxFPgq41hsppLOd9jwfMomFhDAhVpgfF9DKFfLdherR3
+        jov+4FBb3me3c7EdckNrEUUkhOKW2FbnLF/LLsPxgkJ0Tadr31oSocTqllAi+3eY
+        pgdTZOiAtSDePAujtv29LQW7p9NVOg3WsKULWlZRENnUBPdVWhFyTT3yl3jqICrr
+        RSTGfW5nPesP6g4DPwP8/+MCAwEAAQ==
+        -----END PUBLIC KEY-----
+
+
+      privateKey: |
+        -----BEGIN RSA PRIVATE KEY-----
+        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
+        -----END RSA PRIVATE KEY-----
+
+
 webhooks:
   secret: insecure

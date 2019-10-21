@@ -3,8 +3,6 @@ package repo
 import (
 	"context"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/db/trx"
 
@@ -18,16 +16,22 @@ type UserRepo struct {
 // Create
 func (a *UserRepo) Create(ctx context.Context, model *domain.UserItem) error {
 	db := trx.Inject(ctx, a.db)
-	pwd, e := hashPassword(model.Password)
-	if e != nil {
-		return e
-	}
-	model.Password = pwd
 	return db.Save(model).Error
 }
 
-// List
-func (a *UserRepo) GetByEmail(ctx context.Context, email string) (*domain.UserItem, error) {
+// FindByExternalID
+func (a *UserRepo) FindByExternalID(ctx context.Context, externalID string) (*domain.UserItem, error) {
+	db := trx.Inject(ctx, a.db)
+	var (
+		out = &domain.UserItem{}
+		e   error
+	)
+	e = db.Where("external_id=?", externalID).First(out).Error
+	return out, e
+}
+
+// FindByEmail
+func (a *UserRepo) FindByEmail(ctx context.Context, email string) (*domain.UserItem, error) {
 	db := trx.Inject(ctx, a.db)
 	var (
 		out = &domain.UserItem{}
@@ -61,7 +65,7 @@ func NewUserRepo(db *gorm.DB) domain.UserRepo {
 	return &UserRepo{db: db}
 }
 
-func hashPassword(password string) (string, error) {
-	hash, e := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(hash), e
-}
+// func hashPassword(password string) (string, error) {
+// 	hash, e := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+// 	return string(hash), e
+// }
