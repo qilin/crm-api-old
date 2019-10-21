@@ -3,6 +3,8 @@ package eventbus
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/eventbus/subscribers/invites"
+
 	"github.com/qilin/crm-api/internal/eventbus/common"
 
 	"github.com/qilin/crm-api/internal/eventbus/subscribers"
@@ -47,12 +49,14 @@ var (
 		Provider,
 		publishers.ProviderPublishers,
 		subscribers.ProviderSubscribers,
+		invites.WireSet,
 		Cfg,
 	)
 	WireTestSet = wire.NewSet(
 		Provider,
 		publishers.ProviderPublishers,
 		subscribers.ProviderSubscribers,
+		invites.WireTestSet,
 		CfgTest,
 	)
 )

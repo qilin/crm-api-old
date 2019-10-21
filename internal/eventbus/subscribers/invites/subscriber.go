@@ -35,6 +35,7 @@ func (s *InviteSubscriber) Subscribe(conn stan.Conn, eb common.EventBus, subs co
 
 		// todo: build message from template
 		m := "you have new invite"
+
 		if s.mailer.Send(invite.Email, s.cfg.Subject, m) != nil && evt.Attempt < s.cfg.MaxAttempts {
 			evt.Attempt = evt.Attempt + 1
 			eb.PublishEvent(evt)
