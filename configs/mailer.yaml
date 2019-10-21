@@ -1,0 +1,17 @@
+stan:
+  stanClusterId: "test-cluster"
+  stanClientId: "qilin-mailer-client-id"
+  stanOptions:
+    natsURL: nats://natss:4223
+mailer:
+  subject: "invites"
+  MaxAttempts: 5
+  mailer:
+    host: "localhost"
+    port: 25
+    username: ""
+    password: ""
+    replyTo: ""
+    from: ""
+    insecureSkipVerify: true
+

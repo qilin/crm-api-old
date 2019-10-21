@@ -321,7 +321,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	eventBus, cleanup21, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig)
+	eventBus, cleanup21, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
 	if err != nil {
 		cleanup20()
 		cleanup19()
@@ -782,7 +782,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	stanConfig, cleanup17, err := stan.Cfg(configurator)
+	stanConfig, cleanup17, err := stan.CfgTest()
 	if err != nil {
 		cleanup16()
 		cleanup15()
@@ -823,7 +823,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	eventbusConfig, cleanup19, err := eventbus.Cfg(configurator)
+	eventbusConfig, cleanup19, err := eventbus.CfgTest()
 	if err != nil {
 		cleanup18()
 		cleanup17()
@@ -845,7 +845,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	eventBus, cleanup20, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig)
+	eventBus, cleanup20, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
 	if err != nil {
 		cleanup19()
 		cleanup18()

@@ -33,8 +33,8 @@ func CfgTest() (*Config, func(), error) {
 }
 
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, pubs common.Publishers, subs common.Subscribers, stan *stan.Stan, cfg *Config) (*EventBus, func(), error) {
-	g := New(ctx, set, stan, pubs, subs, cfg)
+func Provider(ctx context.Context, set provider.AwareSet, pubs common.Publishers, subs common.Subscribers, stan *stan.Stan, cfg *Config, stanCfg *stan.Config) (*EventBus, func(), error) {
+	g := New(ctx, set, stan, pubs, subs, cfg, stanCfg)
 	err := g.Run()
 	cleanup := func() {
 		g.Stop()

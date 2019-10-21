@@ -15,6 +15,15 @@ services:
       - APP_POSTGRES_DSN=postgres://qilin:insecure@postgres:5432/qilin?sslmode=disable
     networks:
       - default
+  crm-mailer:
+    container_name: qilin-crm-mailer
+    image: p1hub/qilin-crm-api:${TAG}
+    restart: always
+    depends_on:
+      - natss
+    command: ["mailer","-c","configs/mailer.yaml","-d"]
+    networks:
+      - default
   hasura:
     ports:
       - 8081:8080
