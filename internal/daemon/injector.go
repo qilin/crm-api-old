@@ -36,8 +36,8 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
 		wire.Struct(new(provider.AwareSet), "*"),
 		http.WireTestSet,
-		stan.WireSet,
-		eventbus.WireSet,
+		stan.WireTestSet,
+		eventbus.WireTestSet,
 		webhooks.WireTestSet,
 	))
 }
