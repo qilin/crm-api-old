@@ -1,0 +1,64 @@
+- args:
+    permission:
+      columns:
+      - viewed
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: merchant
+    table:
+      name: notifications
+      schema: public
+  type: create_update_permission
+- args:
+    permission:
+      columns:
+      - viewed
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: notifications
+      schema: public
+  type: create_update_permission
+- args:
+    permission:
+      columns:
+      - viewed
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: supporter
+    table:
+      name: notifications
+      schema: public
+  type: create_update_permission
+- args:
+    permission:
+      columns:
+      - viewed
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: developer
+    table:
+      name: notifications
+      schema: public
+  type: create_update_permission

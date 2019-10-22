@@ -7,7 +7,6 @@ import (
 )
 
 type Groups struct {
-	Auth    *echo.Group
 	GraphQL *echo.Group
 	V1      *echo.Group
 	Common  *echo.Echo

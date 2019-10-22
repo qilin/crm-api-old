@@ -89,14 +89,7 @@ func (g *GraphQL) Route(groups *common.Groups) {
 		options...,
 	)
 
-	groups.GraphQL.Any(g.cfg.Route, func(c echo.Context) error {
-		h.ServeHTTP(c.Response(), c.Request().WithContext(
-			context.WithValue(c.Request().Context(),
-				common.UserContextKey, c.Get(common.UserContextKey)),
-		),
-		)
-		return nil
-	})
+	groups.GraphQL.Any(g.cfg.Route, echo.WrapHandler(h))
 }
 
 type PlaygroundCfg struct {
