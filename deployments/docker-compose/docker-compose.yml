@@ -24,7 +24,7 @@ services:
       - default
   hasura:
     container_name: qilin-hasura
-    image: hasura/graphql-engine:v1.0.0-beta.6.cli-migrations
+    image: hasura/graphql-engine:v1.0.0-beta.8.cli-migrations
     restart: always
     networks:
       - default
