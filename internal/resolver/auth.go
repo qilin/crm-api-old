@@ -5,8 +5,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/qilin/crm-api/internal/dispatcher/common"
-
+	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/db/domain"
 
 	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
@@ -78,7 +77,7 @@ func (r *authQueryResolver) Signin(ctx context.Context, obj *graphql1.AuthQuery,
 	}
 
 	// get user
-	user, e := r.repo.User.GetByEmail(ctx, email)
+	user, e := r.repo.User.FindByEmail(ctx, email)
 	if e != nil {
 		return &graphql1.SigninOut{
 			Status: graphql1.SigninOutStatusServerInternalError,
@@ -100,9 +99,14 @@ func (r *authQueryResolver) Signin(ctx context.Context, obj *graphql1.AuthQuery,
 }
 
 func (r *authQueryResolver) Me(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.User, error) {
-	u := common.ExtractUserContext(ctx)
+	u := auth.ExtractUserContext(ctx)
+	user, e := r.repo.User.Get(ctx, u.Id)
+	if e != nil {
+		return nil, e
+	}
 	return &graphql1.User{
-		Email: u.Email,
+		ID:    user.ID,
+		Email: user.Email,
 	}, nil
 }
 

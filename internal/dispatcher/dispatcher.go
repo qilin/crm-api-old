@@ -3,7 +3,8 @@ package dispatcher
 import (
 	"context"
 
-	"github.com/qilin/crm-api/internal/jwt"
+	"github.com/qilin/crm-api/internal/auth"
+	"github.com/qilin/crm-api/internal/db/domain"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -16,33 +17,39 @@ import (
 
 // Dispatcher
 type Dispatcher struct {
-	ctx     context.Context
-	cfg     Config
-	authCfg common.OAuth2
-	appSet  AppSet
+	ctx    context.Context
+	cfg    Config
+	appSet AppSet
 	provider.LMT
 }
 
 // dispatch
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
-	// middleware#2: recover
+
+	echoHttp.Use(middleware.Logger())
 	echoHttp.Use(middleware.Recover())
-	// middleware#1: CORS
-	if d.cfg.Debug {
-		echoHttp.Use(middleware.CORS())
-	} else {
-		echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     d.cfg.CORS.Allowed,
-			AllowMethods:     d.cfg.CORS.Methods,
-			AllowHeaders:     d.cfg.CORS.Headers,
-			AllowCredentials: false,
-		}))
+
+	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     d.cfg.CORS.Allowed,
+		AllowMethods:     d.cfg.CORS.Methods,
+		AllowHeaders:     d.cfg.CORS.Headers,
+		AllowCredentials: true,
+	}))
+
+	// authorization
+	auth, err := auth.New(d.LMT, &d.cfg.Auth, d.appSet.Users)
+	if err != nil {
+		return err
 	}
+	auth.RegisterHandlers(echoHttp)
+
+	// configure graphql group
+	var gql = echoHttp.Group(common.GraphQLGroupPath)
+	gql.Use(auth.Middleware)
 
 	// init group routes
 	grp := &common.Groups{
-		Auth:    echoHttp.Group(common.AuthGroupPath),
-		GraphQL: echoHttp.Group(common.GraphQLGroupPath),
+		GraphQL: gql,
 		Common:  echoHttp,
 		V1:      echoHttp.Group(common.V1Path),
 	}
@@ -59,8 +66,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 }
 
 func (d *Dispatcher) graphqlGroup(group *common.Groups) {
-	// GraphQL JWT Middleware
-	group.GraphQL.Use(d.graphqlJWTMiddleware)
+	// add graphql handlers
 }
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {
@@ -69,9 +75,7 @@ func (d *Dispatcher) commonGroup(grp *echo.Echo) {
 
 // Config
 type Config struct {
-	Debug   bool `fallback:"shared.debug"`
-	WorkDir string
-	OAuth   common.OAuth2
+	Auth    auth.Config
 	CORS    common.CORS
 	invoker *invoker.Invoker
 }
@@ -87,9 +91,9 @@ func (c *Config) Reload(ctx context.Context) {
 }
 
 type AppSet struct {
-	GraphQL     *graphql.GraphQL
-	Handlers    common.Handlers
-	JwtVerifier *jwt.JWTVerefier
+	GraphQL  *graphql.GraphQL
+	Handlers common.Handlers
+	Users    domain.UserRepo
 }
 
 // New

@@ -20,7 +20,6 @@ import (
 	"github.com/qilin/crm-api/internal/eventbus/publishers"
 	"github.com/qilin/crm-api/internal/eventbus/subscribers"
 	"github.com/qilin/crm-api/internal/handlers"
-	"github.com/qilin/crm-api/internal/jwt"
 	"github.com/qilin/crm-api/internal/resolver"
 	"github.com/qilin/crm-api/internal/stan"
 	"github.com/qilin/crm-api/internal/validators"
@@ -111,11 +110,9 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	jwtKeysRepo := repo.NewJwtKeysRepo(db)
-	listRepo := repo.NewListRepo(db)
 	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
 		JwtKeys: jwtKeysRepo,
-		List:    listRepo,
 		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
@@ -423,11 +420,10 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo, awareSet)
 	dispatcherAppSet := dispatcher.AppSet{
-		GraphQL:     graphQL,
-		Handlers:    commonHandlers,
-		JwtVerifier: jwtVerefier,
+		GraphQL:  graphQL,
+		Handlers: commonHandlers,
+		Users:    userRepo,
 	}
 	dispatcherConfig, cleanup25, err := dispatcher.ProviderCfg(configurator)
 	if err != nil {
@@ -646,11 +642,9 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		return nil, nil, err
 	}
 	jwtKeysRepo := repo.NewJwtKeysRepo(db)
-	listRepo := repo.NewListRepo(db)
 	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
 		JwtKeys: jwtKeysRepo,
-		List:    listRepo,
 		User:    userRepo,
 	}
 	manager := trx.NewTrxManager(db)
@@ -943,11 +937,10 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	jwtVerefier := jwt.ProviderJwtVerifier(jwtKeysRepo, awareSet)
 	dispatcherAppSet := dispatcher.AppSet{
-		GraphQL:     graphQL,
-		Handlers:    commonHandlers,
-		JwtVerifier: jwtVerefier,
+		GraphQL:  graphQL,
+		Handlers: commonHandlers,
+		Users:    userRepo,
 	}
 	dispatcherConfig, cleanup24, err := dispatcher.ProviderCfg(configurator)
 	if err != nil {
