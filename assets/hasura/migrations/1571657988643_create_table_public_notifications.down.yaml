@@ -1,0 +1,3 @@
+- args:
+    sql: DROP TABLE "public"."notifications"
+  type: run_sql

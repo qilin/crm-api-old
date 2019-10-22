@@ -1,6 +1,6 @@
 package daemon
 
 const (
-	Prefix           = "pkg.daemon"
-	UnmarshalKey     = "daemon"
+	Prefix       = "pkg.daemon"
+	UnmarshalKey = "daemon"
 )

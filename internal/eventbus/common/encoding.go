@@ -8,8 +8,8 @@ type Wrapper interface {
 }
 
 type Marshaller interface {
-	Marshall(v interface{}) ([]byte, error)
-	UnMarshall(data []byte, v interface{}) error
+	Marshal(v interface{}) ([]byte, error)
+	Unmarshal(data []byte, v interface{}) error
 }
 
 // Wrapper
@@ -25,7 +25,7 @@ func NewJsonWrapper(marshaller Marshaller) Wrapper {
 }
 
 func (w jsonWrapper) Wrap(payload Payloader, attempt int) (Event, error) {
-	msg, err := w.marshaller.Marshall(payload.Payload())
+	msg, err := w.marshaller.Marshal(payload.Payload())
 	if err != nil {
 		return Event{}, err
 	}
@@ -39,7 +39,7 @@ func (w jsonWrapper) Wrap(payload Payloader, attempt int) (Event, error) {
 
 func (w jsonWrapper) UnWrap(data []byte) (Event, error) {
 	var evt Event
-	err := w.marshaller.UnMarshall(data, &evt)
+	err := w.marshaller.Unmarshal(data, &evt)
 	return evt, err
 }
 
@@ -51,10 +51,10 @@ func NewJSONMarshaller() Marshaller {
 	return &jsonMarshaller{}
 }
 
-func (j *jsonMarshaller) Marshall(v interface{}) ([]byte, error) {
+func (j *jsonMarshaller) Marshal(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func (j *jsonMarshaller) UnMarshall(data []byte, v interface{}) error {
+func (j *jsonMarshaller) Unmarshal(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }
