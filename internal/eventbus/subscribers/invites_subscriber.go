@@ -30,7 +30,7 @@ func (s *inviteSubscriber) Subscribe(conn stan.Conn, eb common.EventBus, subs co
 			return
 		}
 		var invite events.Invite
-		err = s.marshaller.UnMarshall(evt.Payload, &invite)
+		err = s.marshaller.Unmarshal(evt.Payload, &invite)
 		if err != nil {
 			log.Error("can not unmarshal event payload, error: %s", logger.Args(err.Error()))
 			return

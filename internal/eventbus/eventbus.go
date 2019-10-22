@@ -2,7 +2,6 @@ package eventbus
 
 import (
 	"context"
-	"sync"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -13,7 +12,6 @@ import (
 )
 
 type EventBus struct {
-	mu   sync.Mutex
 	ctx  context.Context
 	cfg  *Config
 	stan *stan2.Stan

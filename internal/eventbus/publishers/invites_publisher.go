@@ -25,7 +25,7 @@ func (p *invitesPublisher) Publish(msg common.Payloader) error {
 }
 
 func (b *invitesPublisher) PublishEvent(evt common.Event) error {
-	data, err := b.marshaller.Marshall(evt)
+	data, err := b.marshaller.Marshal(evt)
 	if err != nil {
 		b.log.Error("marshalling event failed: %v", logger.Args(err))
 		return err
