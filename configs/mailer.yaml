@@ -11,6 +11,7 @@ eventbus:
     - "invites"
 mailer:
   subject: "You have new invite"
+  template: "configs/mail/new_invite.tpl"
   MaxAttempts: 5
   mailer:
     host: "localhost"
