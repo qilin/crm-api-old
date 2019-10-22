@@ -2,7 +2,6 @@ package eventbus
 
 import (
 	"context"
-	"sync"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -13,11 +12,10 @@ import (
 )
 
 type EventBus struct {
-	mu      sync.Mutex
 	ctx     context.Context
 	cfg     *Config
-	stanCfg *stan2.Config
 	stan    *stan2.Stan
+	stanCfg *stan2.Config
 	conn    stan.Conn
 	provider.LMT
 	pubs map[string]common.Publisher
