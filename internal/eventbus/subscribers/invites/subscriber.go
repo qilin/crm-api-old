@@ -51,7 +51,7 @@ func (s *InviteSubscriber) Subscribe(conn stan.Conn, eb common.EventBus, subs co
 		}
 
 		// send mail
-		if s.mailer.Send(invite.Email, s.cfg.Subject, w.String()) != nil && evt.Attempt < s.cfg.MaxAttempts {
+		if s.mailer.Send(invite.Email, s.cfg.Subject, w.String()) != nil && evt.Attempt+1 < s.cfg.MaxAttempts {
 			evt.Attempt = evt.Attempt + 1
 			if err = eb.PublishEvent(evt); err != nil {
 				log.Error(err.Error())
