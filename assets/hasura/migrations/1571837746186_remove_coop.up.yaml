@@ -1,0 +1,4 @@
+- args:
+    cascade: false
+    sql: delete from features where id='Co-op'
+  type: run_sql

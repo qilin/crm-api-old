@@ -1,0 +1,6 @@
+- args:
+    relationship: reviews
+    table:
+      name: game
+      schema: public
+  type: drop_relationship

@@ -1,0 +1,6 @@
+- args:
+    relationship: game_platforms
+    table:
+      name: game
+      schema: public
+  type: drop_relationship

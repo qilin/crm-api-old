@@ -1,0 +1,4 @@
+- args:
+    cascade: false
+    sql: "insert into genres (id) values\n('action'), \n('adventure'),\n('casual'),\n('indie'),\n('MMO'),\n('RPG'),\n('Strategy'),\n('Racing'),\n('Simulaion'),\n('Sports')"
+  type: run_sql
