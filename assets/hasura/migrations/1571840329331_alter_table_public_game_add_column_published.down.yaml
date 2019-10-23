@@ -1,0 +1,3 @@
+- args:
+    sql: ALTER TABLE "public"."game" DROP COLUMN "published";
+  type: run_sql
