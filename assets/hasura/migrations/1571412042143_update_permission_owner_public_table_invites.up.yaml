@@ -1,0 +1,18 @@
+- args:
+    permission:
+      allow_upsert: true
+      check: {}
+      columns:
+      - email
+      - expiration
+      - first_name
+      - last_name
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: invites
+      schema: public
+  type: create_insert_permission
