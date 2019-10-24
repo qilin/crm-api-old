@@ -1,0 +1,1 @@
+You have new invite, {{.FirstName}}.

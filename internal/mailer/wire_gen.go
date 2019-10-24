@@ -3,7 +3,7 @@
 //go:generate wire
 //+build !wireinject
 
-package graphql
+package mailer
 
 import (
 	"context"
@@ -13,16 +13,16 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/metric"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
-	"github.com/qilin/crm-api/internal/db/repo"
-	"github.com/qilin/crm-api/internal/db/trx"
-	"github.com/qilin/crm-api/internal/resolver"
-	"github.com/qilin/crm-api/internal/validators"
-	"github.com/qilin/crm-api/pkg/postgres"
+	"github.com/qilin/crm-api/internal/eventbus"
+	"github.com/qilin/crm-api/internal/eventbus/publishers"
+	"github.com/qilin/crm-api/internal/eventbus/subscribers"
+	"github.com/qilin/crm-api/internal/eventbus/subscribers/invites"
+	"github.com/qilin/crm-api/internal/stan"
 )
 
 // Injectors from injector.go:
 
-func Build(ctx context.Context, initial config.Initial, observer invoker.Observer) (*GraphQL, func(), error) {
+func BuildMailer(ctx context.Context, initial config.Initial, observer invoker.Observer) (*eventbus.EventBus, func(), error) {
 	configurator, cleanup, err := config.Provider(initial, observer)
 	if err != nil {
 		return nil, nil, err
@@ -77,7 +77,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		Metric: scope,
 		Tracer: tracer,
 	}
-	postgresConfig, cleanup8, err := postgres.ProviderCfg(configurator)
+	commonPublishers, cleanup8, err := publishers.ProviderPublishers()
 	if err != nil {
 		cleanup7()
 		cleanup6()
@@ -88,7 +88,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	db, cleanup9, err := postgres.ProviderGORM(ctx, zap, postgresConfig)
+	invitesConfig, cleanup9, err := invites.Cfg(configurator)
 	if err != nil {
 		cleanup8()
 		cleanup7()
@@ -100,20 +100,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	jwtKeysRepo := repo.NewJwtKeysRepo(db)
-	listRepo := repo.NewListRepo(db)
-	userRepo := repo.NewUserRepo(db)
-	resolverRepo := resolver.Repo{
-		JwtKeys: jwtKeysRepo,
-		List:    listRepo,
-		User:    userRepo,
-	}
-	manager := trx.NewTrxManager(db)
-	appSet := resolver.AppSet{
-		Repo: resolverRepo,
-		Trx:  manager,
-	}
-	resolverConfig, cleanup10, err := resolver.Cfg(configurator)
+	inviteSubscriber, cleanup10, err := invites.Provider(invitesConfig)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -126,7 +113,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	validatorSet, cleanup11, err := validators.Provider()
+	commonSubscribers, cleanup11, err := subscribers.ProviderSubscribers(inviteSubscriber)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -140,7 +127,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	validate, cleanup12, err := validators.ProviderValidators(validatorSet)
+	stanConfig, cleanup12, err := stan.Cfg(configurator)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -155,7 +142,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	graphqlConfig, cleanup13, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate)
+	stanStan, cleanup13, err := stan.Provider(ctx, awareSet, stanConfig)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -171,7 +158,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup14, err := Cfg(configurator)
+	eventbusConfig, cleanup14, err := eventbus.Cfg(configurator)
 	if err != nil {
 		cleanup13()
 		cleanup12()
@@ -188,7 +175,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	graphQL, cleanup15, err := Provider(ctx, graphqlConfig, awareSet, config2)
+	eventBus, cleanup15, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
 	if err != nil {
 		cleanup14()
 		cleanup13()
@@ -206,7 +193,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return nil, nil, err
 	}
-	return graphQL, func() {
+	return eventBus, func() {
 		cleanup15()
 		cleanup14()
 		cleanup13()
@@ -225,7 +212,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 	}, nil
 }
 
-func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Observer) (*GraphQL, func(), error) {
+func BuildMailerTest(ctx context.Context, initial config.Initial, observer invoker.Observer) (*eventbus.EventBus, func(), error) {
 	configurator, cleanup, err := config.Provider(initial, observer)
 	if err != nil {
 		return nil, nil, err
@@ -280,7 +267,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		Metric: scope,
 		Tracer: tracer,
 	}
-	db, cleanup8, err := postgres.ProviderGORMTest()
+	commonPublishers, cleanup8, err := publishers.ProviderPublishers()
 	if err != nil {
 		cleanup7()
 		cleanup6()
@@ -291,20 +278,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	jwtKeysRepo := repo.NewJwtKeysRepo(db)
-	listRepo := repo.NewListRepo(db)
-	userRepo := repo.NewUserRepo(db)
-	resolverRepo := resolver.Repo{
-		JwtKeys: jwtKeysRepo,
-		List:    listRepo,
-		User:    userRepo,
-	}
-	manager := trx.NewTrxManager(db)
-	appSet := resolver.AppSet{
-		Repo: resolverRepo,
-		Trx:  manager,
-	}
-	resolverConfig, cleanup9, err := resolver.CfgTest()
+	invitesConfig, cleanup9, err := invites.CfgTest()
 	if err != nil {
 		cleanup8()
 		cleanup7()
@@ -316,7 +290,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	validatorSet, cleanup10, err := validators.Provider()
+	inviteSubscriber, cleanup10, err := invites.Provider(invitesConfig)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -329,7 +303,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	validate, cleanup11, err := validators.ProviderValidators(validatorSet)
+	commonSubscribers, cleanup11, err := subscribers.ProviderSubscribers(inviteSubscriber)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -343,7 +317,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	graphqlConfig, cleanup12, err := resolver.Provider(ctx, awareSet, appSet, resolverConfig, validate)
+	stanConfig, cleanup12, err := stan.CfgTest()
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -358,7 +332,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup13, err := CfgTest()
+	stanStan, cleanup13, err := stan.Provider(ctx, awareSet, stanConfig)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -374,7 +348,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	graphQL, cleanup14, err := Provider(ctx, graphqlConfig, awareSet, config2)
+	eventbusConfig, cleanup14, err := eventbus.CfgTest()
 	if err != nil {
 		cleanup13()
 		cleanup12()
@@ -391,7 +365,26 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	return graphQL, func() {
+	eventBus, cleanup15, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	return eventBus, func() {
+		cleanup15()
 		cleanup14()
 		cleanup13()
 		cleanup12()
