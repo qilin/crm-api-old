@@ -1,0 +1,19 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - id
+      - name
+      - role
+      - updated_at
+      filter:
+        group_users:
+          user_id:
+            _eq: X-Hasura-User-Id
+      limit: null
+    role: administrator
+    table:
+      name: groups
+      schema: public
+  type: create_select_permission
