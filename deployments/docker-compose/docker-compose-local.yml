@@ -30,7 +30,6 @@ services:
       QILIN_CRM_ENDPOINT: "http://crm-daemon:8080/v1/graphql"
       QILIN_CRM_WEBHOOKS_ENDPOINT: "http://crm-daemon:8080/v1/webhooks"
       QILIN_CRM_WEBHOOKS_SECRET: "insecure"
-      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
       HASURA_GRAPHQL_JWT_SECRET: |
         {
           "type": "RS512",
