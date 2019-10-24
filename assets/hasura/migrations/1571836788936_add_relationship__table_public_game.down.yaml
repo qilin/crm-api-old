@@ -1,6 +1,6 @@
 - args:
     relationship: publishers
     table:
-      name: game
+      name: games
       schema: public
   type: drop_relationship

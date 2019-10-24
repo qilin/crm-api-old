@@ -1,7 +1,7 @@
 - args:
     sql: CREATE TABLE "public"."developers"("game_id" uuid NOT NULL, "name" text NOT
       NULL, "id" serial NOT NULL, PRIMARY KEY ("id") , FOREIGN KEY ("game_id") REFERENCES
-      "public"."game"("id") ON UPDATE cascade ON DELETE cascade);
+      "public"."games"("id") ON UPDATE cascade ON DELETE cascade);
   type: run_sql
 - args:
     name: developers

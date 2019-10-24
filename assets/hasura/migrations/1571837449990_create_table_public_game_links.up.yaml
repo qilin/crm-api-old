@@ -1,7 +1,7 @@
 - args:
     sql: CREATE TABLE "public"."game_links"("game_id" uuid NOT NULL, "site" text,
       "forum" text, "eula" text, "manual" text, PRIMARY KEY ("game_id") , FOREIGN
-      KEY ("game_id") REFERENCES "public"."game"("id") ON UPDATE cascade ON DELETE
+      KEY ("game_id") REFERENCES "public"."games"("id") ON UPDATE cascade ON DELETE
       cascade);
   type: run_sql
 - args:

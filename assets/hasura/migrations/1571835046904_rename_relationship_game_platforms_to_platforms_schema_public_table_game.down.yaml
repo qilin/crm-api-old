@@ -2,6 +2,6 @@
     name: platforms
     new_name: game_platforms
     table:
-      name: game
+      name: games
       schema: public
   type: rename_relationship

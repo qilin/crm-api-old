@@ -1,4 +1,4 @@
 - args:
-    sql: ALTER TABLE "public"."game" ADD COLUMN "published" boolean NOT NULL DEFAULT
+    sql: ALTER TABLE "public"."games" ADD COLUMN "published" boolean NOT NULL DEFAULT
       false;
   type: run_sql

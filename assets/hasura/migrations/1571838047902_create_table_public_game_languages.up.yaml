@@ -2,7 +2,7 @@
     sql: CREATE TABLE "public"."game_languages"("game_id" uuid NOT NULL, "language"
       text NOT NULL, "interface" boolean NOT NULL, "sound" boolean NOT NULL, "subtitles"
       boolean NOT NULL, PRIMARY KEY ("game_id","language") , FOREIGN KEY ("game_id")
-      REFERENCES "public"."game"("id") ON UPDATE cascade ON DELETE cascade);
+      REFERENCES "public"."games"("id") ON UPDATE cascade ON DELETE cascade);
   type: run_sql
 - args:
     name: game_languages

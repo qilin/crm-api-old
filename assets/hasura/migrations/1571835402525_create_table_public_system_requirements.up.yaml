@@ -2,7 +2,7 @@
     sql: CREATE TABLE "public"."system_requirements"("game_id" uuid NOT NULL, "kind"
       text NOT NULL, "os" text, "processor" text, "ram" text, "gpu" text, "sound_card"
       text, "browser" text, PRIMARY KEY ("game_id","kind") , FOREIGN KEY ("game_id")
-      REFERENCES "public"."game"("id") ON UPDATE cascade ON DELETE cascade);
+      REFERENCES "public"."games"("id") ON UPDATE cascade ON DELETE cascade);
   type: run_sql
 - args:
     name: system_requirements
