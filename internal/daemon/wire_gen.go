@@ -16,8 +16,13 @@ import (
 	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/dispatcher"
+	"github.com/qilin/crm-api/internal/eventbus"
+	"github.com/qilin/crm-api/internal/eventbus/publishers"
+	"github.com/qilin/crm-api/internal/eventbus/subscribers"
+	"github.com/qilin/crm-api/internal/eventbus/subscribers/invites"
 	"github.com/qilin/crm-api/internal/handlers"
 	"github.com/qilin/crm-api/internal/resolver"
+	"github.com/qilin/crm-api/internal/stan"
 	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/internal/webhooks"
 	"github.com/qilin/crm-api/pkg/graphql"
@@ -209,7 +214,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	webhooksConfig, cleanup16, err := webhooks.Cfg(configurator)
+	commonPublishers, cleanup16, err := publishers.ProviderPublishers()
 	if err != nil {
 		cleanup15()
 		cleanup14()
@@ -228,7 +233,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	webHooks, cleanup17, err := webhooks.Provider(ctx, awareSet, webhooksConfig)
+	invitesConfig, cleanup17, err := invites.Cfg(configurator)
 	if err != nil {
 		cleanup16()
 		cleanup15()
@@ -248,7 +253,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	commonHandlers, cleanup18, err := handlers.ProviderHandlers(initial, validate, awareSet, graphQL, webHooks)
+	inviteSubscriber, cleanup18, err := invites.Provider(invitesConfig)
 	if err != nil {
 		cleanup17()
 		cleanup16()
@@ -269,12 +274,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherAppSet := dispatcher.AppSet{
-		GraphQL:  graphQL,
-		Handlers: commonHandlers,
-		Users:    userRepo,
-	}
-	dispatcherConfig, cleanup19, err := dispatcher.ProviderCfg(configurator)
+	commonSubscribers, cleanup19, err := subscribers.ProviderSubscribers(inviteSubscriber)
 	if err != nil {
 		cleanup18()
 		cleanup17()
@@ -296,7 +296,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherDispatcher, cleanup20, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
+	stanConfig, cleanup20, err := stan.Cfg(configurator)
 	if err != nil {
 		cleanup19()
 		cleanup18()
@@ -319,7 +319,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup21, err := http.Cfg(configurator)
+	stanStan, cleanup21, err := stan.Provider(ctx, awareSet, stanConfig)
 	if err != nil {
 		cleanup20()
 		cleanup19()
@@ -343,7 +343,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup22, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	eventbusConfig, cleanup22, err := eventbus.Cfg(configurator)
 	if err != nil {
 		cleanup21()
 		cleanup20()
@@ -368,7 +368,256 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
+	eventBus, cleanup23, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
+	if err != nil {
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	webhooksConfig, cleanup24, err := webhooks.Cfg(configurator)
+	if err != nil {
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	webHooks, cleanup25, err := webhooks.Provider(ctx, awareSet, eventBus, webhooksConfig)
+	if err != nil {
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	commonHandlers, cleanup26, err := handlers.ProviderHandlers(initial, validate, awareSet, graphQL, webHooks)
+	if err != nil {
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherAppSet := dispatcher.AppSet{
+		GraphQL:  graphQL,
+		Handlers: commonHandlers,
+		Users:    userRepo,
+	}
+	dispatcherConfig, cleanup27, err := dispatcher.ProviderCfg(configurator)
+	if err != nil {
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherDispatcher, cleanup28, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
+	if err != nil {
+		cleanup27()
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpConfig, cleanup29, err := http.Cfg(configurator)
+	if err != nil {
+		cleanup28()
+		cleanup27()
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpHTTP, cleanup30, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	if err != nil {
+		cleanup29()
+		cleanup28()
+		cleanup27()
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return httpHTTP, func() {
+		cleanup30()
+		cleanup29()
+		cleanup28()
+		cleanup27()
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
 		cleanup22()
 		cleanup21()
 		cleanup20()
@@ -558,7 +807,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	webhooksConfig, cleanup15, err := webhooks.CfgTest()
+	commonPublishers, cleanup15, err := publishers.ProviderPublishers()
 	if err != nil {
 		cleanup14()
 		cleanup13()
@@ -576,7 +825,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	webHooks, cleanup16, err := webhooks.Provider(ctx, awareSet, webhooksConfig)
+	invitesConfig, cleanup16, err := invites.CfgTest()
 	if err != nil {
 		cleanup15()
 		cleanup14()
@@ -595,7 +844,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	commonHandlers, cleanup17, err := handlers.ProviderHandlers(initial, validate, awareSet, graphQL, webHooks)
+	inviteSubscriber, cleanup17, err := invites.Provider(invitesConfig)
 	if err != nil {
 		cleanup16()
 		cleanup15()
@@ -615,12 +864,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherAppSet := dispatcher.AppSet{
-		GraphQL:  graphQL,
-		Handlers: commonHandlers,
-		Users:    userRepo,
-	}
-	dispatcherConfig, cleanup18, err := dispatcher.ProviderCfg(configurator)
+	commonSubscribers, cleanup18, err := subscribers.ProviderSubscribers(inviteSubscriber)
 	if err != nil {
 		cleanup17()
 		cleanup16()
@@ -641,7 +885,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherDispatcher, cleanup19, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
+	stanConfig, cleanup19, err := stan.CfgTest()
 	if err != nil {
 		cleanup18()
 		cleanup17()
@@ -663,7 +907,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup20, err := http.CfgTest()
+	stanStan, cleanup20, err := stan.Provider(ctx, awareSet, stanConfig)
 	if err != nil {
 		cleanup19()
 		cleanup18()
@@ -686,7 +930,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup21, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	eventbusConfig, cleanup21, err := eventbus.CfgTest()
 	if err != nil {
 		cleanup20()
 		cleanup19()
@@ -710,7 +954,248 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
+	eventBus, cleanup22, err := eventbus.Provider(ctx, awareSet, commonPublishers, commonSubscribers, stanStan, eventbusConfig, stanConfig)
+	if err != nil {
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	webhooksConfig, cleanup23, err := webhooks.CfgTest()
+	if err != nil {
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	webHooks, cleanup24, err := webhooks.Provider(ctx, awareSet, eventBus, webhooksConfig)
+	if err != nil {
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	commonHandlers, cleanup25, err := handlers.ProviderHandlers(initial, validate, awareSet, graphQL, webHooks)
+	if err != nil {
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherAppSet := dispatcher.AppSet{
+		GraphQL:  graphQL,
+		Handlers: commonHandlers,
+		Users:    userRepo,
+	}
+	dispatcherConfig, cleanup26, err := dispatcher.ProviderCfg(configurator)
+	if err != nil {
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherDispatcher, cleanup27, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
+	if err != nil {
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpConfig, cleanup28, err := http.CfgTest()
+	if err != nil {
+		cleanup27()
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpHTTP, cleanup29, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	if err != nil {
+		cleanup28()
+		cleanup27()
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return httpHTTP, func() {
+		cleanup29()
+		cleanup28()
+		cleanup27()
+		cleanup26()
+		cleanup25()
+		cleanup24()
+		cleanup23()
+		cleanup22()
 		cleanup21()
 		cleanup20()
 		cleanup19()

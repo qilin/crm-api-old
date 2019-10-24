@@ -51,8 +51,8 @@ func NewClaims(user *domain.UserItem) *TokenClaims {
 	var now = time.Now()
 	return &TokenClaims{
 		SessionClaims: SessionClaims{
-			DefaultRole:  "owner",
-			AllowedRoles: []string{"owner", "admin", "merchant", "developer", "supporter"},
+			DefaultRole:  user.Role,
+			AllowedRoles: []string{user.Role},
 			UserID:       strconv.Itoa(user.ID),
 		},
 		StandardClaims: jwt.StandardClaims{
