@@ -1,0 +1,10 @@
+- args:
+    sql: ALTER TABLE "public"."notifications" ADD COLUMN "timestamp" timestamptz
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."notifications" ALTER COLUMN "timestamp" DROP NOT NULL
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."notifications" ALTER COLUMN "timestamp" SET DEFAULT
+      now()
+  type: run_sql

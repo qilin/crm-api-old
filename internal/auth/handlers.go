@@ -45,15 +45,16 @@ func (a *Auth) logout(c echo.Context) error {
 }
 
 func (a *Auth) callback(c echo.Context) error {
+
+	// Verify state param, defence from CSRF attacks
 	var state = c.FormValue("state")
-
 	a.log.Debug("oauth callback state %s", logger.Args(state))
-
 	if err := a.validateState(c, state); err != nil {
 		return err
 	}
 	a.removeState(c)
 
+	// exchange code to tokens
 	var code = c.FormValue("code")
 	var ctx, cancel = context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -62,6 +63,7 @@ func (a *Auth) callback(c echo.Context) error {
 		return errors.Wrap(err, "auth code exchange failed")
 	}
 
+	// parse and verify id_token
 	rawIDToken, ok := oauthToken.Extra("id_token").(string)
 	if !ok {
 		return fmt.Errorf("id_token not provided")
@@ -74,6 +76,7 @@ func (a *Auth) callback(c echo.Context) error {
 
 	a.log.Debug("user id: %s", logger.Args(idToken.Subject))
 
+	// find user
 	u, err := a.users.FindByExternalID(context.TODO(), idToken.Subject)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
@@ -96,9 +99,10 @@ func (a *Auth) callback(c echo.Context) error {
 
 		a.log.Debug("user not found, create new one")
 		if err := a.users.Create(ctx, &domain.UserItem{
+			TenantID:   0, // TODO
 			ExternalID: idToken.Subject,
 			Email:      claims.Email,
-			Role:       "owner",
+			Role:       "owner", // TODO default role ?
 		}); err != nil {
 			a.log.Debug("%v", logger.Args(err))
 			return err
@@ -112,6 +116,7 @@ func (a *Auth) callback(c echo.Context) error {
 
 	a.log.Info("user logged in %d", logger.Args(u.ID))
 
+	// create auth jwt
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, NewClaims(u))
 	signed, err := token.SignedString(a.jwtKeys.Private)
 	if err != nil {
