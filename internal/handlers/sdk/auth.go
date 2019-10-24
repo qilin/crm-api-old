@@ -33,9 +33,24 @@ func (h *SDKGroup) Route(groups *common.Groups) {
 // Get currency and region by country code
 // POST /sdk/v1/auth
 func (h *SDKGroup) postAuth(ctx echo.Context) error {
+	r := new(Request)
+	if err := ctx.Bind(r); err != nil {
+		return ctx.JSON(http.StatusBadRequest, Response{
+			Code: 400,
+			Msg:  "bad request: can not parse incoming request",
+		})
+	}
+
+	if len(r.URL) == 0 {
+		return ctx.JSON(http.StatusBadRequest, Response{
+			Code: 400,
+			Msg:  "bad request: url can not be empty",
+		})
+	}
+
 	return ctx.JSON(http.StatusOK, Response{
 		Code: 0,
 		Msg:  "",
-		Meta: "{'user_id':10}",
+		Meta: r.Meta,
 	})
 }
