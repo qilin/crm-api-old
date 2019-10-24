@@ -1,3 +1,6 @@
+-- +migrate Up
+
+-- +migrate StatementBegin
 DO $$DECLARE game_id UUID;
 BEGIN
 	INSERT INTO games (
@@ -81,3 +84,6 @@ BEGIN
 		(game_id, 1920, 1080, 'https://steamcdn-a.akamaihd.net/steam/apps/466560/ss_0de6fea3166a04027b671e438645e98186095c63.jpg?t=1571828499');
 
 END$$;
+-- +migrate StatementEnd
+
+-- +migrate Down

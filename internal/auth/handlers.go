@@ -99,7 +99,7 @@ func (a *Auth) callback(c echo.Context) error {
 
 		a.log.Debug("user not found, create new one")
 		if err := a.users.Create(ctx, &domain.UserItem{
-			TenantID:   0, // TODO
+			TenantID:   1, // TODO
 			ExternalID: idToken.Subject,
 			Email:      claims.Email,
 			Role:       "owner", // TODO default role ?
