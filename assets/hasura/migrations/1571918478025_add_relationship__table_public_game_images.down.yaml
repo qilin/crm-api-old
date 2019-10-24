@@ -1,0 +1,6 @@
+- args:
+    relationship: game
+    table:
+      name: game_images
+      schema: public
+  type: drop_relationship

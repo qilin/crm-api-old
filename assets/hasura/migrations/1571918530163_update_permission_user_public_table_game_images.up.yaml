@@ -1,0 +1,18 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - height
+      - id
+      - url
+      - width
+      filter:
+        game:
+          tenant_id:
+            _eq: X-Hasura-Tenant-Id
+      limit: null
+    role: user
+    table:
+      name: game_images
+      schema: public
+  type: create_select_permission
