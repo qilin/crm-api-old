@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: JS SDK API
+  description: Qilin JS SDK API Specification
+  version: 0.1.9
+servers:
+  - url: http://localhost:8082/sdk/v1
+paths:
+  /auth:
+    post:
+      summary: Receives auth data and returns
+      description: Receives iframe URL and returns user's auth status in game
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                meta:
+                  type: string
+              required:
+                - name
+      responses:
+        '200':
+          description: user authenticated successfuly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                authenticated:
+                  value:
+                authenticated_with_meta:
+                  value:
+                    meta: "{'user_id': 1, 'items': [1,2,3]}"
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                bad_request:
+                  value:
+                    code: 400
+                    msg: "URL not provided"
+                    meta: ""
+        '401':
+          description: user not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                not_authenticated:
+                  value:
+                    code: 401
+                    msg: "user not authenticated"
+                    meta: ""
+components:
+  schemas:
+    Response:
+      title: A server response
+      type: object
+      properties:
+        code:
+          type: integer
+          description: error code
+        msg:
+          type: string
+          description: error message
+        meta:
+          type: string
+          description: any user's metadata

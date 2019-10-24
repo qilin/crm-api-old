@@ -52,6 +52,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		GraphQL: gql,
 		Common:  echoHttp,
 		V1:      echoHttp.Group(common.V1Path),
+		SDK:     echoHttp.Group(common.SDKPath),
 	}
 
 	d.graphqlGroup(grp)

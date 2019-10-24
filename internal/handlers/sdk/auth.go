@@ -1,4 +1,4 @@
-package handlers
+package sdk
 
 import (
 	"net/http"
@@ -10,28 +10,32 @@ import (
 )
 
 const (
-	examplePath = "/example"
+	sdkAuth = "/auth"
 )
 
-type ExampleGroup struct {
+type SDKGroup struct {
 	dispatch common.HandlerSet
 	provider.LMT
 }
 
-func NewExampleGroup(set common.HandlerSet) *ExampleGroup {
+func NewSDKGroup(set common.HandlerSet) *SDKGroup {
 	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "PriceGroup"})
-	return &ExampleGroup{
+	return &SDKGroup{
 		dispatch: set,
 		LMT:      &set.AwareSet,
 	}
 }
 
-func (h *ExampleGroup) Route(groups *common.Groups) {
-	groups.Common.GET(examplePath, h.getExample)
+func (h *SDKGroup) Route(groups *common.Groups) {
+	groups.SDK.POST(sdkAuth, h.postAuth)
 }
 
 // Get currency and region by country code
-// GET /api/v1/price_group/country
-func (h *ExampleGroup) getExample(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, "example")
+// POST /sdk/v1/auth
+func (h *SDKGroup) postAuth(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, Response{
+		Code: 0,
+		Msg:  "",
+		Meta: "{'user_id':10}",
+	})
 }

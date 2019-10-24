@@ -10,6 +10,7 @@ type Groups struct {
 	GraphQL *echo.Group
 	V1      *echo.Group
 	Common  *echo.Echo
+	SDK     *echo.Group
 }
 
 // Handler
