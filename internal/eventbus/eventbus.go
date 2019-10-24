@@ -12,10 +12,11 @@ import (
 )
 
 type EventBus struct {
-	ctx  context.Context
-	cfg  *Config
-	stan *stan2.Stan
-	conn stan.Conn
+	ctx     context.Context
+	cfg     *Config
+	stan    *stan2.Stan
+	stanCfg *stan2.Config
+	conn    stan.Conn
 	provider.LMT
 	pubs map[string]common.Publisher
 	subs common.Subscribers
@@ -24,7 +25,8 @@ type EventBus struct {
 func (a *EventBus) Run() error {
 	var e error
 	a.conn, e = a.stan.SimpleConnect(a.ctx, stan2.ConnCfg{
-		Backoff: a.stan.BackoffCopy(),
+		Backoff:      a.stan.BackoffCopy(),
+		StanClientID: a.stanCfg.StanClientID,
 	}, a.L())
 	if e != nil {
 		a.L().WithFields(logger.Fields{"cmp": "eventbus"}).Error("simple connect error: %v", logger.Args(e.Error()))
@@ -37,11 +39,15 @@ func (a *EventBus) Run() error {
 	}
 
 	for _, s := range a.subs {
-		e := s.Subscribe(a.conn, a, a.cfg.Subjects, a.L().WithFields(logger.Fields{"subscriber": s.Name()}))
-		if e != nil {
-			a.L().Error("subscription %s failed with error %s", logger.Args(s.Name(), e.Error()))
-		} else {
-			a.L().Info("subscription %s started", logger.Args(s.Name()))
+		for _, name := range a.cfg.Subscribers {
+			if s.Name() == name {
+				e := s.Subscribe(a.conn, a, a.cfg.Subjects, a.L().WithFields(logger.Fields{"subscriber": s.Name()}))
+				if e != nil {
+					a.L().Error("subscription %s failed with error %s", logger.Args(s.Name(), e.Error()))
+				} else {
+					a.L().Info("subscription %s started", logger.Args(s.Name()))
+				}
+			}
 		}
 	}
 
@@ -66,15 +72,20 @@ func (a *EventBus) PublishEvent(evt common.Event) error {
 	return p.PublishEvent(evt)
 }
 
+func (a *EventBus) Subscribe(sub common.SubscribeHandler) error {
+	return sub(a.ctx, a.conn, a.L())
+}
+
 func (a *EventBus) Stop() error {
 	return a.conn.Close()
 }
 
 // Config
 type Config struct {
-	Debug    bool `fallback:"shared.debug"`
-	Subjects common.Subjects
-	invoker  *invoker.Invoker
+	Debug       bool `fallback:"shared.debug"`
+	Subjects    common.Subjects
+	Subscribers []string
+	invoker     *invoker.Invoker
 }
 
 // OnReload
@@ -87,18 +98,19 @@ func (c *Config) Reload(ctx context.Context) {
 	c.invoker.Reload(ctx)
 }
 
-func New(ctx context.Context, set provider.AwareSet, stan *stan2.Stan, pubs common.Publishers, subs common.Subscribers, cfg *Config) *EventBus {
+func New(ctx context.Context, set provider.AwareSet, stan *stan2.Stan, pubs common.Publishers, subs common.Subscribers, cfg *Config, stanCfg *stan2.Config) *EventBus {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
 	publishers := map[string]common.Publisher{}
 	for _, p := range pubs {
 		publishers[p.Name()] = p
 	}
 	return &EventBus{
-		ctx:  ctx,
-		cfg:  cfg,
-		stan: stan,
-		pubs: publishers,
-		subs: subs,
-		LMT:  &set,
+		ctx:     ctx,
+		cfg:     cfg,
+		stanCfg: stanCfg,
+		stan:    stan,
+		pubs:    publishers,
+		subs:    subs,
+		LMT:     &set,
 	}
 }

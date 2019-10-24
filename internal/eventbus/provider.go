@@ -3,6 +3,8 @@ package eventbus
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/eventbus/subscribers/invites"
+
 	"github.com/qilin/crm-api/internal/eventbus/common"
 
 	"github.com/qilin/crm-api/internal/eventbus/subscribers"
@@ -33,8 +35,8 @@ func CfgTest() (*Config, func(), error) {
 }
 
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, pubs common.Publishers, subs common.Subscribers, stan *stan.Stan, cfg *Config) (*EventBus, func(), error) {
-	g := New(ctx, set, stan, pubs, subs, cfg)
+func Provider(ctx context.Context, set provider.AwareSet, pubs common.Publishers, subs common.Subscribers, stan *stan.Stan, cfg *Config, stanCfg *stan.Config) (*EventBus, func(), error) {
+	g := New(ctx, set, stan, pubs, subs, cfg, stanCfg)
 	err := g.Run()
 	cleanup := func() {
 		g.Stop()
@@ -47,12 +49,14 @@ var (
 		Provider,
 		publishers.ProviderPublishers,
 		subscribers.ProviderSubscribers,
+		invites.WireSet,
 		Cfg,
 	)
 	WireTestSet = wire.NewSet(
 		Provider,
 		publishers.ProviderPublishers,
 		subscribers.ProviderSubscribers,
+		invites.WireTestSet,
 		CfgTest,
 	)
 )

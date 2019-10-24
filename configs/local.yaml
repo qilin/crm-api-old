@@ -115,5 +115,5 @@ stan:
       natsURL: nats://natss:4222
 eventbus:
   subjects:
-    invitesOut: "invitesout"
-    invitesIn: "invitesin"
+    invitesOut: "invites"
+    invitesIn: "invites"

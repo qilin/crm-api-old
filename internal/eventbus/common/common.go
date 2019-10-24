@@ -1,6 +1,8 @@
 package common
 
 import (
+	"context"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	stan "github.com/nats-io/stan.go"
 )
@@ -16,10 +18,14 @@ type Subjects struct {
 	InvitesIn  string
 }
 
+//
+type SubscribeHandler func(ctx context.Context, sc stan.Conn, log logger.Logger) error
+
 // EventBus
 type EventBus interface {
 	Publish(msg Payloader) error
 	PublishEvent(evt Event) error
+	Subscribe(SubscribeHandler) error
 }
 
 // Subscribers & Publishers
