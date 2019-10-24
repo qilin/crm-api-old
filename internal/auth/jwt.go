@@ -39,7 +39,8 @@ type SessionClaims struct {
 	DefaultRole  string   `json:"x-hasura-default-role"`
 	AllowedRoles []string `json:"x-hasura-allowed-roles"`
 	// custom, all must be strings
-	UserID string `json:"x-hasura-user-id,omitempty"`
+	UserID   string `json:"x-hasura-user-id,omitempty"`
+	TenantID string `json:"x-hasura-tenant-id,omitempty"`
 }
 
 type TokenClaims struct {
@@ -51,9 +52,10 @@ func NewClaims(user *domain.UserItem) *TokenClaims {
 	var now = time.Now()
 	return &TokenClaims{
 		SessionClaims: SessionClaims{
-			DefaultRole:  user.Role,
-			AllowedRoles: []string{user.Role},
+			DefaultRole:  "user",
+			AllowedRoles: []string{user.Role, "user"},
 			UserID:       strconv.Itoa(user.ID),
+			TenantID:     strconv.Itoa(user.TenantID),
 		},
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    "https://qilin.protocol.one",
