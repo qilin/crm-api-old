@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"net/http"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 
 type Config struct {
 	OAuth2 struct {
-		Provider     string `required:true`
+		Provider     string `required:"true"`
 		ClientId     string `required:"true"`
 		ClientSecret string `required:"true"`
 		RedirectUrl  string `required:"true"`
@@ -34,27 +35,31 @@ type Config struct {
 }
 
 type Auth struct {
-	cfg      *Config
-	oauth2   *oauth2.Config
-	verifier *oidc.IDTokenVerifier
-	jwtKeys  KeyPair
-
+	ctx         context.Context
+	cfg         Config
+	oauth2      *oauth2.Config
+	verifier    *oidc.IDTokenVerifier
+	jwtKeys     KeyPair
 	stateSecret []byte
-
-	log logger.Logger
-
-	users domain.UserRepo
+	appSet      AppSet
+	provider.LMT
 }
 
-func New(appCtx provider.LMT, cfg *Config, users domain.UserRepo) (*Auth, error) {
-	var keys = oidc.NewRemoteKeySet(context.Background(), cfg.OAuth2.Provider+".well-known/jwks.json")
+type AppSet struct {
+	UserRepo domain.UserRepo
+}
 
+// New
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) (*Auth, error) {
+	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
+	keys := oidc.NewRemoteKeySet(context.Background(), cfg.OAuth2.Provider+".well-known/jwks.json")
 	jwtKeys, err := NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
 	if err != nil {
 		return nil, err
 	}
 	return &Auth{
-		cfg: cfg,
+		ctx: ctx,
+		cfg: *cfg,
 		oauth2: &oauth2.Config{
 			RedirectURL:  cfg.OAuth2.RedirectUrl,
 			ClientID:     cfg.OAuth2.ClientId,
@@ -66,17 +71,13 @@ func New(appCtx provider.LMT, cfg *Config, users domain.UserRepo) (*Auth, error)
 				AuthStyle: oauth2.AuthStyleInHeader,
 			},
 		},
-
 		verifier: oidc.NewVerifier(cfg.OAuth2.Provider, keys, &oidc.Config{
 			ClientID: cfg.OAuth2.ClientId,
 		}),
-
-		jwtKeys: jwtKeys,
-
-		users: users,
-
+		jwtKeys:     jwtKeys,
 		stateSecret: []byte(cfg.Secret),
-		log:         appCtx.L().WithFields(logger.Fields{"service": "auth"}),
+		appSet:      appSet,
+		LMT:         &set,
 	}, nil
 }
 
@@ -89,17 +90,17 @@ func (a *Auth) checkAuthorized(c echo.Context) (string, bool) {
 	}
 
 	if err != nil {
-		a.log.Warning("can't retrive cookies: %v", logger.Args(err))
+		a.L().Warning("can't retrieve cookies: %v", logger.Args(err))
 		return "", false
 	}
 
-	a.log.Debug("session cookie: %s", logger.Args(cssid.Value))
+	a.L().Debug("session cookie: %s", logger.Args(cssid.Value))
 
 	// validate jwt token
 	if _, err := jwt.Parse(cssid.Value, func(*jwt.Token) (interface{}, error) {
 		return a.jwtKeys.Public, nil
 	}); err != nil {
-		a.log.Debug("invalid session token: %v", logger.Args(err))
+		a.L().Debug("invalid session token: %v", logger.Args(err))
 		return "", false
 	}
 

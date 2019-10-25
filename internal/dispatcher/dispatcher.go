@@ -3,14 +3,12 @@ package dispatcher
 import (
 	"context"
 
-	"github.com/qilin/crm-api/internal/auth"
-	"github.com/qilin/crm-api/internal/db/domain"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"github.com/qilin/crm-api/pkg/graphql"
 )
@@ -36,25 +34,16 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AllowCredentials: true,
 	}))
 
-	// authorization
-	auth, err := auth.New(d.LMT, &d.cfg.Auth, d.appSet.Users)
-	if err != nil {
-		return err
-	}
-	auth.RegisterHandlers(echoHttp)
-
-	// configure graphql group
-	var gql = echoHttp.Group(common.GraphQLGroupPath)
-	gql.Use(auth.Middleware)
+	v1 := echoHttp.Group(common.V1Path)
 
 	// init group routes
 	grp := &common.Groups{
-		GraphQL: gql,
+		V1:      v1,
 		Common:  echoHttp,
-		V1:      echoHttp.Group(common.V1Path),
+		Auth:    v1.Group(common.AuthGroupPath),
+		GraphQL: v1.Group(common.GraphQLGroupPath),
 	}
 
-	d.graphqlGroup(grp)
 	d.commonGroup(grp.Common)
 
 	// init routes
@@ -67,6 +56,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
 func (d *Dispatcher) graphqlGroup(group *common.Groups) {
 	// add graphql handlers
+	group.GraphQL.Use(d.appSet.Auth.Middleware)
 }
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {
@@ -75,7 +65,6 @@ func (d *Dispatcher) commonGroup(grp *echo.Echo) {
 
 // Config
 type Config struct {
-	Auth    auth.Config
 	CORS    common.CORS
 	invoker *invoker.Invoker
 }
@@ -91,9 +80,9 @@ func (c *Config) Reload(ctx context.Context) {
 }
 
 type AppSet struct {
+	Auth     *auth.Auth
 	GraphQL  *graphql.GraphQL
 	Handlers common.Handlers
-	Users    domain.UserRepo
 }
 
 // New
