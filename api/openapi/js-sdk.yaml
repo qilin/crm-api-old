@@ -8,7 +8,7 @@ servers:
 paths:
   /auth:
     post:
-      summary: Receives auth data and returns
+      summary: Receives auth data and returns auth token and data
       description: Receives iframe URL and returns user's auth status in game
       requestBody:
         required: true
@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/AuthResponse'
               examples:
                 authenticated:
                   value:
@@ -41,29 +41,111 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
               examples:
                 bad_request:
                   value:
                     code: 400
                     msg: "URL not provided"
-                    meta: ""
         '401':
           description: user not authenticated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response'
+                $ref: '#/components/schemas/ErrorResponse'
               examples:
                 not_authenticated:
                   value:
                     code: 401
                     msg: "user not authenticated"
-                    meta: ""
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internal_server_error:
+                  value:
+                    code: 500
+                    msg: "internal server error"
+  /order:
+    post:
+      summary: Receives new order details and returns ???
+      description: Receives new order details and returns ???
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                meta:
+                  type: string
+              required:
+                - name
+      responses:
+        '200':
+          description: order processed successfuly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+              examples:
+                authenticated:
+                  value:
+                authenticated_with_meta:
+                  value:
+                    meta: "{'user_id': 1, 'items': [1,2,3]}"
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                bad_request:
+                  value:
+                    code: 400
+                    msg: "Order details not provided"
+        '401':
+          description: user not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_authenticated:
+                  value:
+                    code: 401
+                    msg: "user not authenticated"
+        '500':
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internal_server_error:
+                  value:
+                    code: 500
+                    msg: "internal server error"
 components:
   schemas:
-    Response:
-      title: A server response
+    ErrorResponse:
+      title: error response
+      type: object
+      properties:
+        code:
+          type: integer
+          description: error code
+        msg:
+          type: string
+          description: error message
+    AuthResponse:
+      title: auth response
       type: object
       properties:
         code:
@@ -75,3 +157,16 @@ components:
         meta:
           type: string
           description: any user's metadata
+    OrderResponse:
+      title: order response
+      type: object
+      properties:
+        code:
+          type: integer
+          description: error code
+        msg:
+          type: string
+          description: error message
+        order:
+          type: string
+          description: order data

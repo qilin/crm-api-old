@@ -30,10 +30,9 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	echoHttp.Use(middleware.Recover())
 
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     d.cfg.CORS.Allowed,
-		AllowMethods:     d.cfg.CORS.Methods,
-		AllowHeaders:     d.cfg.CORS.Headers,
-		AllowCredentials: true,
+		AllowOrigins: d.cfg.CORS.Allowed,
+		AllowMethods: d.cfg.CORS.Methods,
+		AllowHeaders: d.cfg.CORS.Headers,
 	}))
 
 	// authorization
