@@ -1,0 +1,6 @@
+- args:
+    sql: "\n           alter table \"public\".\"invites\"\n           add constraint
+      \"invites_group_id_fkey\" \n           foreign key (\"group_id\") \n           references
+      \"public\".\"groups\"\n           (\"id\") on update restrict on delete restrict;\n
+      \     "
+  type: run_sql

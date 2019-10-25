@@ -1,0 +1,10 @@
+- args:
+    sql: ALTER TABLE "public"."invites" ALTER COLUMN "expiration" TYPE timestamp with
+      time zone;
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."invites" ALTER COLUMN "expiration" SET NOT NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."invites"."expiration" IS E'null'
+  type: run_sql
