@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	sdkAuth  = "/auth"
-	sdkOrder = "/order"
+	sdkAuthRoute   = "/auth"
+	sdkOrderRoute  = "/order"
+	sdkHealthRoute = "/health"
 )
 
 type SDKGroup struct {
@@ -28,8 +29,9 @@ func NewSDKGroup(set common.HandlerSet) *SDKGroup {
 }
 
 func (h *SDKGroup) Route(groups *common.Groups) {
-	groups.SDK.POST(sdkAuth, h.postAuth)
-	groups.SDK.POST(sdkOrder, h.postOrder)
+	groups.SDK.POST(sdkAuthRoute, h.postAuth)
+	groups.SDK.POST(sdkOrderRoute, h.postOrder)
+	groups.SDK.POST(sdkHealthRoute, h.getHealth)
 }
 
 // POST /sdk/v1/auth
@@ -74,4 +76,8 @@ func (h *SDKGroup) postOrder(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, OrderResponse{
 		Data: r.Data,
 	})
+}
+
+func (h *SDKGroup) getHealth(ctx echo.Context) error {
+	return ctx.NoContent(http.StatusOK)
 }
