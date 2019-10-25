@@ -1,0 +1,9 @@
+- args:
+    sql: ALTER TABLE "public"."invites" ALTER COLUMN "expiration" TYPE timestamptz;
+  type: run_sql
+- args:
+    sql: ALTER TABLE "public"."invites" ALTER COLUMN "expiration" DROP NOT NULL;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."invites"."expiration" IS E''
+  type: run_sql
