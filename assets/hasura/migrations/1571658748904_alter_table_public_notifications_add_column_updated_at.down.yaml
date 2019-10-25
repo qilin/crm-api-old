@@ -1,5 +1,0 @@
-- args:
-    sql: |-
-      DROP TRIGGER IF EXISTS "set_public_notifications_updated_at" ON "public"."notifications";
-      ALTER TABLE "public"."notifications" DROP COLUMN "updated_at";
-  type: run_sql
