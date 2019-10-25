@@ -1,3 +1,3 @@
 - args:
-    sql: alter table "public"."invites" drop constraint "invites_tenant_id_email_key";
+    sql: DROP INDEX "invites_tenant_id_email_key_idx";
   type: run_sql
