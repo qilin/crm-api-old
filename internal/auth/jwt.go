@@ -2,12 +2,16 @@ package auth
 
 import (
 	"crypto"
+	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/qilin/crm-api/internal/db/domain"
 )
+
+const AuthAudience = "auth"
+const HasuraAPIAudience = "hasura"
 
 // Keys =======================================================================
 
@@ -32,6 +36,18 @@ func NewKeyPairFromPEM(public, private string) (KeyPair, error) {
 	return NewKeyPair(publicKey, privateKey), nil
 }
 
+func (keys *KeyPair) Sign(claims jwt.Claims) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
+	return token.SignedString(keys.Private)
+}
+
+func (keys *KeyPair) Parse(rawToken string, claims jwt.Claims) error {
+	_, err := jwt.ParseWithClaims(rawToken, claims, func(*jwt.Token) (interface{}, error) {
+		return keys.Public, nil
+	})
+	return err
+}
+
 // Claims =====================================================================
 
 type SessionClaims struct {
@@ -42,14 +58,21 @@ type SessionClaims struct {
 	UserID string `json:"x-hasura-user-id,omitempty"`
 }
 
-type TokenClaims struct {
+type AccessTokenClaims struct {
 	SessionClaims `json:"https://qilin.protocol.one/claims"`
 	jwt.StandardClaims
 }
 
-func NewClaims(user *domain.UserItem) *TokenClaims {
+func (c *AccessTokenClaims) Valid() error {
+	if !c.VerifyAudience(HasuraAPIAudience, true) {
+		return fmt.Errorf("invalid token audience")
+	}
+	return c.StandardClaims.Valid()
+}
+
+func NewAccessClaims(user *domain.UserItem) *AccessTokenClaims {
 	var now = time.Now()
-	return &TokenClaims{
+	return &AccessTokenClaims{
 		SessionClaims: SessionClaims{
 			DefaultRole:  user.Role,
 			AllowedRoles: []string{user.Role},
@@ -60,7 +83,31 @@ func NewClaims(user *domain.UserItem) *TokenClaims {
 			IssuedAt:  now.Unix(),
 			ExpiresAt: now.Add(time.Hour).Unix(),
 			Subject:   user.ExternalID,
-			Audience:  "some",
+			Audience:  HasuraAPIAudience, // not validated in hasura
+		},
+	}
+}
+
+type RefreshTokenClaims struct {
+	jwt.StandardClaims
+}
+
+func (c *RefreshTokenClaims) Valid() error {
+	if !c.VerifyAudience(AuthAudience, true) {
+		return fmt.Errorf("invalid token audience")
+	}
+	return c.StandardClaims.Valid()
+}
+
+func NewRefreshClaims(user *domain.UserItem) *RefreshTokenClaims {
+	var now = time.Now()
+	return &RefreshTokenClaims{
+		jwt.StandardClaims{
+			Issuer:    "https://qilin.protocol.one",
+			IssuedAt:  now.Unix(),
+			ExpiresAt: now.Add(refreshLifeTime).Unix(),
+			Subject:   user.ExternalID,
+			Audience:  AuthAudience, // used and validated
 		},
 	}
 }

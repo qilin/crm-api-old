@@ -5,18 +5,20 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"net/http"
 	"time"
+
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/coreos/go-oidc"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"golang.org/x/oauth2"
 )
+
+const refreshLifeTime = 7 * 24 * time.Hour
 
 type Config struct {
 	OAuth2 struct {
@@ -28,6 +30,7 @@ type Config struct {
 	AutoSignIn         bool
 	Secret             string
 	SuccessRedirectURL string
+	ErrorRedirectURL   string
 	JWT                struct {
 		PublicKey  string
 		PrivateKey string
@@ -97,14 +100,13 @@ func (a *Auth) checkAuthorized(c echo.Context) (string, bool) {
 	a.L().Debug("session cookie: %s", logger.Args(cssid.Value))
 
 	// validate jwt token
-	if _, err := jwt.Parse(cssid.Value, func(*jwt.Token) (interface{}, error) {
-		return a.jwtKeys.Public, nil
-	}); err != nil {
+	var claims RefreshTokenClaims
+	if err := a.jwtKeys.Parse(cssid.Value, &claims); err != nil {
 		a.L().Debug("invalid session token: %v", logger.Args(err))
 		return "", false
 	}
 
-	return cssid.Value, true
+	return claims.Subject, true
 }
 
 func (a *Auth) removeSession(c echo.Context) {
@@ -121,7 +123,7 @@ func (a *Auth) setSession(c echo.Context, value string) {
 	c.SetCookie(&http.Cookie{
 		Name:     "ssid",
 		Value:    value,
-		MaxAge:   int((30 * time.Minute).Seconds()),
+		MaxAge:   int(refreshLifeTime.Seconds()),
 		HttpOnly: true,
 		Secure:   false, // TODO
 	})

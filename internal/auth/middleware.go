@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 )
 
@@ -56,11 +55,9 @@ func (a *Auth) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(ctx)
 		}
 
-		var claims = &TokenClaims{}
 		// validate jwt token
-		if _, err := jwt.ParseWithClaims(rawToken, claims, func(*jwt.Token) (interface{}, error) {
-			return a.jwtKeys.Public, nil
-		}); err != nil {
+		var claims = &AccessTokenClaims{}
+		if err := a.jwtKeys.Parse(rawToken, claims); err != nil {
 			a.L().Error("invalid jwt token: %v", logger.Args(err))
 			return next(ctx)
 		}

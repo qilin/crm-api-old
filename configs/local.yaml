@@ -34,6 +34,7 @@ auth:
   secret: secretkey
   autoSignIn: true
   successRedirectURL: http://localhost:3000/auth_success
+  errorRedirectURL: http://localhost:3000/
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----
