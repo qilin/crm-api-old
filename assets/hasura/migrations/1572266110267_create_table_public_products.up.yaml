@@ -1,0 +1,12 @@
+- args:
+    sql: CREATE EXTENSION IF NOT EXISTS pgcrypto;
+  type: run_sql
+- args:
+    sql: CREATE TABLE "public"."products"("uuid" uuid NOT NULL DEFAULT gen_random_uuid(),
+      "codename" text NOT NULL, "type" text NOT NULL, "object_id" uuid NOT NULL, PRIMARY
+      KEY ("uuid") );
+  type: run_sql
+- args:
+    name: products
+    schema: public
+  type: add_existing_table_or_view
