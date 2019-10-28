@@ -3,6 +3,8 @@ package dispatcher
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/handlers"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -25,6 +27,11 @@ func ProviderDispatcher(ctx context.Context, set provider.AwareSet, appSet AppSe
 	return d, func() {}, nil
 }
 
+func ProviderSDKDispatcher(ctx context.Context, set provider.AwareSet, h common.Handlers, cfg *Config) (*SDKDispatcher, func(), error) {
+	d := NewSDK(ctx, set, h, cfg)
+	return d, func() {}, nil
+}
+
 var (
 	WireSet = wire.NewSet(
 		ProviderDispatcher,
@@ -36,5 +43,17 @@ var (
 		ProviderDispatcher,
 		ProviderCfg,
 		wire.Struct(new(AppSet), "*"),
+	)
+
+	SDKWireSet = wire.NewSet(
+		ProviderSDKDispatcher,
+		ProviderCfg,
+		handlers.ProviderSDKHandlers,
+	)
+
+	SDKWireTestSet = wire.NewSet(
+		ProviderSDKDispatcher,
+		ProviderCfg,
+		handlers.ProviderSDKHandlers,
 	)
 )

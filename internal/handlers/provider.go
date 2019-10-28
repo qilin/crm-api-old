@@ -12,13 +12,19 @@ import (
 
 // ProviderHandlers
 func ProviderHandlers(initial config.Initial, validator *validator.Validate, set provider.AwareSet, ql *graphql.GraphQL, wh *webhooks.WebHooks) (common.Handlers, func(), error) {
+	return []common.Handler{
+		ql,
+		wh,
+	}, func() {}, nil
+}
+
+// ProviderHandlers
+func ProviderSDKHandlers(validator *validator.Validate, set provider.AwareSet) (common.Handlers, func(), error) {
 	hSet := common.HandlerSet{
 		Validate: validator,
 		AwareSet: set,
 	}
 	return []common.Handler{
 		sdk.NewSDKGroup(hSet),
-		ql,
-		wh,
 	}, func() {}, nil
 }

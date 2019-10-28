@@ -64,8 +64,3 @@ func (a *UserRepo) IsExistsEmail(ctx context.Context, email string) (bool, error
 func NewUserRepo(db *gorm.DB) domain.UserRepo {
 	return &UserRepo{db: db}
 }
-
-// func hashPassword(password string) (string, error) {
-// 	hash, e := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-// 	return string(hash), e
-// }

@@ -41,6 +41,7 @@ var (
 	ProviderRepo = wire.NewSet(
 		repo.NewUserRepo,
 		repo.NewJwtKeysRepo,
+		repo.NewPlatformRepo,
 		trx.NewTrxManager,
 	)
 	ProviderRepoProduction = wire.NewSet(

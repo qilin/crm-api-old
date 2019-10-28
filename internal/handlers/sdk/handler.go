@@ -29,6 +29,7 @@ func NewSDKGroup(set common.HandlerSet) *SDKGroup {
 }
 
 func (h *SDKGroup) Route(groups *common.Groups) {
+	h.L().Info("create routes")
 	groups.SDK.POST(sdkAuthRoute, h.postAuth)
 	groups.SDK.POST(sdkOrderRoute, h.postOrder)
 	groups.SDK.POST(sdkHealthRoute, h.getHealth)
@@ -74,7 +75,7 @@ func (h *SDKGroup) postOrder(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, OrderResponse{
-		Data: r.Data,
+		//Data: r.Data,
 	})
 }
 
