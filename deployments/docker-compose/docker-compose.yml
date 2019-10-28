@@ -16,6 +16,14 @@ services:
       - crm-migration
     networks:
       - default
+  crm-sdk:
+    container_name: qilin-crm-sdk
+    image: p1hub/qilin-crm-api:${TAG}
+    restart: always
+    depends_on:
+      - crm-migration
+    networks:
+      - default
   postgres:
     container_name: qilin-postgres
     image: "postgres:11-alpine"

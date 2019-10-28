@@ -15,6 +15,19 @@ services:
       - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
     networks:
       - default
+  crm-sdk:
+    container_name: qilin-crm-sdk
+    image: p1hub/qilin-crm-api:${TAG}
+    restart: always
+    depends_on:
+      - crm-migration
+    ports:
+      - 8084:8080
+    command: ["sdk","-c","configs/local.yaml","-b",":8080","-d"]
+    environment:
+      - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
+    networks:
+      - default
   crm-mailer:
     container_name: qilin-crm-mailer
     image: p1hub/qilin-crm-api:${TAG}
