@@ -1,0 +1,6 @@
+- args:
+    role: merchant
+    table:
+      name: notifications
+      schema: public
+  type: drop_update_permission

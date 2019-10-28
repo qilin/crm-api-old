@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "public"."notifications" DROP COLUMN "timestamp" CASCADE
-  type: run_sql
