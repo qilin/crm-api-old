@@ -1,0 +1,49 @@
+graphql:
+  introspection: false
+  dataloader:
+    wait: 250us
+  playground:
+    route: /client
+    name: local
+    endpoint: /v1/graphql
+postgres:
+  dsn: "GET FROM ENV"
+  maxOpenConns: 5
+  maxIdleConns: 3
+  connMaxLifetime: 15m
+dispatcher:
+  cors:
+    allowed:
+      - "GET FROM ENV"
+    methods:
+      - "HEAD"
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+    headers:
+      - "*"
+auth:
+  oauth2:
+    provider: "GET FROM ENV"
+    clientId: "GET FROM ENV"
+    clientSecret: "GET FROM ENV"
+    redirectUrl: "GET FROM ENV"
+  secret: "GET FROM ENV"
+  autoSignIn: true
+  successRedirectURL: "GET FROM ENV"
+  jwt:
+    publicKey: "GET FROM ENV"
+    privateKey: "GET FROM ENV"
+webhooks:
+  secret: "GET FROM ENV"
+stan:
+    stanClusterId: "GET FROM ENV"
+    stanClientId: "qilin-crm-daemon"
+    stanOptions:
+      natsURL: "GET FROM ENV"
+eventbus:
+  subjects:
+    invitesOut: "invites"
+    invitesIn: "invites"

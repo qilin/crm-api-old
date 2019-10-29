@@ -11,11 +11,9 @@ postgres:
   maxOpenConns: 5
   maxIdleConns: 3
   connMaxLifetime: 15m
-  logLevel: debug
 dispatcher:
   cors:
-    allowed:
-      - "http://localhost:3000"
+    allowed: "http://localhost:3000,http://localhost:3001"
     methods:
       - "HEAD"
       - "GET"
@@ -112,7 +110,7 @@ webhooks:
   secret: insecure
 stan:
     stanClusterId: "test-cluster"
-    stanClientId: "qilin-daemon-client-id"
+    stanClientId: "qilin-crm-daemon"
     stanOptions:
       natsURL: nats://natss:4222
 eventbus:
