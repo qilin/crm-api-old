@@ -2,6 +2,9 @@
 version: '3.7'
 services:
   crm-migration:
+    image: p1hub/qilin-crm-api:${TAG}
+    depends_on:
+      - postgres
     command: ["migrate","up"]
     environment:
       DSN: "postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable"
@@ -9,6 +12,8 @@ services:
     image: p1hub/qilin-crm-api:${TAG}
     depends_on:
       - crm-migration
+      - postgres
+      - natss
     command: ["daemon","-c","configs/tst.yaml","-b",":8080"]
     environment:
       POSTGRES_DSN: postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
@@ -44,7 +49,7 @@ services:
       - default
   hasura:
     depends_on:
-      - crm-daemon
+      - postgres
     environment:
       HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable"
       HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
