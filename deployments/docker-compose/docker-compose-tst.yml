@@ -48,6 +48,7 @@ services:
     networks:
       - default
   hasura:
+    image: "p1hub/qilin-api-gateway"
     depends_on:
       - postgres
     environment:
