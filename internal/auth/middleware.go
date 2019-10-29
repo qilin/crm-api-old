@@ -71,9 +71,7 @@ func (a *Auth) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		a.L().Debug("auth user: %d", logger.Args(userId))
 		roles := make(map[string]bool)
-		for _, r := range claims.AllowedRoles {
-			roles[strings.ToUpper(r)] = true
-		}
+		roles[strings.ToUpper(claims.Role)] = true
 
 		SetUserContext(ctx, &User{
 			Id:    userId,

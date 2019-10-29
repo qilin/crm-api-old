@@ -24,6 +24,23 @@ func (a *Auth) Route(groups *common.Groups) {
 	groups.Auth.GET("/callback", a.callback)
 	groups.Auth.GET("/logout", a.logout)
 	groups.Auth.GET("/jwt", a.jwt)
+	groups.Auth.GET("/session", a.session)
+}
+
+func (a *Auth) session(c echo.Context) error {
+	claims, ok := a.checkAuthorized(c)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, empty)
+		// c.JSON(http.StatusOK, map[string]interface{}{
+		// 	"x-hasura-role": "anonymous",
+		// })
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"x-hasura-user-id":   claims.UserID,
+		"x-hasura-tenant-id": claims.TenantID,
+		"x-hasura-role":      claims.Role,
+	})
 }
 
 func (a *Auth) login(c echo.Context) error {
@@ -137,42 +154,23 @@ func (a *Auth) callbackError(c echo.Context) error {
 	a.L().Info("user logged in %d", logger.Args(u.ID))
 
 	// create only refresh token, currently it have same meaning as session
-	refreshToken, err := a.jwtKeys.Sign(NewRefreshClaims(u))
+	token, err := a.jwtKeys.Sign(NewAccessClaims(u))
 	if err != nil {
 		a.L().Debug("%v", logger.Args(err))
 		return err
 	}
 
-	a.setSession(c, refreshToken)
+	a.setSession(c, token)
 	return nil
 }
 
 func (a *Auth) jwt(c echo.Context) error {
-	subject, ok := a.checkAuthorized(c)
-	if !ok {
+	if _, ok := a.checkAuthorized(c); !ok {
 		return c.JSON(http.StatusUnauthorized, empty)
 	}
 
-	u, err := a.appSet.UserRepo.FindByExternalID(context.TODO(), subject)
-	if err != nil {
-		a.L().Error("%v", logger.Args(err))
-		return c.JSON(http.StatusUnauthorized, empty)
-	}
-
-	accessToken, err := a.jwtKeys.Sign(NewAccessClaims(u))
-	if err != nil {
-		a.L().Error("%v", logger.Args(err))
-		return c.JSON(http.StatusUnauthorized, empty)
-	}
-
-	refreshToken, err := a.jwtKeys.Sign(NewRefreshClaims(u))
-	if err != nil {
-		a.L().Error("%v", logger.Args(err))
-		return c.JSON(http.StatusUnauthorized, empty)
-	}
-
-	a.setSession(c, refreshToken)
+	cookie, _ := c.Cookie("ssid")
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"jwt": accessToken,
+		"jwt": cookie.Value,
 	})
 }
