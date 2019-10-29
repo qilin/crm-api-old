@@ -1,0 +1,70 @@
+# DO NOT USE THIS COMPOSE FILE, IT'S JUST EXAMPLE
+version: '3.7'
+services:
+  crm-migration:
+    command: ["migrate","up"]
+    environment:
+      DSN: "postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable"
+  crm-daemon:
+    image: p1hub/qilin-crm-api:${TAG}
+    depends_on:
+      - crm-migration
+    command: ["daemon","-c","configs/tst.yaml","-b",":8080"]
+    environment:
+      POSTGRES_DSN: postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
+      DISPATCHER_CORS_ALLOWED: http://crm-dashboard
+      AUTH_O_AUTH2_PROVIDER: "https://auth1.tst.protocol.one"
+      AUTH_O_AUTH2_CLIENT_ID: ""
+      AUTH_O_AUTH2_CLIENT_SECRET: ""
+      AUTH_O_AUTH2_REDIRECT_URL: ""
+      AUTH_SUCCESS_REDIRECT_URL: "http://crm-dashboard/auth_success"
+      AUTH_JWT_PUBLIC_KEY: "-----BEGIN PUBLIC KEY----- ~ -----END PUBLIC KEY-----"
+      AUTH_JWT_PRIVATE_KEY: "-----BEGIN RSA PRIVATE KEY----- ~ -----END RSA PRIVATE KEY-----"
+      AUTH_SECRET: "RANDOM STRING"
+      WEBHOOKS_SECRET: "RANDOM STRING"
+      STAN_STAN_CLUSTER_ID: ""
+      STAN_STAN_OPTIONS_NATS_URL: nats://natss:4222
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://crm-daemon:8080/healthz"]
+  crm-mailer:
+    image: p1hub/qilin-crm-api:${TAG}
+    depends_on:
+      - natss
+    command: ["mailer"]
+    environment:
+      STAN_STAN_CLUSTER_ID: ""
+      STAN_STAN_CLIENT_ID: "qilin-mailer"
+      STAN_STAN_OPTIONS_NATS_URL: nats://natss:4222
+      MAILER_CLIENT_OPTIONS_HOST: "some smtp host"
+      MAILER_CLIENT_OPTIONS_PORT: 25
+      MAILER_CLIENT_OPTIONS_USERNAME: ""
+      MAILER_CLIENT_OPTIONS_PASSWORD: ""
+      MAILER_CLIENT_OPTIONS_INSECURE_SKIP_VERIFY: "false"
+    networks:
+      - default
+  hasura:
+    depends_on:
+      - crm-daemon
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: "postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable"
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_LOG_LEVEL: debug
+      HASURA_GRAPHQL_ENABLE_TELEMETRY: "false"
+      QILIN_CRM_ENDPOINT: "http://crm-daemon:8080/v1/graphql"
+      QILIN_CRM_WEBHOOKS_ENDPOINT: "http://crm-daemon:8080/v1/webhooks"
+      QILIN_CRM_WEBHOOKS_SECRET: "WEBHOOKS_SECRET from crm-daemon"
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
+      HASURA_GRAPHQL_JWT_SECRET: |
+        {
+          "type": "RS512",
+          "key": "AUTH_JWT_PUBLIC_KEY from crm-daemon",
+          "issuer": "https://qilin.protocol.one",
+          "claims_namespace": "https://qilin.protocol.one/claims"          
+        }
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://hasura:8080/healthz"]
+  postgres:
+    image: "postgres:12-alpine"
+  natss:
+    image: "nats-streaming:latest"
