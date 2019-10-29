@@ -12,7 +12,7 @@ services:
       - 8082:8080
     command: ["daemon","-c","configs/local.yaml","-b",":8080","-d"]
     environment:
-      - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
+      - POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
     networks:
       - default
   crm-mailer:

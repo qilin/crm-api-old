@@ -2,7 +2,6 @@ package dispatcher
 
 import (
 	"context"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -61,6 +60,9 @@ func (d *Dispatcher) graphqlGroup(group *common.Groups) {
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {
 	// add static or handlers
+	grp.Any("/healthz", func(ctx echo.Context) error {
+		return ctx.NoContent(200)
+	})
 }
 
 // Config
