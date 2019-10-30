@@ -1,8 +1,8 @@
 package sdk
 
 type ErrorResponse struct {
-	Code int    `json:"code,omitempty"`
-	Msg  string `json:"msg,omitempty"`
+	Code int         `json:"code,omitempty"`
+	Msg  interface{} `json:"msg,omitempty"`
 }
 
 type AuthResponse struct {

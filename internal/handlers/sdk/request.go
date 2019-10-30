@@ -1,8 +1,8 @@
 package sdk
 
 type AuthRequest struct {
-	URL  string `json:"url" form:"url" query:"url"`
-	Meta string `json:"meta" form:"meta" query:"meta"`
+	URL  string      `json:"url" form:"url" query:"url"`
+	Meta interface{} `json:"meta" form:"meta" query:"meta"`
 }
 
 type OrderRequest struct {
