@@ -255,7 +255,7 @@ fixtures:
 
 fixtures-migrate:
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
-	docker run --rm --network container:qilin-postgres -ti p1hub/qilin-crm-api:latest migrate up --dsn 'postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable' --path /assets/fixtures	
+	docker run --rm --network container:qilin-postgres -ti p1hub/qilin-crm-api:${TAG} migrate up --dsn 'postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable' --path /assets/fixtures	
 .PHONY: fixtures-migrate
 
 .DEFAULT_GOAL := help
