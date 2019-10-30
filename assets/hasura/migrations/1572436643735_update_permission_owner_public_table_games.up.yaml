@@ -1,0 +1,17 @@
+- args:
+    permission:
+      allow_upsert: true
+      check: {}
+      columns: []
+      localPresets:
+      - key: tenant_id
+        value: x-hasura-Tenant-Id
+      - key: ""
+        value: ""
+      set:
+        tenant_id: x-hasura-Tenant-Id
+    role: owner
+    table:
+      name: games
+      schema: public
+  type: create_insert_permission
