@@ -1,6 +1,8 @@
-package sdk
+package repo
 
-import "github.com/qilin/crm-api/internal/db/domain"
+import (
+	"github.com/qilin/crm-api/internal/db/domain"
+)
 
 type Repo struct {
 	Platform       domain.PlatformRepo

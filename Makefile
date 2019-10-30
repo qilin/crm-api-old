@@ -75,6 +75,14 @@ clean: ## remove generated files, tidy vendor dependencies
 dev-build-up: build docker-image-cache dev-docker-compose-up ## create new build and recreate containers in docker-compose
 .PHONY: dev-build-up
 
+dev-build-test-plugins: ## build plugins for tests
+	if [ "${DIND}" = "1" ]; then \
+		$(call go_docker,"make dev-build-test-plugins") ;\
+    else \
+        go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/plugin.so" "$(ROOT_DIR)/test/testdata/plugins/meta/plugin.go" ;\
+    fi;
+.PHONY: dev-build-test-plugins
+
 dev-docker-compose-down: ## stop and remove containers, networks, images, and volumes
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
 	TAG=${TAG} DOCKER_NETWORK=$${DOCKER_NETWORK} docker-compose -p $${PROJECT_NAME} ${DOCKER_COMPOSE_ARGS} down -v  ;\

@@ -1,8 +1,9 @@
-package sdk
+package common
 
 type AuthRequest struct {
-	URL  string `json:"url" form:"url" query:"url"`
-	Meta string `json:"meta" form:"meta" query:"meta"`
+	URL              string      `json:"url" form:"url" query:"url" validate:"required,uri"`
+	Meta             interface{} `json:"meta" form:"meta" query:"meta"`
+	QilinProductUUID string      `json:"qilinProductUUID" from:"qilinProductUUID" query:"qilinProductUUID" validate:"omitempty,uuid4"`
 }
 
 type OrderRequest struct {

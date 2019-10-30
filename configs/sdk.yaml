@@ -1,0 +1,32 @@
+graphql:
+  introspection: true
+  dataloader:
+    wait: 250us
+  playground:
+    route: /client
+    name: local
+    endpoint: /v1/graphql
+postgres:
+  dsn: postgres://qilin:insecure@localhost:5567/qilin-hasura?sslmode=disable
+  maxOpenConns: 5
+  maxIdleConns: 3
+  connMaxLifetime: 15m
+  logLevel: debug
+dispatcher:
+  cors:
+    allowed:
+      - "*"
+    methods:
+      - "HEAD"
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+    headers:
+      - "*"
+      -
+sdk:
+  mode:
+  plugins:
+    - test/testdata/plugins/so/plugin.so

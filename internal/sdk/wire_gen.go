@@ -13,10 +13,14 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/metric"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
-	"github.com/qilin/crm-api/internal/dispatcher"
+	"github.com/qilin/crm-api/internal/db/repo"
+	sdk2 "github.com/qilin/crm-api/internal/dispatcher/sdk"
 	"github.com/qilin/crm-api/internal/handlers"
+	repo2 "github.com/qilin/crm-api/internal/sdk/repo"
+	"github.com/qilin/crm-api/internal/sdk/sdk"
 	"github.com/qilin/crm-api/internal/validators"
 	"github.com/qilin/crm-api/pkg/http"
+	"github.com/qilin/crm-api/pkg/postgres"
 )
 
 // Injectors from injector.go:
@@ -99,7 +103,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	commonHandlers, cleanup10, err := handlers.ProviderSDKHandlers(validate, awareSet)
+	postgresConfig, cleanup10, err := postgres.ProviderCfg(configurator)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -112,7 +116,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherConfig, cleanup11, err := dispatcher.ProviderCfg(configurator)
+	db, cleanup11, err := postgres.ProviderGORM(ctx, zap, postgresConfig)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -126,7 +130,13 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	sdkDispatcher, cleanup12, err := dispatcher.ProviderSDKDispatcher(ctx, awareSet, commonHandlers, dispatcherConfig)
+	platformRepo := repo.NewPlatformRepo(db)
+	platformJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
+	repoRepo := &repo2.Repo{
+		Platform:       platformRepo,
+		PlatformJWTKey: platformJWTKeyRepo,
+	}
+	sdkConfig, cleanup12, err := sdk.Cfg(configurator)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -141,7 +151,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup13, err := http.Cfg(configurator)
+	sdkSDK, cleanup13, err := sdk.Provider(ctx, awareSet, repoRepo, sdkConfig)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -157,7 +167,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup14, err := http.Provider(ctx, awareSet, sdkDispatcher, httpConfig)
+	commonHandlers, cleanup14, err := handlers.ProviderSDKHandlers(validate, awareSet, sdkSDK)
 	if err != nil {
 		cleanup13()
 		cleanup12()
@@ -174,7 +184,89 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
+	config2, cleanup15, err := sdk2.Cfg(configurator)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcher, cleanup16, err := sdk2.ProviderDispatcher(ctx, awareSet, commonHandlers, config2)
+	if err != nil {
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpConfig, cleanup17, err := http.Cfg(configurator)
+	if err != nil {
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpHTTP, cleanup18, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	if err != nil {
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return httpHTTP, func() {
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
 		cleanup14()
 		cleanup13()
 		cleanup12()
@@ -270,7 +362,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	commonHandlers, cleanup10, err := handlers.ProviderSDKHandlers(validate, awareSet)
+	db, cleanup10, err := postgres.ProviderGORMTest()
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -283,7 +375,13 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherConfig, cleanup11, err := dispatcher.ProviderCfg(configurator)
+	platformRepo := repo.NewPlatformRepo(db)
+	platformJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
+	repoRepo := &repo2.Repo{
+		Platform:       platformRepo,
+		PlatformJWTKey: platformJWTKeyRepo,
+	}
+	sdkConfig, cleanup11, err := sdk.CfgTest()
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -297,7 +395,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	sdkDispatcher, cleanup12, err := dispatcher.ProviderSDKDispatcher(ctx, awareSet, commonHandlers, dispatcherConfig)
+	sdkSDK, cleanup12, err := sdk.Provider(ctx, awareSet, repoRepo, sdkConfig)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -312,7 +410,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup13, err := http.CfgTest()
+	commonHandlers, cleanup13, err := handlers.ProviderSDKHandlers(validate, awareSet, sdkSDK)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -328,7 +426,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup14, err := http.Provider(ctx, awareSet, sdkDispatcher, httpConfig)
+	config2, cleanup14, err := sdk2.CfgTest()
 	if err != nil {
 		cleanup13()
 		cleanup12()
@@ -345,7 +443,67 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
+	dispatcher, cleanup15, err := sdk2.ProviderDispatcher(ctx, awareSet, commonHandlers, config2)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpConfig, cleanup16, err := http.CfgTest()
+	if err != nil {
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpHTTP, cleanup17, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	if err != nil {
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return httpHTTP, func() {
+		cleanup17()
+		cleanup16()
+		cleanup15()
 		cleanup14()
 		cleanup13()
 		cleanup12()

@@ -23,7 +23,7 @@ services:
       - crm-migration
     ports:
       - 8084:8080
-    command: ["sdk","-c","configs/local.yaml","-b",":8080","-d"]
+    command: ["sdk","-c","configs/sdk.yaml","-b",":8080","-d"]
     environment:
       - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
     networks:

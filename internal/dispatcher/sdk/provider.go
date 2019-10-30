@@ -1,4 +1,4 @@
-package dispatcher
+package sdk
 
 import (
 	"context"
@@ -8,10 +8,11 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
+	"github.com/qilin/crm-api/internal/handlers"
 )
 
 // ProviderCfg
-func ProviderCfg(cfg config.Configurator) (*Config, func(), error) {
+func Cfg(cfg config.Configurator) (*Config, func(), error) {
 	c := &Config{
 		invoker: invoker.NewInvoker(),
 	}
@@ -19,22 +20,26 @@ func ProviderCfg(cfg config.Configurator) (*Config, func(), error) {
 	return c, func() {}, e
 }
 
-// ProviderDispatcher
-func ProviderDispatcher(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) (*Dispatcher, func(), error) {
-	d := New(ctx, set, appSet, cfg)
+// CfgTest
+func CfgTest() (*Config, func(), error) {
+	return &Config{}, func() {}, nil
+}
+
+func ProviderDispatcher(ctx context.Context, set provider.AwareSet, h common.Handlers, cfg *Config) (*Dispatcher, func(), error) {
+	d := New(ctx, set, h, cfg)
 	return d, func() {}, nil
 }
 
 var (
 	WireSet = wire.NewSet(
+		Cfg,
 		ProviderDispatcher,
-		ProviderCfg,
-		wire.Struct(new(AppSet), "*"),
+		handlers.ProviderSDKHandlers,
 	)
 
 	WireTestSet = wire.NewSet(
+		CfgTest,
 		ProviderDispatcher,
-		ProviderCfg,
-		wire.Struct(new(AppSet), "*"),
+		handlers.ProviderSDKHandlers,
 	)
 )

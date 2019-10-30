@@ -10,6 +10,7 @@ COPY ./build/docker/app/files /
 COPY ./api api
 COPY ./assets assets
 COPY ./configs configs
+COPY ./test/testdata/plugins/so plugins
 COPY ./bin bin
 
 RUN chmod +x /docker/bin/* \
