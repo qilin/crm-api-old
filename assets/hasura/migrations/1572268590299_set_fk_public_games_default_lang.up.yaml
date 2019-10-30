@@ -1,0 +1,6 @@
+- args:
+    sql: "\n           alter table \"public\".\"games\"\n           add constraint
+      \"games_default_lang_fkey\" \n           foreign key (\"default_lang\") \n           references
+      \"public\".\"language_tags\"\n           (\"tag\") on update cascade on delete
+      restrict;\n      "
+  type: run_sql

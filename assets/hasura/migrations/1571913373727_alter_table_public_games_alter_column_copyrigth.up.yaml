@@ -1,0 +1,6 @@
+- args:
+    sql: COMMENT ON COLUMN "public"."games"."copyrigth" IS E''
+  type: run_sql
+- args:
+    sql: alter table "public"."games" rename column "copyrigth" to "copyright";
+  type: run_sql

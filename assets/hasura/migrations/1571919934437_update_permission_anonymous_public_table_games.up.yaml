@@ -1,0 +1,23 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - copyright
+      - description
+      - genre
+      - name
+      - published
+      - release_date
+      - tagline
+      filter:
+        _and:
+        - published:
+            _eq: true
+        - tenant_id:
+            _ne: X-Hasura-Tenant-Id
+      limit: null
+    role: anonymous
+    table:
+      name: games
+      schema: public
+  type: create_select_permission

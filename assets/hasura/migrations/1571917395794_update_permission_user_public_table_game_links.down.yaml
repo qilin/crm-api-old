@@ -1,0 +1,20 @@
+- args:
+    role: user
+    table:
+      name: game_links
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns: []
+      computed_fields: []
+      filter:
+        game:
+          tenant_id:
+            _eq: X-Hasura-Tenant-Id
+    role: user
+    table:
+      name: game_links
+      schema: public
+  type: create_select_permission

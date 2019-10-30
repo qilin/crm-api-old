@@ -1,0 +1,11 @@
+- args:
+    sql: CREATE TABLE "public"."game_regional_restrictions"("game_id" uuid NOT NULL,
+      "country" text NOT NULL, PRIMARY KEY ("game_id","country") , FOREIGN KEY ("game_id")
+      REFERENCES "public"."games"("id") ON UPDATE cascade ON DELETE cascade, FOREIGN
+      KEY ("country") REFERENCES "public"."countries"("code") ON UPDATE cascade ON
+      DELETE restrict);
+  type: run_sql
+- args:
+    name: game_regional_restrictions
+    schema: public
+  type: add_existing_table_or_view

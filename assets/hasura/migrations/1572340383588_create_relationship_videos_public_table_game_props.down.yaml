@@ -1,0 +1,6 @@
+- args:
+    relationship: videos
+    table:
+      name: game_props
+      schema: public
+  type: drop_relationship

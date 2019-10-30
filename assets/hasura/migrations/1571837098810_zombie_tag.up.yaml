@@ -1,0 +1,6 @@
+- args:
+    cascade: false
+    sql: |-
+      insert into tags (id) values
+      ('zombie')
+  type: run_sql

@@ -1,0 +1,8 @@
+- args:
+    cascade: false
+    sql: |-
+      INSERT INTO product_types (type, comment) VALUES
+          ('Game', ''),
+          ('DLC', ''),
+          ('TopUp', '');
+  type: run_sql
