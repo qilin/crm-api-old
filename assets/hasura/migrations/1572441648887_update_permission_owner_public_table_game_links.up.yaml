@@ -1,0 +1,21 @@
+- args:
+    permission:
+      allow_upsert: true
+      check:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      columns:
+      - game_id
+      - lang
+      - name
+      - url
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: game_links
+      schema: public
+  type: create_insert_permission
