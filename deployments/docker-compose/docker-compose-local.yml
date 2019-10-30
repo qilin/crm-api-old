@@ -12,7 +12,7 @@ services:
       - 8082:8080
     command: ["daemon","-c","configs/local.yaml","-b",":8080","-d"]
     environment:
-      - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
+      - POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
     networks:
       - default
   crm-mailer:
@@ -25,6 +25,8 @@ services:
     networks:
       - default
   hasura:
+    depends_on:
+      - crm-daemon
     ports:
       - 8081:8080
     volumes:
@@ -46,8 +48,12 @@ services:
           "issuer": "https://qilin.protocol.one",
           "claims_namespace": "https://qilin.protocol.one/claims"          
         }
-
   postgres:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - 5567:5432
     volumes:

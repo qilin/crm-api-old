@@ -22,6 +22,9 @@ var (
 			Dir: global.Slave.WorkDir() + argPath,
 		}
 		migrate.SetTable(argTable)
+		if dsn := os.Getenv("DSN"); dsn != "" {
+			argDsn = dsn
+		}
 		db, re = sql.Open("postgres", argDsn)
 		if re != nil {
 			return re

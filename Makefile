@@ -141,7 +141,17 @@ docker-push: ## push docker image to registry
 generate: init gqlgen-generate go-generate ## execute all generators
 .PHONY: generate
 
-github-build: docker-image docker-push docker-clean ## build application in CI
+github-docker-image: docker-image ## build all docker images
+	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
+	docker build --cache-from $${DOCKER_IMAGE_HASURA}:${CACHE_TAG} -f ${ROOT_DIR}/build/docker/hasura/Dockerfile -t $${DOCKER_IMAGE_HASURA}:${TAG} ${ROOT_DIR}
+.PHONY: github-docker-image
+
+github-docker-push: docker-push ## push all docker images to registry
+	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
+	docker build --cache-from $${DOCKER_IMAGE_HASURA}:${CACHE_TAG} -f ${ROOT_DIR}/build/docker/hasura/Dockerfile -t $${DOCKER_IMAGE_HASURA}:${TAG} ${ROOT_DIR}
+.PHONY: github-docker-push
+
+github-build: github-docker-image docker-push docker-clean ## build application in CI
 .PHONY: github-build
 
 github-test: test-with-coverage ## test application in CI
