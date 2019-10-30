@@ -29,8 +29,9 @@ type Config struct {
 	}
 
 	// cookies rules
-	Domain string
-	Secure bool
+	SessionCookieName string `default:"ssid"`
+	Domain            string
+	Secure            bool
 
 	AutoSignIn         bool
 	Secret             string
@@ -97,7 +98,7 @@ func (a *Auth) checkAuthorized(c echo.Context) (*AccessTokenClaims, bool) {
 	if strings.HasPrefix(auth, "Bearer ") {
 		token = auth[7:]
 	} else {
-		ssid, err := c.Cookie("ssid")
+		ssid, err := c.Cookie(a.cfg.SessionCookieName)
 		if err == http.ErrNoCookie {
 			return nil, false
 		}
@@ -142,7 +143,7 @@ func (a *Auth) checkAuthorized(c echo.Context) (*AccessTokenClaims, bool) {
 
 func (a *Auth) removeSession(c echo.Context) {
 	c.SetCookie(&http.Cookie{
-		Name:     "ssid",
+		Name:     a.cfg.SessionCookieName,
 		Value:    "",
 		HttpOnly: true,
 		Domain:   a.cfg.Domain,
@@ -153,7 +154,7 @@ func (a *Auth) removeSession(c echo.Context) {
 
 func (a *Auth) setSession(c echo.Context, value string) {
 	c.SetCookie(&http.Cookie{
-		Name:     "ssid",
+		Name:     a.cfg.SessionCookieName,
 		Value:    value,
 		HttpOnly: true,
 		Domain:   a.cfg.Domain,

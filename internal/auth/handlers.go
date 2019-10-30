@@ -169,7 +169,7 @@ func (a *Auth) jwt(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, empty)
 	}
 
-	cookie, _ := c.Cookie("ssid")
+	cookie, _ := c.Cookie(a.cfg.SessionCookieName)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"jwt": cookie.Value,
 	})
