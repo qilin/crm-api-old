@@ -53,7 +53,7 @@ func (h *SDKGroup) postAuth(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, AuthResponse{
-		Meta: r.Meta,
+		Meta: r.Meta.(string),
 	})
 }
 
