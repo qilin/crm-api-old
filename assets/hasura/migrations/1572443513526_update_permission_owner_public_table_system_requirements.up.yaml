@@ -1,0 +1,26 @@
+- args:
+    permission:
+      columns:
+      - browser
+      - directx
+      - gpu
+      - kind
+      - opengl
+      - os
+      - processor
+      - ram
+      - sound_card
+      - storage
+      filter:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: system_requirements
+      schema: public
+  type: create_update_permission

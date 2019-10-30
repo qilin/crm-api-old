@@ -1,0 +1,6 @@
+- args:
+    role: owner
+    table:
+      name: system_requirements
+      schema: public
+  type: drop_insert_permission

@@ -1,0 +1,18 @@
+- args:
+    permission:
+      columns:
+      - format
+      - url
+      filter:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: game_thumbnails
+      schema: public
+  type: create_update_permission

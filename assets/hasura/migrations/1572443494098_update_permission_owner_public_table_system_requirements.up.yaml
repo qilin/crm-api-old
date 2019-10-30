@@ -1,0 +1,28 @@
+- args:
+    permission:
+      allow_upsert: true
+      check:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      columns:
+      - game_id
+      - kind
+      - os
+      - processor
+      - ram
+      - gpu
+      - sound_card
+      - browser
+      - directx
+      - storage
+      - opengl
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: system_requirements
+      schema: public
+  type: create_insert_permission
