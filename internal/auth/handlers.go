@@ -3,12 +3,13 @@ package auth
 import (
 	"context"
 	"fmt"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"net/http"
+	"net/url"
 	"time"
 
+	"github.com/qilin/crm-api/internal/dispatcher/common"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo/v4"
@@ -23,12 +24,28 @@ func (a *Auth) Route(groups *common.Groups) {
 	groups.Auth.GET("/callback", a.callback)
 	groups.Auth.GET("/logout", a.logout)
 	groups.Auth.GET("/jwt", a.jwt)
+	groups.Auth.GET("/session", a.session)
+}
+
+func (a *Auth) session(c echo.Context) error {
+	claims, ok := a.checkAuthorized(c)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, empty)
+		// c.JSON(http.StatusOK, map[string]interface{}{
+		// 	"x-hasura-role": "anonymous",
+		// })
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"x-hasura-user-id":   claims.UserID,
+		"x-hasura-tenant-id": claims.TenantID,
+		"x-hasura-role":      claims.Role,
+	})
 }
 
 func (a *Auth) login(c echo.Context) error {
-	_, ok := a.checkAuthorized(c)
-	if ok {
-		return c.Redirect(http.StatusFound, a.cfg.SuccessRedirectURL)
+	if _, ok := a.checkAuthorized(c); ok {
+		return a.redirectSuccess(c)
 	}
 
 	var state = uuid.New().String()
@@ -43,8 +60,29 @@ func (a *Auth) logout(c echo.Context) error {
 	return c.JSON(http.StatusOK, empty)
 }
 
-func (a *Auth) callback(c echo.Context) error {
+func (a *Auth) redirectSuccess(c echo.Context) error {
+	return c.Redirect(http.StatusFound, a.cfg.SuccessRedirectURL)
+}
 
+func (a *Auth) callback(c echo.Context) error {
+	if err := a.callbackError(c); err != nil {
+		// redirect error
+		u, perr := url.Parse(a.cfg.ErrorRedirectURL)
+		if perr != nil {
+			a.L().Error("failed parse error redirect url: %v", logger.Args(perr.Error()))
+			return c.Redirect(http.StatusFound, a.cfg.ErrorRedirectURL)
+		}
+		a.L().Error("auth failed: %v", logger.Args(perr))
+		q := u.Query()
+		q.Add("error", err.Error())
+		u.RawQuery = q.Encode()
+		return c.Redirect(http.StatusFound, u.String())
+	}
+
+	return a.redirectSuccess(c)
+}
+
+func (a *Auth) callbackError(c echo.Context) error {
 	// Verify state param, defence from CSRF attacks
 	var state = c.FormValue("state")
 	a.L().Debug("oauth callback state %s", logger.Args(state))
@@ -115,22 +153,24 @@ func (a *Auth) callback(c echo.Context) error {
 
 	a.L().Info("user logged in %d", logger.Args(u.ID))
 
-	// create auth jwt
-	token := jwt.NewWithClaims(jwt.SigningMethodRS512, NewClaims(u))
-	signed, err := token.SignedString(a.jwtKeys.Private)
+	// create only refresh token, currently it have same meaning as session
+	token, err := a.jwtKeys.Sign(NewAccessClaims(u))
 	if err != nil {
+		a.L().Debug("%v", logger.Args(err))
 		return err
 	}
 
-	a.setSession(c, signed)
-	return c.Redirect(http.StatusFound, a.cfg.SuccessRedirectURL)
+	a.setSession(c, token)
+	return nil
 }
 
 func (a *Auth) jwt(c echo.Context) error {
-	if token, ok := a.checkAuthorized(c); ok {
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"jwt": token,
-		})
+	if _, ok := a.checkAuthorized(c); !ok {
+		return c.JSON(http.StatusUnauthorized, empty)
 	}
-	return c.JSON(http.StatusUnauthorized, empty)
+
+	cookie, _ := c.Cookie(a.cfg.SessionCookieName)
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"jwt": cookie.Value,
+	})
 }
