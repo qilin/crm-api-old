@@ -1,0 +1,13 @@
+- args:
+    name: links
+    table:
+      name: games
+      schema: public
+    using:
+      manual_configuration:
+        column_mapping:
+          id: game_id
+        remote_table:
+          name: game_links
+          schema: public
+  type: create_object_relationship

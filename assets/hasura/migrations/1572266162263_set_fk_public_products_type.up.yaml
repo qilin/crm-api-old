@@ -1,0 +1,6 @@
+- args:
+    sql: "\n           alter table \"public\".\"products\"\n           add constraint
+      \"products_type_fkey\" \n           foreign key (\"type\") \n           references
+      \"public\".\"product_types\"\n           (\"type\") on update cascade on delete
+      restrict;\n      "
+  type: run_sql

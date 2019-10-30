@@ -1,0 +1,16 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      filter:
+        game:
+          tenant_id:
+            _eq: X-Hasura-Tenant-Id
+      limit: null
+    role: user
+    table:
+      name: game_developers
+      schema: public
+  type: create_select_permission

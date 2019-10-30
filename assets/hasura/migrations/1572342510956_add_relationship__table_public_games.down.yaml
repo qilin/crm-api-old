@@ -1,0 +1,6 @@
+- args:
+    relationship: content_ratings
+    table:
+      name: games
+      schema: public
+  type: drop_relationship

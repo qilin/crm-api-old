@@ -1,0 +1,3 @@
+- args:
+    sql: alter table "public"."game_developers" rename to "developers";
+  type: run_sql

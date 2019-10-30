@@ -1,0 +1,19 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - created_at
+      - first_name
+      - id
+      - last_name
+      - picture
+      - status
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      limit: null
+    role: user
+    table:
+      name: users
+      schema: public
+  type: create_select_permission
