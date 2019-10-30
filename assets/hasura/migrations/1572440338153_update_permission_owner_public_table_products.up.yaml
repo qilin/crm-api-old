@@ -1,0 +1,17 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - codename
+      - object_id
+      - type
+      - uuid
+      filter:
+        tenant_id:
+          _eq: x-hasura-tenant-id
+      limit: null
+    role: owner
+    table:
+      name: products
+      schema: public
+  type: create_select_permission
