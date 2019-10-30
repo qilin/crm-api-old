@@ -96,6 +96,11 @@ BEGIN
 	VALUES
 		(game_id, 'en', 1920, 1080, 'https://steamcdn-a.akamaihd.net/steam/apps/466560/ss_0de6fea3166a04027b671e438645e98186095c63.jpg?t=1571828499');
 
+	INSERT INTO products
+		(codename, type, object_id, tenant_id)		
+	VALUES
+		('northgard', 'Game', game_id, 1);
+
 END$$;
 -- +migrate StatementEnd
 
