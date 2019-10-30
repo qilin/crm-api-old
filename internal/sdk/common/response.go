@@ -1,4 +1,4 @@
-package sdk
+package common
 
 type ErrorResponse struct {
 	Code int    `json:"code,omitempty"`
@@ -6,8 +6,8 @@ type ErrorResponse struct {
 }
 
 type AuthResponse struct {
-	Token string `json:"token,omitempty"`
-	Meta  string `json:"meta,omitempty"`
+	Token string      `json:"token,omitempty"`
+	Meta  interface{} `json:"meta,omitempty"`
 }
 
 type OrderResponse struct {

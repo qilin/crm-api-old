@@ -1,8 +1,9 @@
-package dispatcher
+package sdk
 
 import (
 	"context"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
@@ -11,7 +12,7 @@ import (
 )
 
 // Dispatcher
-type SDKDispatcher struct {
+type Dispatcher struct {
 	ctx      context.Context
 	cfg      Config
 	handlers common.Handlers
@@ -19,7 +20,7 @@ type SDKDispatcher struct {
 }
 
 // dispatch
-func (d *SDKDispatcher) Dispatch(echoHttp *echo.Echo) error {
+func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
 	echoHttp.Use(middleware.Logger())
 	echoHttp.Use(middleware.Recover())
@@ -30,14 +31,10 @@ func (d *SDKDispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AllowHeaders: d.cfg.CORS.Headers,
 	}))
 
-	// init group routes
 	grp := &common.Groups{
-		Common: echoHttp,
-		V1:     echoHttp.Group(common.V1Path),
-		SDK:    echoHttp.Group(common.SDKPath),
+		SDK: echoHttp.Group(common.SDKPath),
 	}
 
-	// init routes
 	for _, handler := range d.handlers {
 		handler.Route(grp)
 	}
@@ -45,10 +42,25 @@ func (d *SDKDispatcher) Dispatch(echoHttp *echo.Echo) error {
 	return nil
 }
 
+type Config struct {
+	CORS    common.CORS
+	invoker *invoker.Invoker
+}
+
+// OnReload
+func (c *Config) OnReload(callback func(ctx context.Context)) {
+	c.invoker.OnReload(callback)
+}
+
+// Reload
+func (c *Config) Reload(ctx context.Context) {
+	c.invoker.Reload(ctx)
+}
+
 // New
-func NewSDK(ctx context.Context, set provider.AwareSet, h common.Handlers, cfg *Config) *SDKDispatcher {
+func New(ctx context.Context, set provider.AwareSet, h common.Handlers, cfg *Config) *Dispatcher {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
-	return &SDKDispatcher{
+	return &Dispatcher{
 		ctx:      ctx,
 		cfg:      *cfg,
 		handlers: h,

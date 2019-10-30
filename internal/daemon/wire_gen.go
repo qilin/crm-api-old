@@ -110,11 +110,9 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
-		JwtKeys: jwtKeysRepo,
-		User:    userRepo,
+		User: userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := resolver.AppSet{
@@ -709,11 +707,9 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	userRepo := repo.NewUserRepo(db)
 	resolverRepo := resolver.Repo{
-		JwtKeys: jwtKeysRepo,
-		User:    userRepo,
+		User: userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := resolver.AppSet{

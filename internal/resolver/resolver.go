@@ -65,8 +65,7 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 
 // Repo
 type Repo struct {
-	JwtKeys domain.JWTKeysRepo
-	User    domain.UserRepo
+	User domain.UserRepo
 }
 
 // New returns instance of config graphql resolvers

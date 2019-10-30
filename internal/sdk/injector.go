@@ -9,7 +9,9 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
-	"github.com/qilin/crm-api/internal/dispatcher"
+	dispatcher "github.com/qilin/crm-api/internal/dispatcher/sdk"
+	"github.com/qilin/crm-api/internal/sdk/common"
+	sdk "github.com/qilin/crm-api/internal/sdk/sdk"
 	"github.com/qilin/crm-api/pkg/http"
 )
 
@@ -17,10 +19,10 @@ import (
 func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Observer) (*http.HTTP, func(), error) {
 	panic(wire.Build(
 		provider.Set,
-		wire.Bind(new(http.Dispatcher), new(*dispatcher.SDKDispatcher)),
+		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
+		wire.Bind(new(common.SDK), new(*sdk.SDK)),
 		wire.Struct(new(provider.AwareSet), "*"),
-		http.SDKWireSet,
-		WireSet,
+		sdk.WireSet,
 	))
 }
 
@@ -28,9 +30,9 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker.Observer) (*http.HTTP, func(), error) {
 	panic(wire.Build(
 		provider.Set,
-		wire.Bind(new(http.Dispatcher), new(*dispatcher.SDKDispatcher)),
+		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
+		wire.Bind(new(common.SDK), new(*sdk.SDK)),
 		wire.Struct(new(provider.AwareSet), "*"),
-		http.SDKWireTestSet,
-		WireTestSet,
+		sdk.WireTestSet,
 	))
 }

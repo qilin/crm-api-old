@@ -50,15 +50,4 @@ var (
 		dispatcher.WireSet,
 		graphql.WireTestSet,
 	)
-
-	SDKWireSet = wire.NewSet(
-		Provider,
-		Cfg,
-		dispatcher.SDKWireSet,
-	)
-	SDKWireTestSet = wire.NewSet(
-		Provider,
-		CfgTest,
-		dispatcher.SDKWireTestSet,
-	)
 )

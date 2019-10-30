@@ -100,11 +100,9 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	userRepo := repo.NewUserRepo(db)
 	resolverRepo := Repo{
-		JwtKeys: jwtKeysRepo,
-		User:    userRepo,
+		User: userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
@@ -252,11 +250,9 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	jwtKeysRepo := repo.NewJwtKeysRepo(db)
 	userRepo := repo.NewUserRepo(db)
 	resolverRepo := Repo{
-		JwtKeys: jwtKeysRepo,
-		User:    userRepo,
+		User: userRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
