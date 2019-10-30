@@ -1,0 +1,17 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - lang
+      - name
+      - url
+      filter:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      limit: null
+    role: owner
+    table:
+      name: game_links
+      schema: public
+  type: create_select_permission
