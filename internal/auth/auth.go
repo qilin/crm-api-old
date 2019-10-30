@@ -5,14 +5,16 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
+
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/coreos/go-oidc"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"golang.org/x/oauth2"
@@ -25,9 +27,16 @@ type Config struct {
 		ClientSecret string `required:"true"`
 		RedirectUrl  string `required:"true"`
 	}
+
+	// cookies rules
+	SessionCookieName string `default:"ssid"`
+	Domain            string
+	Secure            bool
+
 	AutoSignIn         bool
 	Secret             string
 	SuccessRedirectURL string
+	ErrorRedirectURL   string
 	JWT                struct {
 		PublicKey  string
 		PrivateKey string
@@ -83,47 +92,74 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config)
 
 // Session ====================================================================
 
-func (a *Auth) checkAuthorized(c echo.Context) (string, bool) {
-	cssid, err := c.Cookie("ssid")
-	if err == http.ErrNoCookie {
-		return "", false
+func (a *Auth) checkAuthorized(c echo.Context) (*AccessTokenClaims, bool) {
+	var token string
+	auth := c.Request().Header.Get("Authorization")
+	if strings.HasPrefix(auth, "Bearer ") {
+		token = auth[7:]
+	} else {
+		ssid, err := c.Cookie(a.cfg.SessionCookieName)
+		if err == http.ErrNoCookie {
+			return nil, false
+		}
+
+		if err != nil {
+			a.L().Warning("can't retrieve cookies: %v", logger.Args(err))
+			return nil, false
+		}
+		token = ssid.Value
 	}
 
-	if err != nil {
-		a.L().Warning("can't retrieve cookies: %v", logger.Args(err))
-		return "", false
-	}
-
-	a.L().Debug("session cookie: %s", logger.Args(cssid.Value))
+	a.L().Debug("auth token: %s", logger.Args(token))
 
 	// validate jwt token
-	if _, err := jwt.Parse(cssid.Value, func(*jwt.Token) (interface{}, error) {
-		return a.jwtKeys.Public, nil
-	}); err != nil {
-		a.L().Debug("invalid session token: %v", logger.Args(err))
-		return "", false
+	var claims AccessTokenClaims
+	if err := a.jwtKeys.Parse(token, &claims); err != nil {
+		a.L().Debug("invalid auth token: %v", logger.Args(err))
+		return nil, false
 	}
 
-	return cssid.Value, true
+	if claims.UserID != "" {
+		id, err := strconv.Atoi(claims.UserID)
+		if err != nil {
+			a.L().Warning("%v", logger.Args(err))
+			return nil, false
+		}
+		u, err := a.appSet.UserRepo.Get(c.Request().Context(), id)
+		if err != nil {
+			a.L().Warning("%v", logger.Args(err))
+			return nil, false
+		}
+
+		if u.AuthTimestamp.Unix() > claims.IssuedAt {
+			a.L().Debug("auth token revoked")
+			return nil, false
+		}
+
+	}
+
+	return &claims, true
 }
 
 func (a *Auth) removeSession(c echo.Context) {
 	c.SetCookie(&http.Cookie{
-		Name:     "ssid",
+		Name:     a.cfg.SessionCookieName,
 		Value:    "",
-		MaxAge:   0,
 		HttpOnly: true,
-		Secure:   false, // TODO
+		Domain:   a.cfg.Domain,
+		Path:     "/",
+		Secure:   a.cfg.Secure,
 	})
 }
 
 func (a *Auth) setSession(c echo.Context, value string) {
 	c.SetCookie(&http.Cookie{
-		Name:     "ssid",
+		Name:     a.cfg.SessionCookieName,
 		Value:    value,
-		MaxAge:   int((30 * time.Minute).Seconds()),
 		HttpOnly: true,
-		Secure:   false, // TODO
+		Domain:   a.cfg.Domain,
+		Path:     "/",
+		Secure:   a.cfg.Secure,
 	})
 }
 
