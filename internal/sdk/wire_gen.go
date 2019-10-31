@@ -132,9 +132,13 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 	}
 	platformRepo := repo.NewPlatformRepo(db)
 	platformJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
+	productsRepo := repo.NewProductsRepo(db)
+	userMapRepo := repo.NewUserMapRepo(db)
 	repoRepo := &repo2.Repo{
 		Platform:       platformRepo,
 		PlatformJWTKey: platformJWTKeyRepo,
+		Products:       productsRepo,
+		UserMap:        userMapRepo,
 	}
 	sdkConfig, cleanup12, err := sdk.Cfg(configurator)
 	if err != nil {
@@ -377,9 +381,13 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 	}
 	platformRepo := repo.NewPlatformRepo(db)
 	platformJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
+	productsRepo := repo.NewProductsRepo(db)
+	userMapRepo := repo.NewUserMapRepo(db)
 	repoRepo := &repo2.Repo{
 		Platform:       platformRepo,
 		PlatformJWTKey: platformJWTKeyRepo,
+		Products:       productsRepo,
+		UserMap:        userMapRepo,
 	}
 	sdkConfig, cleanup11, err := sdk.CfgTest()
 	if err != nil {
