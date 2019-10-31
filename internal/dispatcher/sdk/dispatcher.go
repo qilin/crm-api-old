@@ -23,7 +23,7 @@ type Dispatcher struct {
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
 	echoHttp.Use(middleware.Logger())
-	echoHttp.Use(middleware.Recover())
+	//echoHttp.Use(middleware.Recover())
 
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: d.cfg.CORS.Allowed,

@@ -53,6 +53,13 @@ func (h *SDKGroup) postAuth(ctx echo.Context) error {
 		})
 	}
 
+	if r.Meta == nil {
+		r.Meta = map[string]string{}
+	}
+
+	j, _ := h.sdk.IssueJWT("user_id", "qilin_uuid")
+	h.L().Info(string(j))
+
 	if err := h.set.Validate.Struct(r); err != nil {
 		h.L().Info(err.Error())
 		return ctx.JSON(http.StatusBadRequest, common2.ErrorResponse{
