@@ -2,7 +2,13 @@ package sdk
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/x509"
+	"encoding/pem"
 	"strings"
+	"time"
+
+	"github.com/qilin/crm-api/internal/db/domain"
 
 	"github.com/qilin/crm-api/internal/sdk/repo"
 
@@ -18,6 +24,20 @@ type Config struct {
 	Debug   bool `fallback:"shared.debug"`
 	Mode    common.SDKMode
 	Plugins []string
+	JWT     JWT
+}
+
+type JWT struct {
+	Subject    string
+	Iss        string
+	Exp        int // time expiration in minutes
+	PrivateKey string
+	PublicKey  string
+}
+
+type KeyPair struct {
+	Public  *ecdsa.PublicKey
+	Private *ecdsa.PrivateKey
 }
 
 type SDK struct {
@@ -27,6 +47,8 @@ type SDK struct {
 	authenticator common.Authenticate
 	orderer       common.Order
 	keyRegister   jwt.KeyRegister
+	repo          *repo.Repo
+	keyPair       KeyPair
 	provider.LMT
 }
 
@@ -35,7 +57,10 @@ func (s *SDK) Mode() common.SDKMode {
 }
 
 func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
-	return s.keyRegister.Check(token)
+	// todo: return it back after tests
+	// todo: optimise with ParseWithourCheck + iss key map
+	//return s.keyRegister.Check(token)
+	return jwt.ECDSACheck(token, s.keyPair.Public)
 }
 
 func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
@@ -44,6 +69,25 @@ func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, toke
 
 func (s *SDK) Order(ctx context.Context, request common.OrderRequest, log logger.Logger) (response common.OrderResponse, err error) {
 	return s.orderer(ctx, request, log)
+}
+
+func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
+	return s.repo.Products.Get(s.ctx, uuid)
+}
+
+func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
+	var claims jwt.Claims
+	claims.Subject = "alice@example.com"
+	claims.Set[common.UserID] = userId
+	claims.Set[common.QilinProductUUID] = qilinProductUUID
+
+	if s.cfg.JWT.Exp > 0 {
+		now := time.Now().Round(time.Second)
+		claims.Expires = jwt.NewNumericTime(now.Add(time.Duration(s.cfg.JWT.Exp) * time.Minute))
+	}
+
+	// issue a JWT
+	return claims.ECDSASign(jwt.ES256, s.keyPair.Private)
 }
 
 func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config) *SDK {
@@ -92,9 +136,36 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 		break
 	default:
 		// todo: default qilin mode
+		sdk.keyPair, err = decodePemECDSA(cfg.JWT.PrivateKey, cfg.JWT.PublicKey)
+		if err != nil {
+			set.L().Emergency(err.Error())
+		}
+
 		qln := qilin.NewQilinAuthenticator()
 		sdk.authenticator = qln.Auth
 		sdk.orderer = qln.Order
 	}
 	return sdk
+}
+
+func decodePemECDSA(pemPriv, pemPub string) (KeyPair, error) {
+	block, _ := pem.Decode([]byte(pemPriv))
+	x509Encoded := block.Bytes
+	privateKey, err := x509.ParseECPrivateKey(x509Encoded)
+	if err != nil {
+		return KeyPair{}, err
+	}
+
+	blockPub, _ := pem.Decode([]byte(pemPub))
+	x509EncodedPub := blockPub.Bytes
+	genericPublicKey, err := x509.ParsePKIXPublicKey(x509EncodedPub)
+	if err != nil {
+		return KeyPair{}, err
+	}
+	publicKey := genericPublicKey.(*ecdsa.PublicKey)
+
+	return KeyPair{
+		Public:  publicKey,
+		Private: privateKey,
+	}, nil
 }

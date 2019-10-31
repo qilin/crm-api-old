@@ -3,6 +3,8 @@ package repo
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/db/trx"
+
 	"github.com/jinzhu/gorm"
 	"github.com/qilin/crm-api/internal/db/domain"
 )
@@ -11,20 +13,33 @@ type PlatformJWTKeyRepo struct {
 	db *gorm.DB
 }
 
-func (p *PlatformJWTKeyRepo) All(ctx context.Context) ([]domain.PlatformJWTKeyItem, error) {
-	return nil, nil
+func (a *PlatformJWTKeyRepo) All(ctx context.Context) ([]domain.PlatformJWTKeyItem, error) {
+	db := trx.Inject(ctx, a.db)
+	var (
+		keys = []domain.PlatformJWTKeyItem{}
+	)
+	e := db.Find(&keys).Error
+	return keys, e
 }
 
-func (p *PlatformJWTKeyRepo) Create(ctx context.Context, model *domain.PlatformJWTKeyItem) error {
-	return nil
+func (a *PlatformJWTKeyRepo) Create(ctx context.Context, model *domain.PlatformJWTKeyItem) error {
+	db := trx.Inject(ctx, a.db)
+	return db.Save(model).Error
 }
 
-func (p *PlatformJWTKeyRepo) Get(ctx context.Context, alg, iss string) (*domain.PlatformJWTKeyItem, error) {
-	return &domain.PlatformJWTKeyItem{}, nil
+func (a *PlatformJWTKeyRepo) Get(ctx context.Context, alg, iss string) (*domain.PlatformJWTKeyItem, error) {
+	db := trx.Inject(ctx, a.db)
+	var (
+		out = &domain.PlatformJWTKeyItem{}
+		e   error
+	)
+	e = db.Where("alg=? AND iss=?", alg, iss).First(out).Error
+	return out, e
 }
 
-func (p *PlatformJWTKeyRepo) Delete(ctx context.Context, item *domain.PlatformJWTKeyItem) error {
-	return nil
+func (a *PlatformJWTKeyRepo) Delete(ctx context.Context, item *domain.PlatformJWTKeyItem) error {
+	db := trx.Inject(ctx, a.db)
+	return db.Delete(item).Error
 }
 
 func NewPlatformJWTKeyRepo(db *gorm.DB) domain.PlatformJWTKeyRepo {
