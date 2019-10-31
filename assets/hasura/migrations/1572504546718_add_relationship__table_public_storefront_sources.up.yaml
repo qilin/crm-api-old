@@ -1,0 +1,8 @@
+- args:
+    name: catalog
+    table:
+      name: storefront_sources
+      schema: public
+    using:
+      foreign_key_constraint_on: catalog_id
+  type: create_object_relationship

@@ -1,0 +1,16 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - endpoint
+      - id
+      - name
+      filter:
+        tenant_id:
+          _eq: x-hasura-tenant-id
+      limit: null
+    role: owner
+    table:
+      name: catalogs
+      schema: public
+  type: create_select_permission
