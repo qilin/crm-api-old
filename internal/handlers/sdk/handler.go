@@ -57,9 +57,6 @@ func (h *SDKGroup) postAuth(ctx echo.Context) error {
 		r.Meta = map[string]string{}
 	}
 
-	j, _ := h.sdk.IssueJWT("user_id", "qilin_uuid")
-	h.L().Info(string(j))
-
 	if err := h.set.Validate.Struct(r); err != nil {
 		h.L().Info(err.Error())
 		return ctx.JSON(http.StatusBadRequest, common2.ErrorResponse{
@@ -146,7 +143,7 @@ func (h *SDKGroup) devMode(ctx context.Context, r common2.AuthRequest) (common2.
 		return common2.AuthResponse{}, errors.New(StatusText(errTokenNoQilinPorductUUID))
 	}
 
-	err = h.set.Validate.Var(qilinProductUUID, "uuidv4")
+	err = h.set.Validate.Var(qilinProductUUID, "uuid4")
 	if err != nil {
 		return common2.AuthResponse{}, err
 	}
@@ -183,7 +180,7 @@ func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common
 		return common2.AuthResponse{}, errors.New(StatusText(errTokenNoQilinPorductUUID))
 	}
 
-	err = h.set.Validate.Var(qilinProductUUID, "uuidv4")
+	err = h.set.Validate.Var(qilinProductUUID, "uuid4")
 	if err != nil {
 		return common2.AuthResponse{}, err
 	}
@@ -207,7 +204,10 @@ func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common
 		return common2.AuthResponse{}, err
 	}
 
-	iframe, _ := url.Parse(product.URL)
+	iframe, err := url.Parse(product.URL)
+	if err != nil {
+		return common2.AuthResponse{}, err
+	}
 	iframe.Query().Add("jwt", string(jwt))
 
 	// return meta[url] = channeling URL, channeling URL = URL?jwt=<JWT>
@@ -215,5 +215,8 @@ func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common
 		"url": iframe.String(),
 	}
 
-	return h.sdk.Authenticate(ctx, r, claims, h.L())
+	return common2.AuthResponse{
+		Token: string(jwt),
+		Meta:  r.Meta,
+	}, nil
 }
