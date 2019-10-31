@@ -1,0 +1,11 @@
+- args:
+    sql: ALTER TABLE "public"."storefront_sources" ALTER COLUMN "sync_version" TYPE
+      bigint;
+  type: run_sql
+- args:
+    sql: ALTER TABLE ONLY "public"."storefront_sources" ALTER COLUMN "sync_version"
+      SET DEFAULT 0;
+  type: run_sql
+- args:
+    sql: COMMENT ON COLUMN "public"."storefront_sources"."sync_version" IS E'null'
+  type: run_sql

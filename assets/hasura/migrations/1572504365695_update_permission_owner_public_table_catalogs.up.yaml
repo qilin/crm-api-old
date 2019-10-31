@@ -1,0 +1,10 @@
+- args:
+    permission:
+      filter:
+        tenant_id:
+          _eq: x-hasura-tenant-id
+    role: owner
+    table:
+      name: catalogs
+      schema: public
+  type: create_delete_permission

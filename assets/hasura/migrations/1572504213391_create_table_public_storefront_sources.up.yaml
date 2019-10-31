@@ -1,0 +1,9 @@
+- args:
+    sql: CREATE TABLE "public"."storefront_sources"("storefront_id" integer NOT NULL,
+      "id" serial NOT NULL, "catalog_id" integer NOT NULL, "filter" text NOT NULL,
+      "sync_version" bigint NOT NULL, PRIMARY KEY ("id") );
+  type: run_sql
+- args:
+    name: storefront_sources
+    schema: public
+  type: add_existing_table_or_view
