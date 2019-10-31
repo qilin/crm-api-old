@@ -1,0 +1,59 @@
+type StoreQuery {
+	games: [Game!]!
+}
+
+type Game {
+	id: ID!
+	title: String!
+	summary: String!
+	description: String!
+	publisher: Publisher!
+	covers: Covers!
+	screenshots: [Image!]!
+	tags: [Tag!]!
+	genre: Genres!
+}
+
+type Publisher {
+	title: String!
+}
+
+enum Genres {
+	Board
+	Cards
+	Casino
+	Farm
+	Racing
+	Shooter
+	FindItems
+	Puzzle
+	RPG
+	Simulator
+	Strategy	
+}
+
+enum TagType {
+	genre
+	common
+}
+
+type Tag {
+	name: String
+	type: TagType
+}
+
+type Image {
+	url: String!
+}
+
+type Covers {
+	floor_small: Image
+	main_little: Image
+	main_big: Image
+	floor_medium: Image
+	floor_wide: Image
+	floor_large: Image
+	floor_smallest: Image
+	floor_widest: Image
+	background_big: Image
+}
