@@ -76,8 +76,11 @@ func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
 }
 
 func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
-	var claims jwt.Claims
-	claims.Subject = "alice@example.com"
+	claims := jwt.Claims{
+		Set: map[string]interface{}{},
+	}
+	claims.Subject = s.cfg.JWT.Subject
+	claims.Issuer = s.cfg.JWT.Iss
 	claims.Set[common.UserID] = userId
 	claims.Set[common.QilinProductUUID] = qilinProductUUID
 
@@ -87,7 +90,7 @@ func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
 	}
 
 	// issue a JWT
-	return claims.ECDSASign(jwt.ES256, s.keyPair.Private)
+	return claims.ECDSASign(jwt.ES512, s.keyPair.Private)
 }
 
 func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config) *SDK {
@@ -104,10 +107,11 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 	}
 
 	sdk := &SDK{
-		ctx: ctx,
-		cfg: *cfg,
-		pm:  pm,
-		LMT: &set,
+		ctx:  ctx,
+		cfg:  *cfg,
+		repo: repo,
+		pm:   pm,
+		LMT:  &set,
 	}
 
 	// load keys
@@ -124,6 +128,8 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 		}
 	}
 
+	sdk.keyPair, err = decodePemECDSA(cfg.JWT.PrivateKey, cfg.JWT.PublicKey)
+
 	switch cfg.Mode {
 	case common.ParentMode:
 		// todo: configure parent sdk
@@ -136,7 +142,6 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 		break
 	default:
 		// todo: default qilin mode
-		sdk.keyPair, err = decodePemECDSA(cfg.JWT.PrivateKey, cfg.JWT.PublicKey)
 		if err != nil {
 			set.L().Emergency(err.Error())
 		}
