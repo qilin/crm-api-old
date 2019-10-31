@@ -1,0 +1,21 @@
+- args:
+    permission:
+      allow_upsert: true
+      check:
+        storefront:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      columns:
+      - catalog_id
+      - filter
+      - storefront_id
+      - sync_version
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: storefront_sources
+      schema: public
+  type: create_insert_permission
