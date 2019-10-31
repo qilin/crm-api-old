@@ -4,6 +4,8 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/pascaldekloe/jwt"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/internal/sdk/common"
 )
@@ -21,11 +23,12 @@ func (p *plugin) Name() string {
 }
 
 func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
-	return func(ctx context.Context, request common.AuthRequest, token string, log logger.Logger) (response common.AuthResponse, err error) {
+	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 		val, ok := ctx.Value("value").(string)
 		if !ok {
 			val = "default value"
 		}
+
 		var meta interface{}
 		tof := reflect.TypeOf(request.Meta)
 		switch tof.Kind() {
