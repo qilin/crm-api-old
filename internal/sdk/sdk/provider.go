@@ -40,6 +40,8 @@ var (
 	ProviderRepo = wire.NewSet(
 		repo.NewPlatformRepo,
 		repo.NewPlatformJWTKeyRepo,
+		repo.NewProductsRepo,
+		repo.NewUserMapRepo,
 		trx.NewTrxManager,
 	)
 

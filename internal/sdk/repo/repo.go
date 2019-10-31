@@ -8,4 +8,5 @@ type Repo struct {
 	Platform       domain.PlatformRepo
 	PlatformJWTKey domain.PlatformJWTKeyRepo
 	Products       domain.ProductsRepo
+	UserMap        domain.UserMapRepo
 }
