@@ -66,10 +66,13 @@ func (h *SDKGroup) postAuth(ctx echo.Context) error {
 
 	switch h.sdk.Mode() {
 	case common2.ParentMode:
+		// pass it into plugin
 		resp, err = h.parentMode(context.Background(), r)
 	case common2.DeveloperMode:
+		// parse, verify and pass into plugin
 		resp, err = h.devMode(context.Background(), r)
 	default:
+		// parse, verify and pass into adapter
 		resp, err = h.qilinMode(context.Background(), r)
 	}
 
@@ -145,7 +148,7 @@ func (h *SDKGroup) devMode(ctx context.Context, r common2.AuthRequest) (common2.
 		return common2.AuthResponse{}, err
 	}
 
-	// todo: check userID
+	// todo: ?
 
 	ctx = context.WithValue(ctx, common2.UserID, userId)
 	r.QilinProductUUID = qilinProductUUID
@@ -182,11 +185,28 @@ func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common
 		return common2.AuthResponse{}, err
 	}
 
-	// todo: check userID
-	// todo: check qilinProductUUID and extract channeling URL
+	// check qilinProductUUID and extract channeling URL
+	product, err := h.sdk.GetProductByUUID(qilinProductUUID)
+	if err != nil {
+		return common2.AuthResponse{}, err
+	}
+
 	// todo: check mapping (iss+userID) & userID Qilin
-	// todo: build JWT (qilinProductUUID,userID,
-	// todo: return meta[url] = channeling URL, channeling URL = URL?jwt=<JWT>
+	//
+
+	// build JWT (qilinProductUUID,userID,
+	jwt, err := h.sdk.IssueJWT(userId, product.ID)
+	if err != nil {
+		return common2.AuthResponse{}, err
+	}
+
+	iframe, _ := url.Parse(product.URL)
+	iframe.Query().Add("jwt", string(jwt))
+
+	// return meta[url] = channeling URL, channeling URL = URL?jwt=<JWT>
+	r.Meta = map[string]string{
+		"url": iframe.String(),
+	}
 
 	return h.sdk.Authenticate(ctx, r, claims, h.L())
 }

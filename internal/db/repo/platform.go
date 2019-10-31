@@ -13,12 +13,13 @@ type PlatformRepo struct {
 	db *gorm.DB
 }
 
-func (p *PlatformRepo) Create(ctx context.Context, model *domain.PlatformItem) error {
-	return nil
+func (a *PlatformRepo) Create(ctx context.Context, model *domain.PlatformItem) error {
+	db := trx.Inject(ctx, a.db)
+	return db.Save(model).Error
 }
 
-func (p *PlatformRepo) Get(ctx context.Context, id int) (*domain.PlatformItem, error) {
-	db := trx.Inject(ctx, p.db)
+func (a *PlatformRepo) Get(ctx context.Context, id int) (*domain.PlatformItem, error) {
+	db := trx.Inject(ctx, a.db)
 	var (
 		out = &domain.PlatformItem{}
 		e   error
