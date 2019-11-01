@@ -39,6 +39,7 @@ type ResolverRoot interface {
 	AuthQuery() AuthQueryResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	StoreQuery() StoreQueryResolver
 }
 
 type DirectiveRoot struct {
@@ -84,6 +85,7 @@ type ComplexityRoot struct {
 		Genre       func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Publisher   func(childComplexity int) int
+		Rating      func(childComplexity int) int
 		Screenshots func(childComplexity int) int
 		Summary     func(childComplexity int) int
 		Tags        func(childComplexity int) int
@@ -121,7 +123,7 @@ type ComplexityRoot struct {
 	}
 
 	StoreQuery struct {
-		Games func(childComplexity int) int
+		Games func(childComplexity int, id *string, genre *Genres, top *int, newest *int) int
 	}
 
 	Tag struct {
@@ -149,6 +151,9 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Auth(ctx context.Context) (*AuthQuery, error)
 	Store(ctx context.Context) (*StoreQuery, error)
+}
+type StoreQueryResolver interface {
+	Games(ctx context.Context, obj *StoreQuery, id *string, genre *Genres, top *int, newest *int) ([]*Game, error)
 }
 
 type executableSchema struct {
@@ -337,6 +342,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Game.Publisher(childComplexity), true
 
+	case "Game.rating":
+		if e.complexity.Game.Rating == nil {
+			break
+		}
+
+		return e.complexity.Game.Rating(childComplexity), true
+
 	case "Game.screenshots":
 		if e.complexity.Game.Screenshots == nil {
 			break
@@ -433,7 +445,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.StoreQuery.Games(childComplexity), true
+		args, err := ec.field_StoreQuery_games_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.StoreQuery.Games(childComplexity, args["id"].(*string), args["genre"].(*Genres), args["top"].(*int), args["newest"].(*int)), true
 
 	case "Tag.name":
 		if e.complexity.Tag.Name == nil {
@@ -628,7 +645,7 @@ enum RoleEnum {
     USER
 }`},
 	&ast.Source{Name: "api/graphql/store.graphql", Input: `type StoreQuery {
-	games: [Game!]!
+	games(id:ID, genre:Genres, top:Int, newest: Int): [Game!]! @goField(forceResolver: true)
 }
 
 type Game {
@@ -641,6 +658,7 @@ type Game {
 	screenshots: [Image!]!
 	tags: [Tag!]!
 	genre: Genres!
+	rating: Int!
 }
 
 type Publisher {
@@ -649,14 +667,14 @@ type Publisher {
 
 enum Genres {
 	Board
-	Card
+	Cards
 	Casino
 	Farm
 	Racing
 	Shooter
 	FindItems
 	Puzzle
-	Rpg
+	RPG
 	Simulator
 	Strategy	
 }
@@ -762,6 +780,44 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_StoreQuery_games_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 *Genres
+	if tmp, ok := rawArgs["genre"]; ok {
+		arg1, err = ec.unmarshalOGenres2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["genre"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["top"]; ok {
+		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["top"] = arg2
+	var arg3 *int
+	if tmp, ok := rawArgs["newest"]; ok {
+		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newest"] = arg3
 	return args, nil
 }
 
@@ -1823,6 +1879,43 @@ func (ec *executionContext) _Game_genre(ctx context.Context, field graphql.Colle
 	return ec.marshalNGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Game_rating(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Game",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rating, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Image_url(ctx context.Context, field graphql.CollectedField, obj *Image) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2235,13 +2328,20 @@ func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql
 		Object:   "StoreQuery",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_StoreQuery_games_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Games, nil
+		return ec.resolvers.StoreQuery().Games(rctx, obj, args["id"].(*string), args["genre"].(*Genres), args["top"].(*int), args["newest"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3833,6 +3933,11 @@ func (ec *executionContext) _Game(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "rating":
+			out.Values[i] = ec._Game_rating(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4076,10 +4181,19 @@ func (ec *executionContext) _StoreQuery(ctx context.Context, sel ast.SelectionSe
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("StoreQuery")
 		case "games":
-			out.Values[i] = ec._StoreQuery_games(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StoreQuery_games(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4994,6 +5108,53 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
+func (ec *executionContext) unmarshalOGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, v interface{}) (Genres, error) {
+	var res Genres
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalOGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, sel ast.SelectionSet, v Genres) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalOGenres2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, v interface{}) (*Genres, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOGenres2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, sel ast.SelectionSet, v *Genres) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOID2string(ctx context.Context, v interface{}) (string, error) {
+	return graphql.UnmarshalID(v)
+}
+
+func (ec *executionContext) marshalOID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	return graphql.MarshalID(v)
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOID2string(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOID2string(ctx, sel, *v)
+}
+
 func (ec *executionContext) marshalOImage2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx context.Context, sel ast.SelectionSet, v Image) graphql.Marshaler {
 	return ec._Image(ctx, sel, &v)
 }
@@ -5003,6 +5164,29 @@ func (ec *executionContext) marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋ
 		return graphql.Null
 	}
 	return ec._Image(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	return graphql.MarshalInt(v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOInt2int(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOInt2int(ctx, sel, *v)
 }
 
 func (ec *executionContext) unmarshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) (RoleEnum, error) {
