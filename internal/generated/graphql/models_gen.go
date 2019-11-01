@@ -54,6 +54,7 @@ type Game struct {
 	Screenshots []*Image   `json:"screenshots"`
 	Tags        []*Tag     `json:"tags"`
 	Genre       Genres     `json:"genre"`
+	Rating      int        `json:"rating"`
 }
 
 type Image struct {
@@ -142,21 +143,21 @@ type Genres string
 
 const (
 	GenresBoard     Genres = "Board"
-	GenresCard      Genres = "Card"
+	GenresCards     Genres = "Cards"
 	GenresCasino    Genres = "Casino"
 	GenresFarm      Genres = "Farm"
 	GenresRacing    Genres = "Racing"
 	GenresShooter   Genres = "Shooter"
 	GenresFindItems Genres = "FindItems"
 	GenresPuzzle    Genres = "Puzzle"
-	GenresRpg       Genres = "Rpg"
+	GenresRpg       Genres = "RPG"
 	GenresSimulator Genres = "Simulator"
 	GenresStrategy  Genres = "Strategy"
 )
 
 var AllGenres = []Genres{
 	GenresBoard,
-	GenresCard,
+	GenresCards,
 	GenresCasino,
 	GenresFarm,
 	GenresRacing,
@@ -170,7 +171,7 @@ var AllGenres = []Genres{
 
 func (e Genres) IsValid() bool {
 	switch e {
-	case GenresBoard, GenresCard, GenresCasino, GenresFarm, GenresRacing, GenresShooter, GenresFindItems, GenresPuzzle, GenresRpg, GenresSimulator, GenresStrategy:
+	case GenresBoard, GenresCards, GenresCasino, GenresFarm, GenresRacing, GenresShooter, GenresFindItems, GenresPuzzle, GenresRpg, GenresSimulator, GenresStrategy:
 		return true
 	}
 	return false

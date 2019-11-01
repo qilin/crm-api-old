@@ -1,5 +1,5 @@
 type StoreQuery {
-	games: [Game!]!
+	games(id:ID, genre:Genres, top:Int, newest: Int): [Game!]! @goField(forceResolver: true)
 }
 
 type Game {
@@ -12,6 +12,7 @@ type Game {
 	screenshots: [Image!]!
 	tags: [Tag!]!
 	genre: Genres!
+	rating: Int!
 }
 
 type Publisher {
