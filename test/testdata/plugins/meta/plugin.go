@@ -29,14 +29,18 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 			val = "default value"
 		}
 
+		qilinProductUUID, ok := token.String("qilinProductUUID")
+		userID, ok := token.String("userID")
+
 		var meta interface{}
 		tof := reflect.TypeOf(request.Meta)
 		switch tof.Kind() {
 		case reflect.Map:
 			meta := request.Meta.(map[string]string)
-			meta["value"] = val
+			meta["qilinProductUUID"] = qilinProductUUID
+			meta["userID"] = userID
 		case reflect.String:
-			meta = val
+			meta = val + "?qilinProductUUID=" + qilinProductUUID + "&userID=" + userID
 		}
 		//if authenticate == nil {
 		return common.AuthResponse{
