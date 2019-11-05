@@ -17,4 +17,5 @@ GOOS="linux"
 GOARCH="amd64"
 DOCKER_NETWORK="p1devnet"
 DOCKER_IMAGE=p1hub/qilin-crm-api
+DOCKER_IMAGE_HASURA=p1hub/qilin-api-gateway
 PROJECT_NAME="qilin-crm-api"

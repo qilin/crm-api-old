@@ -1,0 +1,20 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - duration
+      - height
+      - id
+      - lang
+      - url
+      - width
+      filter:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      limit: null
+    role: owner
+    table:
+      name: game_video
+      schema: public
+  type: create_select_permission

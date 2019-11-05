@@ -1,0 +1,10 @@
+- args:
+    sql: CREATE TABLE "public"."game_genres"("game_id" uuid NOT NULL, "genre" text
+      NOT NULL, PRIMARY KEY ("game_id","genre") , FOREIGN KEY ("game_id") REFERENCES
+      "public"."games"("id") ON UPDATE cascade ON DELETE cascade, FOREIGN KEY ("genre")
+      REFERENCES "public"."genres"("id") ON UPDATE cascade ON DELETE cascade);
+  type: run_sql
+- args:
+    name: game_genres
+    schema: public
+  type: add_existing_table_or_view

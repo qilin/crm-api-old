@@ -149,7 +149,17 @@ docker-push: ## push docker image to registry
 generate: init gqlgen-generate go-generate ## execute all generators
 .PHONY: generate
 
-github-build: docker-image docker-push docker-clean ## build application in CI
+github-docker-image: docker-image ## build all docker images
+	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
+	docker build --cache-from $${DOCKER_IMAGE_HASURA}:${CACHE_TAG} -f ${ROOT_DIR}/build/docker/hasura/Dockerfile -t $${DOCKER_IMAGE_HASURA}:${TAG} ${ROOT_DIR}
+.PHONY: github-docker-image
+
+github-docker-push: docker-push ## push all docker images to registry
+	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
+	docker build --cache-from $${DOCKER_IMAGE_HASURA}:${CACHE_TAG} -f ${ROOT_DIR}/build/docker/hasura/Dockerfile -t $${DOCKER_IMAGE_HASURA}:${TAG} ${ROOT_DIR}
+.PHONY: github-docker-push
+
+github-build: github-docker-image docker-push docker-clean ## build application in CI
 .PHONY: github-build
 
 github-test: test-with-coverage ## test application in CI
@@ -246,5 +256,14 @@ init:
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 .PHONY: help
+
+fixtures:
+	find ./assets/fixtures/ -type f -name '*.sql' -exec psql postgres://postgres:postgres@localhost:5567/qilin-hasura -f {} +
+.PHONY: fixtures
+
+fixtures-migrate:
+	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
+	docker run --rm --network container:qilin-postgres -ti p1hub/qilin-crm-api:${TAG} migrate up --dsn 'postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable' --path /assets/fixtures	
+.PHONY: fixtures-migrate
 
 .DEFAULT_GOAL := help

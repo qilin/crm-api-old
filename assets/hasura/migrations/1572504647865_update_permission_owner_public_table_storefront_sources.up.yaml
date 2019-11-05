@@ -1,0 +1,19 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - catalog_id
+      - filter
+      - id
+      - storefront_id
+      - sync_version
+      filter:
+        storefront:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      limit: null
+    role: owner
+    table:
+      name: storefront_sources
+      schema: public
+  type: create_select_permission

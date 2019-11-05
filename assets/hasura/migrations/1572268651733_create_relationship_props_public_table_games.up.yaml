@@ -1,0 +1,14 @@
+- args:
+    name: props
+    table:
+      name: games
+      schema: public
+    using:
+      manual_configuration:
+        column_mapping:
+          default_lang: lang
+          id: id
+        remote_table:
+          name: game_props
+          schema: public
+  type: create_object_relationship

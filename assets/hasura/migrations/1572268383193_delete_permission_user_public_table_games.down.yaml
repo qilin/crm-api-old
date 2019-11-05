@@ -1,0 +1,19 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - id
+      - name
+      - description
+      - tagline
+      - release_date
+      - copyright
+      - genre
+      - published
+      computed_fields: []
+      filter: {}
+    role: user
+    table:
+      name: games
+      schema: public
+  type: create_select_permission

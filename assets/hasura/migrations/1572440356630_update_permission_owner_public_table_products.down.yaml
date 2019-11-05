@@ -1,0 +1,6 @@
+- args:
+    role: owner
+    table:
+      name: products
+      schema: public
+  type: drop_update_permission

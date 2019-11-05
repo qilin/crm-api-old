@@ -1,0 +1,9 @@
+- args:
+    cascade: false
+    sql: |-
+      insert into game_types (type) values
+       ('Desktop'),
+       ('Web'),
+       ('Console'),
+       ('Mobile');
+  type: run_sql

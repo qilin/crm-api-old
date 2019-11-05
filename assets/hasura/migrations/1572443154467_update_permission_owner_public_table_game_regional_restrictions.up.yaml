@@ -1,0 +1,11 @@
+- args:
+    permission:
+      filter:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+    role: owner
+    table:
+      name: game_regional_restrictions
+      schema: public
+  type: create_delete_permission

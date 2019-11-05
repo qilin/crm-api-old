@@ -1,0 +1,23 @@
+- args:
+    permission:
+      columns:
+      - description
+      - eula
+      - lang
+      - manual
+      - name
+      - site
+      - tagline
+      filter:
+        game:
+          tenant_id:
+            _eq: X-Hasura-Tenant-Id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: game_props
+      schema: public
+  type: create_update_permission

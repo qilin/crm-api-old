@@ -1,0 +1,6 @@
+- args:
+    relationship: localized_props
+    table:
+      name: games
+      schema: public
+  type: drop_relationship

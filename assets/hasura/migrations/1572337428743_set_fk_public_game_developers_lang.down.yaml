@@ -1,0 +1,4 @@
+- args:
+    sql: "\n          alter table \"public\".\"game_developers\" drop constraint \"game_developers_lang_fkey\"\n
+      \     "
+  type: run_sql

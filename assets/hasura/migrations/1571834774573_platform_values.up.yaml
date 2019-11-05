@@ -1,0 +1,4 @@
+- args:
+    cascade: false
+    sql: insert into platforms (id) values ('linux'), ('mac'), ('win'), ('web')
+  type: run_sql

@@ -1,0 +1,6 @@
+- args:
+    sql: "\n           alter table \"public\".\"storefront_sources\"\n           add
+      constraint \"storefront_sources_catalog_id_fkey\" \n           foreign key (\"catalog_id\")
+      \n           references \"public\".\"catalogs\"\n           (\"id\") on update
+      cascade on delete restrict;\n      "
+  type: run_sql

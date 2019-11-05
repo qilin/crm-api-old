@@ -1,0 +1,25 @@
+- args:
+    permission:
+      allow_upsert: true
+      check:
+        game:
+          tenant_id:
+            _eq: X-Hasura-Tenant-Id
+      columns:
+      - description
+      - eula
+      - lang
+      - manual
+      - name
+      - site
+      - tagline
+      - id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: game_props
+      schema: public
+  type: create_insert_permission

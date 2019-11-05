@@ -1,0 +1,28 @@
+- args:
+    role: owner
+    table:
+      name: games
+      schema: public
+  type: drop_insert_permission
+- args:
+    permission:
+      check: {}
+      columns:
+      - copyright
+      - default_lang
+      - genre
+      - published
+      - release_date
+      - type
+      localPresets:
+      - key: tenant_id
+        value: x-hasura-Tenant-Id
+      - key: ""
+        value: ""
+      set:
+        tenant_id: x-hasura-Tenant-Id
+    role: owner
+    table:
+      name: games
+      schema: public
+  type: create_insert_permission

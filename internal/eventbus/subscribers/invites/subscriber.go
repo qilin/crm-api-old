@@ -75,10 +75,10 @@ func (s *InviteSubscriber) Name() string {
 
 // Config
 type Config struct {
-	Debug    bool `fallback:"shared.debug"`
-	Subject  string
-	Template string
-	Mailer   MailConfig
+	Debug         bool `fallback:"shared.debug"`
+	Subject       string
+	Template      string
+	ClientOptions MailConfig
 	// number of max attempts to send message on error
 	MaxAttempts int
 	invoker     *invoker.Invoker
@@ -108,7 +108,7 @@ func New(cfg *Config) *InviteSubscriber {
 	m := common.NewJSONMarshaller()
 	return &InviteSubscriber{
 		cfg:        cfg,
-		mailer:     NewMailer(cfg.Mailer),
+		mailer:     NewMailer(cfg.ClientOptions),
 		marshaller: m,
 		wrapper:    common.NewJsonWrapper(m),
 	}

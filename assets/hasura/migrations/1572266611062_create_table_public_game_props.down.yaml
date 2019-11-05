@@ -1,0 +1,3 @@
+- args:
+    sql: DROP TABLE "public"."game_props"
+  type: run_sql

@@ -4,6 +4,8 @@ package daemon
 
 import (
 	"context"
+	"github.com/qilin/crm-api/internal/auth"
+	"github.com/qilin/crm-api/internal/handlers"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
@@ -26,6 +28,10 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		stan.WireSet,
 		eventbus.WireSet,
 		webhooks.WireSet,
+		wire.Struct(new(handlers.Handlers), "*"),
+		handlers.ProviderHandlers,
+		auth.WireSet,
+		dispatcher.WireSet,
 	))
 }
 
@@ -39,5 +45,9 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		stan.WireTestSet,
 		eventbus.WireTestSet,
 		webhooks.WireTestSet,
+		wire.Struct(new(handlers.Handlers), "*"),
+		handlers.ProviderHandlers,
+		auth.WireSet,
+		dispatcher.WireSet,
 	))
 }

@@ -1,0 +1,14 @@
+- args:
+    name: publishers
+    table:
+      name: game_props
+      schema: public
+    using:
+      manual_configuration:
+        column_mapping:
+          id: game_id
+          lang: lang
+        remote_table:
+          name: game_publishers
+          schema: public
+  type: create_array_relationship

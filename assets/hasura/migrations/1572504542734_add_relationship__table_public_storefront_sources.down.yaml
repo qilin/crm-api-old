@@ -1,0 +1,6 @@
+- args:
+    relationship: storefront
+    table:
+      name: storefront_sources
+      schema: public
+  type: drop_relationship
