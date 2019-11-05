@@ -28,7 +28,7 @@ dispatcher:
 sdk:
   mode: "dev"
   plugins:
-    - test/testdata/plugins/so/plugin.so
+    - test/testdata/plugins/so/dev.so
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----

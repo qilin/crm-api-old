@@ -28,7 +28,7 @@ dispatcher:
 sdk:
   mode: "parent"
   plugins:
-    - test/testdata/plugins/so/plugin.so
+    - test/testdata/plugins/so/parent.so
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----
