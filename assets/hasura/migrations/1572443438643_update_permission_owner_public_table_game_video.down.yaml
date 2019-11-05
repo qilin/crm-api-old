@@ -1,0 +1,6 @@
+- args:
+    role: owner
+    table:
+      name: game_video
+      schema: public
+  type: drop_delete_permission

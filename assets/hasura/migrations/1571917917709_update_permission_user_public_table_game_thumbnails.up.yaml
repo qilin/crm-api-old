@@ -1,0 +1,16 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - format
+      - url
+      filter:
+        game:
+          tenant_id:
+            _eq: X-Hausra-Tenant-Id
+      limit: null
+    role: user
+    table:
+      name: game_thumbnails
+      schema: public
+  type: create_select_permission

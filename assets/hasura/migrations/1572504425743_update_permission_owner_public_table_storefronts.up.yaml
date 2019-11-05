@@ -1,0 +1,20 @@
+- args:
+    permission:
+      allow_upsert: true
+      check:
+        tenant_id:
+          _eq: x-hasura-tenant-id
+      columns:
+      - name
+      localPresets:
+      - key: tenant_id
+        value: x-hasura-tenant-id
+      - key: ""
+        value: ""
+      set:
+        tenant_id: x-hasura-tenant-id
+    role: owner
+    table:
+      name: storefronts
+      schema: public
+  type: create_insert_permission

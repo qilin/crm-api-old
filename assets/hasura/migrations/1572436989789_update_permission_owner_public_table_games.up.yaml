@@ -1,0 +1,21 @@
+- args:
+    permission:
+      columns:
+      - copyright
+      - default_lang
+      - genre
+      - published
+      - release_date
+      - type
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: games
+      schema: public
+  type: create_update_permission

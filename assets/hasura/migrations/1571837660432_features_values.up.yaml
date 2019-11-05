@@ -1,0 +1,9 @@
+- args:
+    cascade: false
+    sql: |-
+      insert into features (id) values
+      ('Singleplayer'),
+      ('Multiplayer'),
+      ('Achivements'),
+      ('Co-op')
+  type: run_sql

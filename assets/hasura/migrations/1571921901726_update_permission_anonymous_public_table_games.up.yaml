@@ -1,0 +1,29 @@
+- args:
+    role: anonymous
+    table:
+      name: games
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - copyright
+      - description
+      - genre
+      - name
+      - published
+      - release_date
+      - tagline
+      computed_fields: []
+      filter:
+        _and:
+        - tenant_id:
+            _eq: ""
+        - published:
+            _eq: true
+    role: anonymous
+    table:
+      name: games
+      schema: public
+  type: create_select_permission

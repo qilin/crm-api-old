@@ -1,0 +1,15 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - country
+      filter:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      limit: null
+    role: owner
+    table:
+      name: game_regional_restrictions
+      schema: public
+  type: create_select_permission

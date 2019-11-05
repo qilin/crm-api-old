@@ -1,0 +1,21 @@
+- args:
+    permission:
+      columns:
+      - duration
+      - height
+      - lang
+      - url
+      - width
+      filter:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: owner
+    table:
+      name: game_video
+      schema: public
+  type: create_update_permission

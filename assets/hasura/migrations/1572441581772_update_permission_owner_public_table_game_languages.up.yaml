@@ -1,0 +1,18 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - interface
+      - language
+      - sound
+      - subtitles
+      filter:
+        game:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+      limit: null
+    role: owner
+    table:
+      name: game_languages
+      schema: public
+  type: create_select_permission

@@ -1,0 +1,6 @@
+- args:
+    relationship: additional_genres
+    table:
+      name: games
+      schema: public
+  type: drop_relationship

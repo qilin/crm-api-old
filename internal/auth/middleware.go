@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,29 +14,29 @@ type contextKey struct{ name string }
 
 var userCtxKey = &contextKey{"user"}
 
-func ExtractUserContext(ctx context.Context) *AuthUser {
-	if user, ok := ctx.Value(userCtxKey).(*AuthUser); ok {
+func ExtractUserContext(ctx context.Context) *User {
+	if user, ok := ctx.Value(userCtxKey).(*User); ok {
 		return user
 	}
-	return &AuthUser{}
+	return &User{}
 }
 
 // SetUserContext sets user context into http.Request
 // we need it because gqlgen don't knows about echo.Context and uses http.Request context
 // but there is no easy way to set Request context.
-func SetUserContext(ctx echo.Context, user *AuthUser) {
+func SetUserContext(ctx echo.Context, user *User) {
 	r := ctx.Request()
 	newctx := context.WithValue(r.Context(), userCtxKey, user)
 	ctx.SetRequest(r.WithContext(newctx))
 }
 
-// AuthUser
-type AuthUser struct {
+// User
+type User struct {
 	Id    int
 	Roles map[string]bool
 }
 
-func (u *AuthUser) IsEmpty() bool {
+func (u *User) IsEmpty() bool {
 	return u.Id == 0
 }
 
@@ -46,43 +45,39 @@ func (a *Auth) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		authHeader := ctx.Request().Header.Get(echo.HeaderAuthorization)
 		if authHeader == "" {
-			a.log.Error("no auth header")
+			a.L().Error("no auth header")
 			return next(ctx)
 		}
 
 		rawToken, ok := ExtractTokenFromAuthHeader(authHeader)
 		if !ok {
-			a.log.Error("invalid auth header")
+			a.L().Error("invalid auth header")
 			return next(ctx)
 		}
 
-		var claims = &TokenClaims{}
 		// validate jwt token
-		if _, err := jwt.ParseWithClaims(rawToken, claims, func(*jwt.Token) (interface{}, error) {
-			return a.jwtKeys.Public, nil
-		}); err != nil {
-			a.log.Error("invalid jwt token: %v", logger.Args(err))
+		var claims = &AccessTokenClaims{}
+		if err := a.jwtKeys.Parse(rawToken, claims); err != nil {
+			a.L().Error("invalid jwt token: %v", logger.Args(err))
 			return next(ctx)
 		}
 
 		// create internal session with JWT.id and mapped internal user with ID and roles?
 		userId, err := strconv.Atoi(claims.UserID)
 		if err != nil {
-			a.log.Error("invalid jwt claims: %v", logger.Args(err))
+			a.L().Error("invalid jwt claims: %v", logger.Args(err))
 			return next(ctx)
 		}
 
-		a.log.Debug("auth user: %d", logger.Args(userId))
+		a.L().Debug("auth user: %d", logger.Args(userId))
 		roles := make(map[string]bool)
-		for _, r := range claims.AllowedRoles {
-			roles[strings.ToUpper(r)] = true
-		}
+		roles[strings.ToUpper(claims.Role)] = true
 
-		SetUserContext(ctx, &AuthUser{
+		SetUserContext(ctx, &User{
 			Id:    userId,
 			Roles: roles,
 		})
-		a.log.Debug("auth user: %d", logger.Args(ExtractUserContext(ctx.Request().Context())))
+		a.L().Debug("auth user: %d", logger.Args(ExtractUserContext(ctx.Request().Context())))
 
 		return next(ctx)
 	}

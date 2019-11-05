@@ -58,7 +58,7 @@ func (s *SDK) Mode() common.SDKMode {
 
 func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
 	// todo: return it back after tests
-	// todo: optimise with ParseWithourCheck + iss key map
+	// todo: optimise with ParseWithoutCheck + iss key map
 	//return s.keyRegister.Check(token)
 	return jwt.ECDSACheck(token, s.keyPair.Public)
 }
@@ -99,7 +99,7 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 		for _, p := range cfg.Plugins {
 			err := pm.Load(p)
 			if err != nil {
-				set.L().Error(err.Error())
+				set.L().Emergency(err.Error())
 			} else {
 				set.L().Info("loaded plugin " + p)
 			}

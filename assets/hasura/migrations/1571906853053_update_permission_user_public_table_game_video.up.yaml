@@ -1,0 +1,17 @@
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - duration
+      - game_id
+      - height
+      - id
+      - url
+      - width
+      filter: {}
+      limit: null
+    role: user
+    table:
+      name: game_video
+      schema: public
+  type: create_select_permission

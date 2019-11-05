@@ -1,0 +1,10 @@
+- args:
+    sql: CREATE TABLE "public"."game_thumbnails"("game_id" uuid NOT NULL, "format"
+      text NOT NULL, "url" text NOT NULL, PRIMARY KEY ("game_id","format") , FOREIGN
+      KEY ("game_id") REFERENCES "public"."games"("id") ON UPDATE cascade ON DELETE
+      cascade);
+  type: run_sql
+- args:
+    name: game_thumbnails
+    schema: public
+  type: add_existing_table_or_view

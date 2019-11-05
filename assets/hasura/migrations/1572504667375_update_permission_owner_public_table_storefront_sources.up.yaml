@@ -1,0 +1,11 @@
+- args:
+    permission:
+      filter:
+        storefront:
+          tenant_id:
+            _eq: x-hasura-tenant-id
+    role: owner
+    table:
+      name: storefront_sources
+      schema: public
+  type: create_delete_permission

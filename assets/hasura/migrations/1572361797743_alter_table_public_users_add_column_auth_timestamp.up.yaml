@@ -1,0 +1,4 @@
+- args:
+    sql: ALTER TABLE "public"."users" ADD COLUMN "auth_timestamp" timestamptz NOT
+      NULL DEFAULT now();
+  type: run_sql

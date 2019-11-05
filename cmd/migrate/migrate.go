@@ -3,23 +3,28 @@ package migrate
 import (
 	"database/sql"
 	"fmt"
+	"os"
+
 	_ "github.com/lib/pq"
 	global "github.com/qilin/crm-api/cmd"
-	"github.com/rubenv/sql-migrate"
+	migrate "github.com/rubenv/sql-migrate"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var (
 	argDsn, argTable string
+	argPath          string
 	argLimit         int
 	db               *sql.DB
 	ms               *migrate.FileMigrationSource
 	initCmdFn        = func(cmd *cobra.Command, _ []string) (re error) {
 		ms = &migrate.FileMigrationSource{
-			Dir: global.Slave.WorkDir() + "/assets/migrations",
+			Dir: global.Slave.WorkDir() + argPath,
 		}
 		migrate.SetTable(argTable)
+		if dsn := os.Getenv("DSN"); dsn != "" {
+			argDsn = dsn
+		}
 		db, re = sql.Open("postgres", argDsn)
 		if re != nil {
 			return re
@@ -76,5 +81,6 @@ func init() {
 	Cmd.PersistentFlags().StringVar(&argTable, "table", "migrations", "Table for migration history")
 	Cmd.PersistentFlags().IntVar(&argLimit, "limit", 0, "Limit the number of migrations (0 = unlimited)")
 	Cmd.PersistentFlags().StringVar(&argDsn, "dsn", "postgres://qilin:insecure@localhost:5567/qilin?sslmode=disable", "DSN connection string")
+	Cmd.PersistentFlags().StringVar(&argPath, "path", "/assets/migrations", "path to migrations")
 	Cmd.AddCommand(cmdUp, cmdDown)
 }

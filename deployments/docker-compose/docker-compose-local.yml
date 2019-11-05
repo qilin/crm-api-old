@@ -12,7 +12,7 @@ services:
       - 8082:8080
     command: ["daemon","-c","configs/local.yaml","-b",":8080","-d"]
     environment:
-      - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
+      - POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
     networks:
       - default
   crm-sdk:
@@ -38,6 +38,8 @@ services:
     networks:
       - default
   hasura:
+    depends_on:
+      - crm-daemon
     ports:
       - 8081:8080
     volumes:
@@ -52,16 +54,13 @@ services:
       QILIN_CRM_ENDPOINT: "http://crm-daemon:8080/v1/graphql"
       QILIN_CRM_WEBHOOKS_ENDPOINT: "http://crm-daemon:8080/v1/webhooks"
       QILIN_CRM_WEBHOOKS_SECRET: "insecure"
-      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: "anonymous"
-      HASURA_GRAPHQL_JWT_SECRET: |
-        {
-          "type": "RS512",
-          "key": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA1cGV3FeyHS6zzCfbS/G/\nWrpae9jdj7WozCUbIG5Yxg5Mnvxt+WkAHQloL2z13QX1FZ66pUvqa3c6ZPOn9KEi\nKgjQaHH84AwdpqMNK8adpmhfPYLOql0Kk28lJFlGhbZ8FSM1OHnyK2H2RikZGJv1\nJ5w9qMUFQIlKJGxSPbovwpMSzhcv6aG8PzGlz6K5Fhiy+CUGENuesmLfcpCM7mvr\nMJmDi6frGA4K3A6djCdUFoMtGtuA1v/a2c+EMvovG8FjEzynOxD1mnNJn9k77BwA\nABUqXnw2Rm+Usdmk+8wajVp3k4pdKM0kyuV5ttuoEIxzepVV1IpMIZ7XCx80awgw\nvyn+txj9QFtrP3iU4cKAuVYyvDD/50KlJgklGximGsNhFo4p5uOsM8DFsyXdCCRd\nx46p+4Hawj5LxqQObw0QVGAZbNe1S3cGcKvP4DA7J/n2e02/FgoXevHh9S7i4LpG\nekErTHOjsTaqMO+dpqpthxFPgq41hsppLOd9jwfMomFhDAhVpgfF9DKFfLdherR3\njov+4FBb3me3c7EdckNrEUUkhOKW2FbnLF/LLsPxgkJ0Tadr31oSocTqllAi+3eY\npgdTZOiAtSDePAujtv29LQW7p9NVOg3WsKULWlZRENnUBPdVWhFyTT3yl3jqICrr\nRSTGfW5nPesP6g4DPwP8/+MCAwEAAQ==\n-----END PUBLIC KEY-----",
-          "issuer": "https://qilin.protocol.one",
-          "claims_namespace": "https://qilin.protocol.one/claims"          
-        }
-
+      HASURA_GRAPHQL_AUTH_HOOK: "http://crm-daemon:8080/v1/auth/session"
   postgres:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - 5567:5432
     volumes:
