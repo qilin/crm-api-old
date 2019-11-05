@@ -208,7 +208,10 @@ func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common
 	if err != nil {
 		return common2.AuthResponse{}, err
 	}
-	iframe.Query().Add("jwt", string(jwt))
+
+	ifq := iframe.Query()
+	ifq.Set("jwt", string(jwt))
+	iframe.RawQuery = ifq.Encode()
 
 	// return meta[url] = channeling URL, channeling URL = URL?jwt=<JWT>
 	r.Meta = map[string]string{
