@@ -32,7 +32,8 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	}))
 
 	grp := &common.Groups{
-		SDK: echoHttp.Group(common.SDKPath),
+		SDK:    echoHttp.Group(common.SDKPath),
+		Common: echoHttp,
 	}
 
 	for _, handler := range d.handlers {

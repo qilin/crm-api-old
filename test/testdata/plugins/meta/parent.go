@@ -26,6 +26,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		qilinProductUUID := request.QilinProductUUID
 		userID := "1"
 
+		// todo: add meta.URL to open iframe
 		meta := map[string]string{}
 		meta["mode"] = "parent"
 		meta["qilinProductUUID"] = qilinProductUUID
@@ -36,8 +37,8 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		//}
 
 		return common.AuthResponse{
-			Token: "_jwt_plugin_generated_by_plugin_",
-			Meta:  meta,
+			//Token: "_jwt_plugin_generated_by_plugin_",
+			Meta: meta,
 		}, nil
 	}
 }

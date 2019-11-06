@@ -27,13 +27,13 @@ func (a *UserMapRepo) Get(ctx context.Context, id int) (*domain.UserMapItem, err
 	return out, e
 }
 
-func (a *UserMapRepo) FindByExternalID(ctx context.Context, externalID string) (*domain.UserMapItem, error) {
+func (a *UserMapRepo) FindByExternalID(ctx context.Context, platformId int, externalID string) (*domain.UserMapItem, error) {
 	db := trx.Inject(ctx, a.db)
 	var (
 		out = &domain.UserMapItem{}
 		e   error
 	)
-	e = db.Where("external_id=?", externalID).First(out).Error
+	e = db.Where("platform_id = ? AND external_id=?", externalID).First(out).Error
 	return out, e
 }
 

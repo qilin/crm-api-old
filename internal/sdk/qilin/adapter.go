@@ -26,8 +26,7 @@ func (a QilinAuth) Auth(ctx context.Context, request common.AuthRequest, token *
 	log.Info("ADAPTER GOT REQUEST")
 
 	return common.AuthResponse{
-		Token: "qilin adapter token",
-		Meta:  request.Meta,
+		Meta: request.Meta,
 	}, nil
 
 }

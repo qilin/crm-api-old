@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/pascaldekloe/jwt"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/labstack/echo/v4"
+	"github.com/pascaldekloe/jwt"
 	"github.com/qilin/crm-api/internal/sdk/common"
 )
 
@@ -37,12 +37,16 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		meta["qilinProductUUID"] = qilinProductUUID
 		meta["userID"] = userID
 
-		//if authenticate == nil {
+		//if authenticate != nil {
 		//	return authenticate(ctx, request, token, log)
 		//}
 		return common.AuthResponse{
-			Token: "_jwt_plugin_generated_by_plugin_",
-			Meta:  meta,
+			//Token: "_jwt_plugin_generated_by_plugin_",
+			Meta: meta,
 		}, nil
 	}
+}
+
+func (p *plugin) Http(r *echo.Echo) {
+	// attach any HTTP endpoints you want
 }
