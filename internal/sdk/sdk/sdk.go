@@ -8,21 +8,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/qilin/crm-api/internal/db/domain"
-
-	"github.com/qilin/crm-api/internal/sdk/repo"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
+	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/sdk/common"
 	"github.com/qilin/crm-api/internal/sdk/plugins"
 	"github.com/qilin/crm-api/internal/sdk/qilin"
+	"github.com/qilin/crm-api/internal/sdk/repo"
 )
 
 type Config struct {
 	Debug   bool `fallback:"shared.debug"`
 	Mode    common.SDKMode
+	Iframe  string // todo: it's temporary
 	Plugins []string
 	JWT     JWT
 }
@@ -57,9 +57,8 @@ func (s *SDK) Mode() common.SDKMode {
 }
 
 func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
-	// todo: return it back after tests
 	// todo: optimise with ParseWithoutCheck + iss key map
-	//return s.keyRegister.Check(token)
+	//return s.keyRegister.Check(token) // todo: uncomment it back after tests
 	return jwt.ECDSACheck(token, s.keyPair.Public)
 }
 
@@ -71,8 +70,32 @@ func (s *SDK) Order(ctx context.Context, request common.OrderRequest, log logger
 	return s.orderer(ctx, request, log)
 }
 
+func (s *SDK) MapExternalUserToUser(platformId int, externalId string) string {
+	//user, err := s.repo.UserMap.FindByExternalID(s.ctx, platformId, externalId)
+	// if user not found, create new user, otherwise return user.UserId
+	//if err == gorm.ErrRecordNotFound {
+	//	user := &domain.UserMapItem{
+	//		PlatformID: platformId,
+	//		ExternalID: externalId,
+	//	}
+	//	s.repo.UserMap.Create(s.ctx, user)
+	//}
+	return "1c3e43a5-8513-42b3-8774-596c78079bb2"
+}
+
 func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
-	return s.repo.Products.Get(s.ctx, uuid)
+	// todo: hardcode reponse with config
+	return &domain.ProductItem{
+		ID:        uuid,
+		URL:       s.cfg.Iframe, // todo: return config value
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}, nil
+	//return s.repo.Products.Get(s.ctx, uuid)
+}
+
+func (s *SDK) PluginsRoute(echo *echo.Echo) {
+	s.pm.Http(echo, s.L())
 }
 
 func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {

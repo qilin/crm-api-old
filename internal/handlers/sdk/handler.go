@@ -38,6 +38,9 @@ func NewSDKGroup(set common.HandlerSet, sdk common2.SDK) *SDKGroup {
 }
 
 func (h *SDKGroup) Route(groups *common.Groups) {
+	// plugins routes
+	h.sdk.PluginsRoute(groups.Common)
+	// sdk routes
 	groups.SDK.POST(sdkAuthRoute, h.postAuth)
 	groups.SDK.POST(sdkOrderRoute, h.postOrder)
 	groups.SDK.POST(sdkHealthRoute, h.getHealth)
@@ -189,6 +192,7 @@ func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common
 		return common2.AuthResponse{}, err
 	}
 
+	// todo: tmp fix, hardcoded product value; prod needs logic fix inside GetProductByUUID
 	// check qilinProductUUID and extract channeling URL
 	product, err := h.sdk.GetProductByUUID(qilinProductUUID)
 	if err != nil {
@@ -196,9 +200,10 @@ func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common
 	}
 
 	// todo: check mapping (iss+userID) & userID Qilin
-	//
+	// todo: tmp fix, hardcoded userID as uuidV4; prod needs logic fix inside MapExternalUserToUser
+	userId = h.sdk.MapExternalUserToUser(0, userId)
 
-	// build JWT (qilinProductUUID,userID,
+	// build JWT (qilinProductUUID,userID)
 	jwt, err := h.sdk.IssueJWT(userId, product.ID)
 	if err != nil {
 		return common2.AuthResponse{}, err
@@ -219,7 +224,6 @@ func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common
 	}
 
 	return common2.AuthResponse{
-		Token: string(jwt),
-		Meta:  r.Meta,
+		Meta: r.Meta,
 	}, nil
 }

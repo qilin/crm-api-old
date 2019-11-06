@@ -1,6 +1,15 @@
 package plugins
 
-import "github.com/qilin/crm-api/internal/sdk/common"
+import (
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/labstack/echo/v4"
+	"github.com/qilin/crm-api/internal/sdk/common"
+)
+
+type Httper interface {
+	Name() string
+	Http(r *echo.Echo, log logger.Logger)
+}
 
 type Authenticator interface {
 	Name() string

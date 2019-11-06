@@ -6,8 +6,7 @@ type ErrorResponse struct {
 }
 
 type AuthResponse struct {
-	Token string      `json:"token,omitempty"`
-	Meta  interface{} `json:"meta,omitempty"`
+	Meta interface{} `json:"meta,omitempty"`
 }
 
 type OrderResponse struct {
