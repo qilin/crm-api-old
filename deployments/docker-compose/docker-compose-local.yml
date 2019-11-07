@@ -23,7 +23,8 @@ services:
       - crm-migration
     ports:
       - 8084:8080
-    command: ["sdk","-c","configs/sdk.yaml","-b",":8080","-d"]
+      - 1443:1443
+    command: ["sdk","-c","configs/sdk-dev.yaml","-b",":8080","-d"]
     environment:
       - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
     networks:
@@ -72,6 +73,7 @@ services:
     volumes:
       - natss:/datastore
     command: ["-store","sql","--sql_driver","postgres", "--sql_source","postgres://natss:insecure@postgres:5432/natss?sslmode=disable"]
+
 volumes:
   postgres:
   natss:
