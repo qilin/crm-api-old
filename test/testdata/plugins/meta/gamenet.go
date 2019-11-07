@@ -97,10 +97,11 @@ func root() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			jwt := r.URL.Query().Get("jwt")
+			_ = jwt
 
 			http.SetCookie(w, &http.Cookie{
 				Name:  "PHPSESSID",
-				Value: "ifegr82590sus02eadqqnoo3v0",
+				Value: "gr0k682k9906qq9s95u3iuqqa5",
 			})
 			w.WriteHeader(http.StatusOK)
 			w.Write(index)
