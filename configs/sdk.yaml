@@ -27,7 +27,7 @@ dispatcher:
       - "*"
 sdk:
   mode:
-  iframe: "http://localhost:8084/iframe"
+  iframe: "http://localhost:8084/qilinmode/iframe"
   plugins:
   jwt:
     publicKey: |
