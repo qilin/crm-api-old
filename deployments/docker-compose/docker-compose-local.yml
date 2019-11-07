@@ -22,9 +22,35 @@ services:
     depends_on:
       - crm-migration
     ports:
-      - 8084:8080
+      - 8086:8080
+    command: ["sdk","-c","configs/sdk.yaml","-b",":8080","-d"]
+    environment:
+      - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
+    networks:
+      - default
+  crm-sdk-dev:
+    container_name: qilin-crm-sdk-dev
+    image: p1hub/qilin-crm-api:${TAG}
+    restart: always
+    depends_on:
+      - crm-migration
+    ports:
+      - 8085:8080
       - 1443:1443
     command: ["sdk","-c","configs/sdk-dev.yaml","-b",":8080","-d"]
+    environment:
+      - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
+    networks:
+      - default
+  crm-sdk-parent:
+    container_name: qilin-crm-sdk-parent
+    image: p1hub/qilin-crm-api:${TAG}
+    restart: always
+    depends_on:
+      - crm-migration
+    ports:
+      - 8084:8080
+    command: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080","-d"]
     environment:
       - APP_POSTGRES_DSN=postgres://postgres:postgres@postgres:5432/qilin-hasura?sslmode=disable
     networks:
