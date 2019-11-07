@@ -79,8 +79,7 @@ dev-build-test-plugins: ## build plugins for tests
 	if [ "${DIND}" = "1" ]; then \
 		$(call go_docker,"make dev-build-test-plugins") ;\
     else \
-        go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/dev.so" "$(ROOT_DIR)/test/testdata/plugins/meta/dev.go" ;\
-        go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/parent.so" "$(ROOT_DIR)/test/testdata/plugins/meta/parent.go" ;\
+        go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/rambler.so" "$(ROOT_DIR)/test/testdata/plugins/parent/rambler.go" ;\
         go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/gamenet.so" "$(ROOT_DIR)/test/testdata/plugins/meta/gamenet.go" ;\
     fi;
 .PHONY: dev-build-test-plugins
