@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"context"
 	"os"
 	"plugin"
 
@@ -56,9 +57,9 @@ func (m *PluginManager) Load(path string) error {
 	return nil
 }
 
-func (m *PluginManager) Http(echo2 *echo.Echo, log logger.Logger) {
+func (m *PluginManager) Http(ctx context.Context, echo2 *echo.Echo, log logger.Logger) {
 	for _, p := range m.http {
-		p.Http(echo2, log.WithFields(logger.Fields{"plugin": p.Name()}))
+		p.Http(ctx, echo2, log.WithFields(logger.Fields{"plugin": p.Name()}))
 	}
 }
 
