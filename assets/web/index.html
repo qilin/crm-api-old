@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100vw;
+      height: 100vh;
+      background-color: #203859;
+    }
+    #show_iframe {
+      display: inline-block;
+      min-width: 110px;
+      text-align: center;
+      text-transform: uppercase;
+      text-decoration: none;
+      user-select: none;
+      vertical-align: baseline;
+      border-radius: 1px;
+      cursor: pointer;
+      transition: background-color 200ms, border 200ms;
+      color: #fff;
+      border: 1px solid #28bc00;
+      background-color: #28bc00;
+    }
+
+    #show_iframe:hover {
+      border: 1px solid #24a900;
+      background-color: #24a900;
+    }
+
+    #show_iframe span {
+      overflow-x: hidden;
+      padding: 0 1em;
+      font-family: roboto, Helvetica, sans-serif;
+      font-size: 2em;
+      font-weight: 500;
+      font-style: normal;
+      line-height: 1.5em;
+      letter-spacing: 1.3px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    #closeFrame {
+      cursor: pointer;
+    }
+
+    #game_iframe {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #343b4c;
+      color: #fff;
+      padding: 0;
+    }
+
+  </style>
+  <script src="./sdk-qilin.js"></script>
+  <title>Document</title>
+</head>
+<body>
+  <div class="container">
+    <button id="show_iframe">
+      <span>
+        Открыть игру
+      </span>
+    </button>
+    <div id="game_iframe">
+      <span id="fullscreen">[ ]</span>
+      <span id="closeFrame">X</span>
+      <iframe style="width: 100vw; height: 100vh" frameborder="0" allowfullscreen></iframe>
+    </div>      
+  </div>
+  <script>
+    // create SDK helper
+    const helper = qilinGameParent('3d4ff5f9-8614-4524-ba4b-378a9fdb4594', 'http://localhost:8084/sdk/v1');
+
+    // create PayFormCallback
+    const showPayment = (...args) => new Promise(resolve => {
+      const status = confirm(args);
+      resolve(status);
+    });
+
+    const showError = (err) => {
+      document.body.style.color = 'red';
+      document.body.innerHTML = '<h1>Something went wrong. See console.</h1>';
+      console.error(err);
+    };
+
+    // init SDK helper
+    helper.init({ url: './adapter.html?jwt=hghgkgkhj' })
+      .then(meta => {
+        const { url } = meta;
+
+        // Create iframe with src = url
+        const showIframeButton = document.querySelector('#show_iframe span');
+        const gameIframe = document.querySelector('#game_iframe');
+        const fullscreenButton = document.querySelector('#fullscreen');
+        const closeIframeButton = document.querySelector('#closeFrame');
+        
+        fullscreenButton.onclick = (event) => {
+          if (!helper.checkFullscreenSupport()) return;
+
+          const elem = event.target.parentElement;
+          if (!document.fullscreenElement) {
+            elem.requestFullscreen()
+              .then(() => helper.setFullscreen(true))
+          } else {
+            document.exitFullscreen();
+            helper.setFullscreen(false);
+          }
+        };
+        showIframeButton.onclick = () => {
+          gameIframe.style.display = 'block';
+          gameIframe.querySelector('iframe').src = url;
+        };
+
+        closeIframeButton.onclick = () => {
+          gameIframe.style.display = 'none';
+          gameIframe.querySelector('iframe').src = url;
+        };
+        helper.onShowPayForm(showPayment);
+      })
+      .catch(err => showError(err));
+  </script>
+</body>
+</html>
