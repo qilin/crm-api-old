@@ -28,7 +28,7 @@ dispatcher:
 sdk:
   mode: "dev"
   plugins:
-    - test/testdata/plugins/so/dev.so
+    - plugins/gamenet.so
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----
