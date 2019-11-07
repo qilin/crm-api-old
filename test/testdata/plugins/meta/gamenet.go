@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -83,6 +87,7 @@ func root() http.HandlerFunc {
 			}
 		},
 		ModifyResponse: func(res *http.Response) error {
+			fmt.Println(res.Request.RequestURI)
 			for _, v := range res.Header {
 				for i := range v {
 					if strings.Contains(v[i], "https://gamenet.ru") {
@@ -90,11 +95,45 @@ func root() http.HandlerFunc {
 					}
 				}
 			}
+			res.Header.Del("X-Frame-Options")
+
+			if res.Header.Get("Content-Encoding") == "gzip" {
+
+				gr, err := gzip.NewReader(res.Body)
+				if err != nil {
+					return err
+				}
+
+				data, err := ioutil.ReadAll(gr)
+				if err != nil {
+					return err
+				}
+				res.Body.Close()
+
+				if strings.Contains(res.Request.RequestURI, "push-cookies.js") {
+					fmt.Println(hex.Dump(data))
+				}
+				if bytes.Contains(data, []byte("window.top")) {
+					fmt.Println("replace in", res.Request.RequestURI)
+					data = bytes.ReplaceAll(data, []byte("window.top"), []byte("window.parent"))
+				}
+				var buf bytes.Buffer
+				w := gzip.NewWriter(&buf)
+				w.Write(data)
+				w.Close()
+
+				res.Body = ioutil.NopCloser(&buf)
+			}
 			return nil
 		},
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/start" {
+			w.WriteHeader(http.StatusOK)
+			w.Write(start)
+			return
+		}
 		if r.URL.Path == "/" {
 			jwt := r.URL.Query().Get("jwt")
 			_ = jwt
@@ -126,4 +165,8 @@ func singleJoiningSlash(a, b string) string {
 
 var index = []byte(`
 	<iframe id="iFrameClient" name="iFrameClient" frameborder="0" width="100%" height="100%" allowfullscreen="allowfullscreen" wmode="Opaque" data-bind="attr: {src: frameSrc}, style: { visibility: hideClient() ? 'hidden' : 'visible' }" src="http://localhost:1443/games/khanwars/iframe?wmode=opaque" style="visibility: visible;"></iframe>
+`)
+
+var start = []byte(`
+	<iframe id="iFrameClient" name="iFrameClient" frameborder="0" width="100%" height="100%" allowfullscreen="allowfullscreen" wmode="Opaque" data-bind="attr: {src: frameSrc}, style: { visibility: hideClient() ? 'hidden' : 'visible' }" src="file:///home/devy/workspace/qilin/js-sdk/examples/gamenetAdapter/index.html" style="visibility: visible;"></iframe>
 `)
