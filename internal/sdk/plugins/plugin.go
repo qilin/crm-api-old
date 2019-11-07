@@ -1,6 +1,8 @@
 package plugins
 
 import (
+	"context"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/qilin/crm-api/internal/sdk/common"
@@ -8,7 +10,7 @@ import (
 
 type Httper interface {
 	Name() string
-	Http(r *echo.Echo, log logger.Logger)
+	Http(ctx context.Context, r *echo.Echo, log logger.Logger)
 }
 
 type Authenticator interface {

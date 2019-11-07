@@ -28,7 +28,10 @@ dispatcher:
 sdk:
   mode: "parent"
   plugins:
-    - test/testdata/plugins/so/parent.so
+    - test/testdata/plugins/so/rambler.so
+  pluginsConfig:
+    parent_iframe_url: "http://localhost:8084/parent/iframe/game?jwt=<...>"
+    parent_http_route: "/parent/iframe"
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----

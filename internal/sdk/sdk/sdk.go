@@ -20,11 +20,12 @@ import (
 )
 
 type Config struct {
-	Debug   bool `fallback:"shared.debug"`
-	Mode    common.SDKMode
-	Iframe  string // todo: it's temporary
-	Plugins []string
-	JWT     JWT
+	Debug         bool `fallback:"shared.debug"`
+	Mode          common.SDKMode
+	Iframe        string // todo: it's temporary
+	Plugins       []string
+	PluginsConfig map[string]string
+	JWT           JWT
 }
 
 type JWT struct {
@@ -63,11 +64,11 @@ func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
 }
 
 func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
-	return s.authenticator(ctx, request, token, log)
+	return s.authenticator(context.WithValue(ctx, "config", s.cfg.PluginsConfig), request, token, log)
 }
 
 func (s *SDK) Order(ctx context.Context, request common.OrderRequest, log logger.Logger) (response common.OrderResponse, err error) {
-	return s.orderer(ctx, request, log)
+	return s.orderer(context.WithValue(ctx, "config", s.cfg.PluginsConfig), request, log)
 }
 
 func (s *SDK) MapExternalUserToUser(platformId int, externalId string) string {
@@ -84,9 +85,9 @@ func (s *SDK) MapExternalUserToUser(platformId int, externalId string) string {
 }
 
 func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
-	// todo: hardcode reponse with config
+	// todo: hardcoded reponse with config
 	return &domain.ProductItem{
-		ID:        uuid,
+		ID:        "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb8",
 		URL:       s.cfg.Iframe, // todo: return config value
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -95,7 +96,7 @@ func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
 }
 
 func (s *SDK) PluginsRoute(echo *echo.Echo) {
-	s.pm.Http(echo, s.L())
+	s.pm.Http(context.WithValue(context.Background(), "config", s.cfg.PluginsConfig), echo, s.L())
 }
 
 func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
