@@ -27,7 +27,7 @@ dispatcher:
       - "*"
 sdk:
   mode:
-  iframe: "http://localhost:8084/qilinmode/iframe"
+  iframe: "http://localhost:1443/" #games/khanwars/iframe/?wmode=opaque"
   iframeTemplate: "configs/sdk/qilin-adapter-iframe.html"
   plugins:
   jwt:
