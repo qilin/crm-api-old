@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -32,24 +33,11 @@ func (p *plugin) Name() string {
 
 func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
-		// qilinProductUUID, ok := token.String("qilinProductUUID")
-		// if !ok {
-		// 	qilinProductUUID = "unknown"
-		// }
-		// userID, ok := token.String("userID")
-		// if !ok {
-		// 	userID = "unknown"
-		// }
+		meta := map[string]string{
+			"mode": "gamenet",
+			"url":  "http://localhost:1443/games/khanwars/iframe?wmode=opaque",
+		}
 
-		meta := map[string]string{}
-		meta["mode"] = "gamenet"
-		meta["url"] = "http://localhost:1443/games/khanwars/iframe?wmode=opaque"
-		// meta["qilinProductUUID"] = qilinProductUUID
-		// meta["userID"] = userID
-
-		//if authenticate == nil {
-		//	return authenticate(ctx, request, token, log)
-		//}
 		return common.AuthResponse{
 			Meta: meta,
 		}, nil
@@ -60,6 +48,22 @@ func init() {
 	// starting proxy server
 	go func() {
 		mux := http.NewServeMux()
+		mux.HandleFunc("/sdk/v1/auth", func(w http.ResponseWriter, r *http.Request) {
+			var rs = common.AuthResponse{
+				Meta: map[string]string{
+					"url": "http://localhost:1443/games/khanwars/iframe?wmode=opaque",
+				},
+			}
+			data, err := json.Marshal(&rs)
+			if err != nil {
+				fmt.Println(err.Error())
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			w.Write(data)
+		})
 		mux.HandleFunc("/", root())
 		if err := http.ListenAndServe(":1443", mux); err != nil {
 			fmt.Println("gamenet plugin:", err.Error())
@@ -136,7 +140,7 @@ func root() http.HandlerFunc {
 
 			http.SetCookie(w, &http.Cookie{
 				Name:  "PHPSESSID",
-				Value: "gr0k682k9906qq9s95u3iuqqa5",
+				Value: "9fsejs803b2gjvfdo8ng28d3u0",
 			})
 			w.WriteHeader(http.StatusOK)
 			w.Write(index)
@@ -191,7 +195,7 @@ parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcel
 </head>
 <body>
   <script>
-    const helper = qilinGameProxy('http://localhost:8085/sdk/v1');  
+    const helper = qilinGameProxy('/sdk/v1');  
     helper.init()
       .then(() => console.log('Adapter was started'))
       .catch(err => console.log(err));
