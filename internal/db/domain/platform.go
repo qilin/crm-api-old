@@ -2,6 +2,7 @@ package domain
 
 import "context"
 
+// todo: probably rename
 type PlatformItem struct {
 	ID     int    `gorm:"column:id" json:"id"`
 	Name   string `gorm:"name", json:"name"`
@@ -10,6 +11,7 @@ type PlatformItem struct {
 
 // TableName
 func (PlatformItem) TableName() string {
+	// todo: rename, conflict with hasura table name
 	return "platforms"
 }
 
