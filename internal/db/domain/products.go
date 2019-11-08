@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// todo: probably rename
 type ProductItem struct {
 	ID        string    `gorm:"column:id" json:"id"`
 	URL       string    `gorm:"column:url" json:"url"`
@@ -14,6 +15,7 @@ type ProductItem struct {
 
 // TableName
 func (ProductItem) TableName() string {
+	// todo: rename, conflict with hasura table name
 	return "products"
 }
 

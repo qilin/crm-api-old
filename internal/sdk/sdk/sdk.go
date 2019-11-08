@@ -78,7 +78,7 @@ func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
 }
 
 func (s *SDK) IframeHtml(qiliProductUUID string) (string, error) {
-	// in qilin mode no difference always same html
+	// in qilin mode no difference, always same html for all products
 	tplName := path.Base(s.cfg.IframeTemplate)
 	tpl, err := template.New(tplName).ParseFiles(s.cfg.IframeTemplate)
 	if err != nil {
