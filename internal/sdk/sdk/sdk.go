@@ -1,10 +1,13 @@
 package sdk
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/pem"
+	"html/template"
+	"path"
 	"strings"
 	"time"
 
@@ -20,12 +23,13 @@ import (
 )
 
 type Config struct {
-	Debug         bool `fallback:"shared.debug"`
-	Mode          common.SDKMode
-	Iframe        string // todo: it's temporary
-	Plugins       []string
-	PluginsConfig map[string]string
-	JWT           JWT
+	Debug          bool `fallback:"shared.debug"`
+	Mode           common.SDKMode
+	Iframe         string // todo: it's temporary
+	IframeTemplate string
+	Plugins        []string
+	PluginsConfig  map[string]string
+	JWT            JWT
 }
 
 type JWT struct {
@@ -53,35 +57,8 @@ type SDK struct {
 	provider.LMT
 }
 
-func (s *SDK) Mode() common.SDKMode {
-	return s.cfg.Mode
-}
-
-func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
-	// todo: optimise with ParseWithoutCheck + iss key map
-	//return s.keyRegister.Check(token) // todo: uncomment it back after tests
-	return jwt.ECDSACheck(token, s.keyPair.Public)
-}
-
 func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 	return s.authenticator(context.WithValue(ctx, "config", s.cfg.PluginsConfig), request, token, log)
-}
-
-func (s *SDK) Order(ctx context.Context, request common.OrderRequest, log logger.Logger) (response common.OrderResponse, err error) {
-	return s.orderer(context.WithValue(ctx, "config", s.cfg.PluginsConfig), request, log)
-}
-
-func (s *SDK) MapExternalUserToUser(platformId int, externalId string) string {
-	//user, err := s.repo.UserMap.FindByExternalID(s.ctx, platformId, externalId)
-	// if user not found, create new user, otherwise return user.UserId
-	//if err == gorm.ErrRecordNotFound {
-	//	user := &domain.UserMapItem{
-	//		PlatformID: platformId,
-	//		ExternalID: externalId,
-	//	}
-	//	s.repo.UserMap.Create(s.ctx, user)
-	//}
-	return "1c3e43a5-8513-42b3-8774-596c78079bb2"
 }
 
 func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
@@ -95,8 +72,26 @@ func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
 	//return s.repo.Products.Get(s.ctx, uuid)
 }
 
-func (s *SDK) PluginsRoute(echo *echo.Echo) {
-	s.pm.Http(context.WithValue(context.Background(), "config", s.cfg.PluginsConfig), echo, s.L())
+func (s *SDK) IframeHtml(qiliProductUUID string) (string, error) {
+	p, err := s.GetProductByUUID(qiliProductUUID)
+	if err != nil {
+		return "", err
+	}
+
+	tplName := path.Base(s.cfg.Iframe)
+	tpl, err := template.New(tplName).Parse(s.cfg.Iframe)
+	if err != nil {
+		return "", err
+	}
+	buf := &bytes.Buffer{}
+	err = tpl.ExecuteTemplate(buf, tplName, map[string]interface{}{
+		"URL": p.URL,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
 
 func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
@@ -115,6 +110,37 @@ func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
 
 	// issue a JWT
 	return claims.ECDSASign(jwt.ES512, s.keyPair.Private)
+}
+
+func (s *SDK) MapExternalUserToUser(platformId int, externalId string) string {
+	//user, err := s.repo.UserMap.FindByExternalID(s.ctx, platformId, externalId)
+	// if user not found, create new user, otherwise return user.UserId
+	//if err == gorm.ErrRecordNotFound {
+	//	user := &domain.UserMapItem{
+	//		PlatformID: platformId,
+	//		ExternalID: externalId,
+	//	}
+	//	s.repo.UserMap.Create(s.ctx, user)
+	//}
+	return "1c3e43a5-8513-42b3-8774-596c78079bb2"
+}
+
+func (s *SDK) Mode() common.SDKMode {
+	return s.cfg.Mode
+}
+
+func (s *SDK) Order(ctx context.Context, request common.OrderRequest, log logger.Logger) (response common.OrderResponse, err error) {
+	return s.orderer(context.WithValue(ctx, "config", s.cfg.PluginsConfig), request, log)
+}
+
+func (s *SDK) PluginsRoute(echo *echo.Echo) {
+	s.pm.Http(context.WithValue(context.Background(), "config", s.cfg.PluginsConfig), echo, s.L())
+}
+
+func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
+	// todo: optimise with ParseWithoutCheck + iss key map
+	//return s.keyRegister.Check(token) // todo: uncomment it back after tests
+	return jwt.ECDSACheck(token, s.keyPair.Public)
 }
 
 func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config) *SDK {
