@@ -1,23 +1,17 @@
 package sdk
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"html/template"
 	"net/http"
 	"net/url"
-
-	"github.com/qilin/crm-api/internal/handlers/sdk/iframes"
-
-	"github.com/pascaldekloe/jwt"
-
-	common2 "github.com/qilin/crm-api/internal/sdk/common"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
+	"github.com/pascaldekloe/jwt"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
+	common2 "github.com/qilin/crm-api/internal/sdk/common"
 )
 
 const (
@@ -128,23 +122,12 @@ func (h *SDKGroup) getHealth(ctx echo.Context) error {
 }
 
 func (h *SDKGroup) qilinIframe(ctx echo.Context) error {
-	// todo: get html page with URL from config
-	p, _ := h.sdk.GetProductByUUID("")
-
-	tpl, err := template.New("iframe").Parse(iframes.QilinIframe)
-	if err != nil {
-		h.L().Emergency("Incorrect template format of QilinIframe: " + err.Error())
-	}
-
-	buf := &bytes.Buffer{}
-	err = tpl.ExecuteTemplate(ctx.Response().Writer, "iframe", map[string]interface{}{
-		"URL": p.URL,
-	})
+	// todo: extract product uuid from request
+	html, err := h.sdk.IframeHtml("")
 	if err != nil {
 		return ctx.HTML(http.StatusInternalServerError, err.Error())
 	}
-
-	return ctx.HTML(http.StatusOK, buf.String())
+	return ctx.HTML(http.StatusOK, html)
 }
 
 func (h *SDKGroup) parentMode(ctx context.Context, r common2.AuthRequest) (common2.AuthResponse, error) {
