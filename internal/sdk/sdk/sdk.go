@@ -78,8 +78,8 @@ func (s *SDK) IframeHtml(qiliProductUUID string) (string, error) {
 		return "", err
 	}
 
-	tplName := path.Base(s.cfg.Iframe)
-	tpl, err := template.New(tplName).Parse(s.cfg.Iframe)
+	tplName := path.Base(s.cfg.IframeTemplate)
+	tpl, err := template.New(tplName).Parse(s.cfg.IframeTemplate)
 	if err != nil {
 		return "", err
 	}
