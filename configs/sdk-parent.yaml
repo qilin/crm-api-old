@@ -28,10 +28,26 @@ dispatcher:
 sdk:
   mode: "parent"
   plugins:
-    - plugins/rambler.so
+    - /app/plugins/rambler.so
   pluginsConfig:
     parent_iframe_url: "./adapter.html?jwt=eyJhbGciOiJFUzUxMiJ9.eyJleHAiOjE1NzM0OTM0MTEsImlzcyI6IlFpbGluIiwicWlsaW5Qcm9kdWN0VVVJRCI6ImZhMTRiMzk5LWFlOWItNDExMS05YzdmLTBmMWZlMmNjMWViOCIsInN1YiI6IlFpbGluU3ViamVjdCIsInVzZXJJRCI6IjFjM2U0M2E1LTg1MTMtNDJiMy04Nzc0LTU5NmM3ODA3OWJiMiJ9.v_R1yU3nXgCb2THSU9udRMa3jiC8zmJy1QD7AiyagZkpa3lkcyo6bPlKoKqT2TaY-1GMBrUBoklUW4YZPtQX9RMBOaGcwwcAXqBO7MCB9J3vDK9DOXufKOWdT-CXWukp" #"http://localhost:8084/parent/iframe/game?jwt=<...>"
     parent_http_route: "/parent/iframe/game"
+    parent_http_template: "configs/sdk/parent-adapter-iframe.html"
+    parent_app_secret: "rambler's app secret key"
+    parent_public_key: |
+      -----BEGIN PUBLIC KEY-----
+      MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEfQa/uwg5YlO8DTa98hwwt795y4F3ST4A
+      T1/2WtQTdggoYIzdgNTgQ7lX9+ZLjorowANuooooeuO+51Sw1hZTKbtEa7oOHxr+
+      o78UMCziRQeQzRBnIBjHt8Z2H9DUxrHb
+      -----END PUBLIC KEY-----
+
+    parent_private_key: |
+      -----BEGIN PRIVATE KEY-----
+      MIGkAgEBBDAEk3lnN3fagRuoi7SZnpiq6+KW9uU7OLgfvONA+gTzToFWYel8qW3L
+      4PFpjFPb0MmgBwYFK4EEACKhZANiAAR9Br+7CDliU7wNNr3yHDC3v3nLgXdJPgBP
+      X/Za1BN2CChgjN2A1OBDuVf35kuOiujAA26iiih6477nVLDWFlMpu0Rrug4fGv6j
+      vxQwLOJFB5DNEGcgGMe3xnYf0NTGsds=
+      -----END PRIVATE KEY-----
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----
