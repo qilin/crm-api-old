@@ -29,6 +29,9 @@ sdk:
   mode: "dev"
   plugins:
     - plugins/gamenet.so
+  pluginsConfig:
+    port: "1443"
+    entryURL: "http://localhost:1443"
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----
