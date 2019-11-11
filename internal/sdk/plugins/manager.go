@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"context"
+	"errors"
 	"os"
 	"plugin"
 
@@ -26,17 +27,17 @@ func NewPluginManager() *PluginManager {
 
 func (m *PluginManager) Load(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return err
+		return errors.New("File not found {" + path + "}: " + err.Error())
 	}
 
 	file, err := plugin.Open(path)
 	if err != nil {
-		return err
+		return errors.New("Can not open {" + path + "}: " + err.Error())
 	}
 
 	instance, err := file.Lookup("Plugin")
 	if err != nil {
-		return err
+		return errors.New("Can not lookup {" + path + "}: " + err.Error())
 	}
 
 	ath, ok := instance.(Authenticator)
