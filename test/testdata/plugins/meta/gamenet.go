@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -51,7 +50,7 @@ func init() {
 		mux.HandleFunc("/sdk/v1/auth", func(w http.ResponseWriter, r *http.Request) {
 			var rs = common.AuthResponse{
 				Meta: map[string]string{
-					"url": "http://localhost:1443/games/khanwars/iframe?wmode=opaque",
+					"url": "/games/khanwars/iframe?wmode=opaque",
 				},
 			}
 			data, err := json.Marshal(&rs)
@@ -78,6 +77,7 @@ func root() http.HandlerFunc {
 	proxy := &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
 			req.Host = "gamenet.ru"
+			// follow lines of code copied from httputil.NewReverseProxy
 			req.URL.Scheme = target.Scheme
 			req.URL.Host = target.Host
 			req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
@@ -115,11 +115,8 @@ func root() http.HandlerFunc {
 				}
 				res.Body.Close()
 
-				if strings.Contains(res.Request.RequestURI, "push-cookies.js") {
-					fmt.Println(hex.Dump(data))
-				}
 				if bytes.Contains(data, []byte("window.top")) {
-					fmt.Println("replace in", res.Request.RequestURI)
+					// fmt.Println("replace in", res.Request.RequestURI)
 					data = bytes.ReplaceAll(data, []byte("window.top"), []byte("window.parent"))
 				}
 				var buf bytes.Buffer
@@ -138,9 +135,18 @@ func root() http.HandlerFunc {
 			jwt := r.URL.Query().Get("jwt")
 			_ = jwt
 
+			// TODO user from jws token
+			session, err := auth("aleksandr.barsukov@protocol.one", "password")
+			if err != nil {
+				fmt.Println(err)
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte("Unauthorized"))
+				return
+			}
+
 			http.SetCookie(w, &http.Cookie{
 				Name:  "PHPSESSID",
-				Value: "9fsejs803b2gjvfdo8ng28d3u0",
+				Value: session,
 			})
 			w.WriteHeader(http.StatusOK)
 			w.Write(index)
@@ -149,6 +155,50 @@ func root() http.HandlerFunc {
 		proxy.ServeHTTP(w, r)
 		return
 	}
+}
+
+func auth(login, password string) (string, error) {
+	var c = &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	form := make(url.Values)
+	form.Add("login", login)
+	form.Add("password", password)
+	form.Add("captcha", "")
+	form.Add("mid", "175419290")
+	form.Add("browserhwid", "1ba8e830bc511735b9676f94455feab9")
+	form.Add("rp", "")
+	form.Add("trustedLocation", "1")
+	form.Add("code2fa", "")
+	form.Add("json", "1")
+	form.Add("2fa", "1")
+
+	req, err := http.NewRequest(http.MethodPost, "https://gnlogin.ru/", strings.NewReader(form.Encode()))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("not authorized")
+	}
+	return ssid(resp)
+}
+
+func ssid(resp *http.Response) (string, error) {
+	for _, c := range resp.Cookies() {
+		if c.Name == "PHPSESSID" {
+			return c.Value, nil
+		}
+	}
+	return "", fmt.Errorf("session not found")
 }
 
 func singleJoiningSlash(a, b string) string {
