@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -34,7 +35,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 		meta := map[string]string{
 			"mode": "gamenet",
-			"url":  "http://localhost:1443/games/khanwars/iframe?wmode=opaque",
+			"url":  "/games/khanwars/iframe?wmode=opaque",
 		}
 
 		return common.AuthResponse{
@@ -43,7 +44,27 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 	}
 }
 
-func init() {
+func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
+	cfg, ok := ctx.Value("config").(map[string]string)
+	if !ok {
+		log.Error("plugin: can not cast context config to map[string]string")
+	}
+
+	port, ok := cfg["port"]
+	if !ok {
+		port = "1443"
+	}
+
+	url, ok := cfg["entryURL"]
+	if !ok {
+		log.Error("plugin: can not find entryURL in config")
+	}
+
+	run(port, url)
+
+}
+
+func run(port, url string) {
 	// starting proxy server
 	go func() {
 		mux := http.NewServeMux()
@@ -63,15 +84,15 @@ func init() {
 			w.WriteHeader(http.StatusOK)
 			w.Write(data)
 		})
-		mux.HandleFunc("/", root())
-		if err := http.ListenAndServe(":1443", mux); err != nil {
+		mux.HandleFunc("/", root(url))
+		if err := http.ListenAndServe(":"+port, mux); err != nil {
 			fmt.Println("gamenet plugin:", err.Error())
 		}
 	}()
 }
 
 // eyJhbGciOiJFUzUxMiJ9.eyJleHAiOjE1NzM0ODM2NjUsImlzcyI6IlFpbGluIiwicWlsaW5Qcm9kdWN0VVVJRCI6IjNkNGZmNWY5LTg2MTQtNDUyNC1iYTRiLTM3OGE5ZmRiNDU5NCIsInN1YiI6IlFpbGluU3ViamVjdCIsInVzZXJJRCI6IjEwMDUwMCJ9.QDwRpjt93j0oFdHUq9MZEQ8RBJ01QdFeCUz3qppb61b60qq0g_gOQCd-8NuwADtgwUfC4IRwMVfzCixXpJ5ug83lHTprQmXfyyUsSg-nlZ89CFuiCC_PuZkH2CJQKqU5
-func root() http.HandlerFunc {
+func root(proxyurl string) http.HandlerFunc {
 	target, _ := url.Parse("https://gamenet.ru")
 	targetQuery := target.RawQuery
 	proxy := &httputil.ReverseProxy{
@@ -96,7 +117,7 @@ func root() http.HandlerFunc {
 			for _, v := range res.Header {
 				for i := range v {
 					if strings.Contains(v[i], "https://gamenet.ru") {
-						v[i] = strings.Replace(v[i], "https://gamenet.ru", "http://localhost:1443", -1)
+						v[i] = strings.Replace(v[i], "https://gamenet.ru", proxyurl, -1)
 					}
 				}
 			}
