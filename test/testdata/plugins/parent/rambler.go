@@ -3,12 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
-	"errors"
-	"fmt"
-	"io"
 	"net/http"
-	"net/url"
 	"path"
 	"text/template"
 
@@ -48,41 +43,19 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 			log.Emergency("plugin: can not cast context config to map[string]string")
 		}
 
-		appSecret := cfg["parent_app_secret"]
-
-		iframeURLString, ok := cfg["parent_iframe_url"]
+		url, ok := cfg["parent_iframe_url"]
 		if !ok {
-			log.Emergency("plugin: can not find config value `parent_iframe_url`")
-		}
-		iframeURL, err := url.Parse(iframeURLString)
-
-		// Check rambler auth & signature
-		u, err := url.Parse(request.URL)
-		q := u.Query()
-		h := md5.New()
-		params := fmt.Sprintf("game_id=%s&slug=%s&timestamp-%s&user_id=%s&%s",
-			q.Get("game_id"), q.Get("slug"), q.Get("timestamp"), q.Get("user_id"), appSecret)
-		io.WriteString(h, params)
-		sig := string(h.Sum(nil))
-		if sig != q.Get("sig") {
-			return common.AuthResponse{}, errors.New("incorrect signature")
+			url = "%parent_iframe_url%"
 		}
 
-		// QilinProductUUID: "3d4ff5f9-8614-4524-ba4b-378a9fdb4594"
+		// todo: issue JWT
 
-		// Issue JWT and add it to game's URL
-		jwt, err := utils.IssueJWT("", "", q.Get("user_id"), "3d4ff5f9-8614-4524-ba4b-378a9fdb4594", 0, keyPair.Private)
-		if err != nil {
-			return common.AuthResponse{}, err
+		meta := map[string]interface{}{
+			"url": url,
 		}
-		ifq := iframeURL.Query()
-		ifq.Add("jwt", string(jwt))
-		iframeURL.RawQuery = ifq.Encode()
 
 		return common.AuthResponse{
-			Meta: map[string]interface{}{
-				"url": iframeURL.String(),
-			},
+			Meta: meta,
 		}, nil
 	}
 }
