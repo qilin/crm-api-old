@@ -12,12 +12,11 @@ import (
 	"path"
 	"text/template"
 
-	"github.com/qilin/crm-api/test/testdata/plugins/parent/utils"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
 	"github.com/qilin/crm-api/internal/sdk/common"
+	"github.com/qilin/crm-api/test/testdata/plugins/parent/utils"
 )
 
 type plugin struct {
@@ -29,12 +28,13 @@ var (
 	keyPair utils.KeyPair
 )
 
-type RamblerAuthRequest struct {
-	GameId    string `json:"game_id" query:"game_id"`
-	Slug      string `json:"slug" query:"slug"`
-	Timestamp string `json:"timestamp" query:"timestamp"`
-	UserId    string `json:"user_id" query:"user_id"`
-	Sig       string `json:"sig" query:"sig"`
+type RamblerUserInfo struct {
+	Id        string `json:"id"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Status    string `json:"status"`
+	Email     string `json:"email"`
+	Gender    string `json:"gender"`
 }
 
 func (p *plugin) Name() string {
