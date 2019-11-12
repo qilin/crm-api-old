@@ -48,7 +48,7 @@ var (
 	ProviderSDKRepo = wire.NewSet(
 		ProviderRepo,
 		wire.Struct(new(sdkRepo.Repo), "*"),
-		postgres.WireSet,
+		postgres.WireTestSet,
 	)
 
 	ProviderSDKTestRepo = wire.NewSet(
