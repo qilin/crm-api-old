@@ -6,6 +6,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"html/template"
 	"path"
 	"strings"
@@ -25,7 +26,7 @@ import (
 type Config struct {
 	Debug          bool `fallback:"shared.debug"`
 	Mode           common.SDKMode
-	Iframe         string // todo: it's temporary
+	Iframes        map[string]string // todo: it's temporary
 	IframeTemplate string
 	Plugins        []string
 	PluginsConfig  map[string]string
@@ -62,31 +63,29 @@ func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, toke
 }
 
 func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
-	// todo: hardcoded reponse with config
-	return &domain.ProductItem{
-		ID:        "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb8",
-		URL:       s.cfg.Iframe, // todo: return config value
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}, nil
 	//return s.repo.Products.Get(s.ctx, uuid)
+	url, ok := s.cfg.Iframes[uuid]
+	if ok {
+		// todo: hardcoded reponse with config
+		return &domain.ProductItem{
+			ID:        uuid,
+			URL:       url, // todo: return config value
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}, nil
+	}
+	return nil, fmt.Errorf("unknown product UUID '%s'", uuid)
 }
 
 func (s *SDK) IframeHtml(qiliProductUUID string) (string, error) {
-	p, err := s.GetProductByUUID(qiliProductUUID)
-	if err != nil {
-		return "", err
-	}
-
+	// in qilin mode no difference, always same html for all products
 	tplName := path.Base(s.cfg.IframeTemplate)
-	tpl, err := template.New(tplName).Parse(s.cfg.IframeTemplate)
+	tpl, err := template.New(tplName).ParseFiles(s.cfg.IframeTemplate)
 	if err != nil {
 		return "", err
 	}
 	buf := &bytes.Buffer{}
-	err = tpl.ExecuteTemplate(buf, tplName, map[string]interface{}{
-		"URL": p.URL,
-	})
+	err = tpl.Execute(buf, nil)
 	if err != nil {
 		return "", err
 	}
