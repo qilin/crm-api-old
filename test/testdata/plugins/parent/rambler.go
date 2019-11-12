@@ -109,24 +109,32 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	}
 
 	// Parent Iframe provider
-	route, ok := cfg["parent_http_route"]
+	indexRoute, ok := cfg["parent_index_route"]
 	if !ok {
-		log.Emergency("plugin: can not find parent_http_route in config")
+		log.Emergency("plugin: can not find parent_index_route in config")
+	}
+	// Parent Iframe provider
+	iframeProviderRoute, ok := cfg["parent_iframe_route"]
+	if !ok {
+		log.Emergency("plugin: can not find parent_iframe_route in config")
 	}
 
-	r.GET(route, func(c echo.Context) error {
-		return p.IframeProvider(c, cfg, log)
+	r.GET(indexRoute, func(c echo.Context) error {
+		return p.IndexHandler(c, cfg, log)
+	})
+	r.GET(iframeProviderRoute, func(c echo.Context) error {
+		return p.IframeProviderHandler(c, cfg, log)
 	})
 }
 
-func (p *plugin) IframeProvider(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
-	tplPath, ok := cfg["parent_http_template"]
+func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
+	tplPath, ok := cfg["parent_iframe_template"]
 	if !ok {
-		log.Emergency("plugin: can not find parent_http_template in config")
+		log.Emergency("plugin: can not find parent_iframe_template in config")
 	}
 
 	tplName := path.Base(tplPath)
-	tpl, err := template.New(tplName).Parse(tplPath)
+	tpl, err := template.New(tplName).ParseFiles(tplPath)
 	if err != nil {
 		return err
 	}
@@ -136,6 +144,27 @@ func (p *plugin) IframeProvider(ctx echo.Context, cfg map[string]string, log log
 		"IframeURL":         "",
 	})
 	if err != nil {
+		return err
+	}
+	return ctx.HTML(http.StatusOK, buf.String())
+}
+
+func (p *plugin) IndexHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
+	tplPath, ok := cfg["parent_index_template"]
+	if !ok {
+		log.Emergency("plugin: can not find parent_index_template in config")
+	}
+
+	tplName := path.Base(tplPath)
+	tpl, err := template.New(tplName).ParseFiles(tplPath)
+	if err != nil {
+		log.Error(err.Error())
+		return err
+	}
+	buf := &bytes.Buffer{}
+	err = tpl.ExecuteTemplate(buf, tplName, map[string]interface{}{})
+	if err != nil {
+		log.Error(err.Error())
 		return err
 	}
 	return ctx.HTML(http.StatusOK, buf.String())
