@@ -6,6 +6,8 @@
 p1hub/qilin-crm-api:demo-sdk
 ```
 
+URL для открытия страницы с кнопкой играть: `/integration/demo/parent/game`
+
 Порты: 
 ```
 [8080, 1443]
