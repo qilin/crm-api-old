@@ -80,7 +80,7 @@ dev-build-test-plugins: ## build plugins for tests
 		$(call go_docker,"make dev-build-test-plugins") ;\
     else \
         go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/rambler.so" "$(ROOT_DIR)/test/testdata/plugins/parent/rambler.go" ;\
-        go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/gamenet.so" "$(ROOT_DIR)/test/testdata/plugins/meta/gamenet.go" ;\
+        go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/gamenet.so" "$(ROOT_DIR)/test/testdata/plugins/gamenet/gamenet.go" ;\
     fi;
 .PHONY: dev-build-test-plugins
 
