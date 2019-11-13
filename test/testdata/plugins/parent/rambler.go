@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
 	"github.com/qilin/crm-api/internal/sdk/common"
+	"github.com/qilin/crm-api/test/testdata/plugins/parent/rambler"
 	"github.com/qilin/crm-api/test/testdata/plugins/parent/utils"
 )
 
@@ -121,6 +122,8 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	r.GET(iframeProviderRoute, func(c echo.Context) error {
 		return p.IframeProviderHandler(c, cfg, log)
 	})
+	r.GET("/integration/game/iframe", p.runTestGame)
+	r.GET("/integration/game/iframe", p.billingCallback)
 }
 
 func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
@@ -164,4 +167,28 @@ func (p *plugin) IndexHandler(ctx echo.Context, cfg map[string]string, log logge
 		return err
 	}
 	return ctx.HTML(http.StatusOK, buf.String())
+}
+
+func (p *plugin) runTestGame(ctx echo.Context) error {
+	if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
+		"user_id", "game_id", "slug", "timestamp") {
+		return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
+	}
+	return ctx.HTML(http.StatusOK, "OK")
+}
+
+func (p *plugin) billingCallback(ctx echo.Context) error {
+	switch ctx.QueryParam("notification_type") {
+	case "get_item":
+		if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
+			"item", "app_id", "user_id", "receiver_id", "lang") {
+			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
+		}
+	case "order_status_change":
+		if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
+			"item", "app_id", "user_id", "receiver_id", "lang", "order_id", "item_price", "status") {
+			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
+		}
+	}
+	return ctx.HTML(http.StatusOK, "OK")
 }
