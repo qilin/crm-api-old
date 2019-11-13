@@ -30,7 +30,7 @@ parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcel
 </head>
 <body>
   <script>
-    const helper = qilinGameProxy('http://localhost:8085/sdk/v1');  
+    const helper = qilinGameProxy('/integration/demo/dev/sdk/v1');
     helper.init()
       .then(() => console.log('Adapter was started'))
       .catch(err => console.log(err));

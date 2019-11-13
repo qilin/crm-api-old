@@ -31,7 +31,7 @@ sdk:
     - plugins/gamenet.so
   pluginsConfig:
     port: "1443"
-    entryURL: "http://localhost:1443"
+    entryURL: "/integration/demo/game"
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----
