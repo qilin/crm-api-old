@@ -35,7 +35,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 		meta := map[string]string{
 			"mode": "gamenet",
-			"url":  "/games/khanwars/iframe?wmode=opaque",
+			"url":  "/integration/demo/game/games/khanwars/iframe?wmode=opaque",
 		}
 
 		return common.AuthResponse{
@@ -71,7 +71,7 @@ func run(port, url string) {
 		mux.HandleFunc("/sdk/v1/auth", func(w http.ResponseWriter, r *http.Request) {
 			var rs = common.AuthResponse{
 				Meta: map[string]string{
-					"url": "/games/khanwars/iframe?wmode=opaque",
+					"url": "/integration/demo/game/games/khanwars/iframe?wmode=opaque",
 				},
 			}
 			data, err := json.Marshal(&rs)
