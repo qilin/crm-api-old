@@ -98,7 +98,7 @@
   </div>
   <script>
     // create SDK helper
-    const helper = qilinGameParent('3d4ff5f9-8614-4524-ba4b-378a9fdb4594', 'http://localhost:8084/sdk/v1');
+    const helper = qilinGameParent('3d4ff5f9-8614-4524-ba4b-378a9fdb4594', '/sdk/v1');
 
     // create PayFormCallback
     const showPayment = (...args) => new Promise(resolve => {
@@ -113,7 +113,7 @@
     };
 
     // init SDK helper
-    helper.init({ url: '/adapter?jwt=hghgkgkhj' })
+    helper.init()
       .then(meta => {
         const { url } = meta;
 
