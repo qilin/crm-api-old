@@ -124,7 +124,7 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 		return p.IframeProviderHandler(c, cfg, log)
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
-	r.GET("/integration/game/iframe", p.billingCallback)
+	r.GET("/integration/game/billing", p.billingCallback)
 }
 
 func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
@@ -177,7 +177,17 @@ func (p *plugin) runTestGame(ctx echo.Context) error {
 		return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 	}
 	fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
-	return ctx.HTML(http.StatusOK, "OK")
+	return ctx.HTML(http.StatusOK, `
+<script src="//sandbox.games.rambler.ru/assets/ext/rgames.js" ></script>
+<script>
+rgames.init().then(() => {
+	rgames.showOrderBox( {
+		item : 100500 ,
+		type : '' ,
+	} ) ;
+} ) ;	
+</script>
+		`)
 }
 
 func (p *plugin) billingCallback(ctx echo.Context) error {
