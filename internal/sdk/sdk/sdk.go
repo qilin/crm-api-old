@@ -155,6 +155,8 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 		}
 	}
 
+	pm.Init(ctx, cfg.PluginsConfig, set.L())
+
 	sdk := &SDK{
 		ctx:  ctx,
 		cfg:  *cfg,

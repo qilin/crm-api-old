@@ -22,3 +22,8 @@ type Orderer interface {
 	Name() string
 	Order(order common.Order) common.Order
 }
+
+type Initable interface {
+	Name() string
+	Init(ctx context.Context, cfg map[string]string, log logger.Logger)
+}

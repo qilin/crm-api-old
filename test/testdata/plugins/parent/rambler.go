@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"path"
 	"text/template"
@@ -23,49 +24,7 @@ var (
 	keyPair utils.KeyPair
 )
 
-type RamblerUserInfo struct {
-	Id        string `json:"id"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-	Status    string `json:"status"`
-	Email     string `json:"email"`
-	Gender    string `json:"gender"`
-}
-
-func (p *plugin) Name() string {
-	return "example.plugin"
-}
-
-func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
-	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
-		cfg, ok := ctx.Value("config").(map[string]string)
-		if !ok {
-			log.Emergency("plugin: can not cast context config to map[string]string")
-		}
-
-		url, ok := cfg["parent_iframe_url"]
-		if !ok {
-			url = "%parent_iframe_url%"
-		}
-
-		// todo: issue JWT
-
-		meta := map[string]interface{}{
-			"url": url,
-		}
-
-		return common.AuthResponse{
-			Meta: meta,
-		}, nil
-	}
-}
-
-func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
-	cfg, ok := ctx.Value("config").(map[string]string)
-	if !ok {
-		log.Emergency("plugin: can not cast context config to map[string]string")
-	}
-
+func (p *plugin) Init(ctx context.Context, cfg map[string]string, log logger.Logger) {
 	// load encryption keys
 	sk, ok := cfg["parent_private_key"]
 	if !ok {
@@ -75,10 +34,74 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	if !ok {
 		log.Emergency("plugin: can not load parent_public_key")
 	}
+
 	var err error
 	keyPair, err = utils.DecodePemECDSA(sk, pk)
 	if err != nil {
 		log.Emergency("plugin: can not parse key pair")
+	}
+}
+
+func (p *plugin) Name() string {
+	return "rambler.plugin"
+}
+
+func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
+	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
+		cfg, ok := ctx.Value("config").(map[string]string)
+		if !ok {
+			log.Emergency("plugin: can not cast context config to map[string]string")
+		}
+
+		// fake auth
+		if fake, ok := cfg["parent_auth_fake"]; ok && fake == "true" {
+			url, ok := cfg["parent_iframe_url"]
+			if !ok {
+				url = "%parent_iframe_url%"
+			}
+			return common.AuthResponse{
+				Meta: map[string]interface{}{
+					"url": url,
+				},
+			}, nil
+		}
+
+		// get http request from context
+		req, ok := ctx.Value("request").(*http.Request)
+		if !ok {
+			log.Emergency("can't extract *http.Request from context")
+		}
+
+		// get cookie
+		cookie, err := req.Cookie(cfg["parent_auth_cookie_name"])
+		if err != nil {
+			return response, err
+		}
+
+		authToken := cookie.Value
+		// todo: verify authToken
+		if len(authToken) == 0 {
+			return response, errors.New("not authenticated")
+		}
+
+		// issue JWT
+		jwt, err := utils.IssueJWT("", "", "", "3d4ff5f9-8614-4524-ba4b-378a9fdb4594", 0, keyPair.Private)
+		if err != nil {
+			return response, err
+		}
+		// url to return
+		response.Meta = map[string]interface{}{
+			"url":    utils.AddURLParams(cfg["parent_iframe_url"], map[string]string{"jwt": string(jwt)}),
+			"cookie": authToken,
+		}
+		return
+	}
+}
+
+func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
+	cfg, ok := ctx.Value("config").(map[string]string)
+	if !ok {
+		log.Emergency("plugin: can not cast context config to map[string]string")
 	}
 
 	// Parent Iframe provider

@@ -74,7 +74,7 @@ func (h *SDKGroup) postAuth(ctx echo.Context) error {
 	switch h.sdk.Mode() {
 	case common2.ParentMode:
 		// pass it into plugin
-		resp, err = h.parentMode(context.Background(), r)
+		resp, err = h.parentMode(context.WithValue(context.Background(), "request", ctx.Request()), r)
 	case common2.DeveloperMode:
 		// parse, verify and pass into plugin
 		resp, err = h.devMode(context.Background(), r)
@@ -132,8 +132,6 @@ func (h *SDKGroup) qilinIframe(ctx echo.Context) error {
 
 func (h *SDKGroup) parentMode(ctx context.Context, r common2.AuthRequest) (common2.AuthResponse, error) {
 	claims := &jwt.Claims{}
-	token, _ := h.sdk.IssueJWT(h.sdk.MapExternalUserToUser(0, ""), "")
-	h.L().Info(string(token))
 	return h.sdk.Authenticate(ctx, r, claims, h.L())
 }
 

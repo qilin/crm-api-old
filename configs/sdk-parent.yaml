@@ -36,11 +36,8 @@ sdk:
     parent_index_route: "/game"
     parent_index_template: "configs/sdk/parent-index.html"
     parent_app_secret: "rambler's app secret key"
-    parent_oauth_client_id: ""
-    parent_oauth_client_secret: ""
-    parent_oauth_redirect_uri: ""
-    parent_oauth_token_uri: ""
-    parent_oauth_auth_uri: ""
+    parent_auth_fake: "true"
+    parent_auth_cookie_name: "qpssid"
     parent_public_key: |
       -----BEGIN PUBLIC KEY-----
       MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEfQa/uwg5YlO8DTa98hwwt795y4F3ST4A

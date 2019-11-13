@@ -12,6 +12,7 @@ import (
 )
 
 type PluginManager struct {
+	init  []Initable
 	auth  []Authenticator
 	order []Orderer
 	http  []Httper
@@ -19,6 +20,7 @@ type PluginManager struct {
 
 func NewPluginManager() *PluginManager {
 	return &PluginManager{
+		init:  []Initable{},
 		auth:  []Authenticator{},
 		order: []Orderer{},
 		http:  []Httper{},
@@ -40,6 +42,11 @@ func (m *PluginManager) Load(path string) error {
 		return errors.New("Can not lookup {" + path + "}: " + err.Error())
 	}
 
+	init, ok := instance.(Initable)
+	if ok {
+		m.init = append(m.init, init)
+	}
+
 	ath, ok := instance.(Authenticator)
 	if ok {
 		m.auth = append([]Authenticator{ath}, m.auth...)
@@ -56,6 +63,12 @@ func (m *PluginManager) Load(path string) error {
 	}
 
 	return nil
+}
+
+func (m *PluginManager) Init(ctx context.Context, cfg map[string]string, log logger.Logger) {
+	for _, p := range m.init {
+		p.Init(ctx, cfg, log)
+	}
 }
 
 func (m *PluginManager) Http(ctx context.Context, echo2 *echo.Echo, log logger.Logger) {
