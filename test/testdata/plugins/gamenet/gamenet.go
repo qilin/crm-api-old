@@ -55,7 +55,7 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 		port = "1443"
 	}
 
-	url, ok := cfg["entryURL"]
+	url, ok := cfg["entryurl"]
 	if !ok {
 		log.Error("plugin: can not find entryURL in config")
 	}
