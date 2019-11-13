@@ -125,6 +125,8 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
 	r.GET("/integration/game/billing", p.billingCallback)
+	r.POST("/integration/game/billing", p.billingCallback)
+	r.POST("/api/v2/svc/payment/create", p.createOrder)
 }
 
 func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
@@ -198,13 +200,30 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 			fmt.Println("bad signature", ctx.Request().RequestURI)
 			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 		}
+		fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"response": map[string]interface{}{
+				"title":     "50 золотых монет",
+				"photo_url": "https://ihcdn3.ioimg.org/iov6live/images/payments/payment_new/payment_packs_images/small_diamond.png",
+				"price":     50.0,
+			},
+		})
 	case "order_status_change":
 		if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
 			"item", "app_id", "user_id", "receiver_id", "lang", "order_id", "item_price", "status") {
 			fmt.Println("bad signature", ctx.Request().RequestURI)
 			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 		}
+		fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
+			"response": map[string]interface{}{
+				"order_id": ctx.QueryParam("order_id"),
+			},
+		})
 	}
-	fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
-	return ctx.HTML(http.StatusOK, "OK")
+	return ctx.HTML(http.StatusNotFound, "method not found")
+}
+
+func (p *plugin) createOrder(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, map[string]interface{}{})
 }
