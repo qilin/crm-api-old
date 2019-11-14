@@ -35,7 +35,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 		meta := map[string]string{
 			"mode": "gamenet",
-			"url":  "/integration/demo/game/games/khanwars/iframe?wmode=opaque",
+			"url":  "/games/khanwars/iframe?wmode=opaque",
 		}
 
 		return common.AuthResponse{
