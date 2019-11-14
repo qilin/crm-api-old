@@ -1,0 +1,99 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+enableCertIssuer: true
+
+ingress:
+  hostname: tst.qilin.super.com
+  path: /
+  hostnamePrefix:
+
+ingressProxy:
+  hostname: demo-game.tst.qilin.super.com
+  path: /
+  hostnamePrefix:
+
+certIssuer:
+  email: admin@protocol.one
+
+crmngx:
+    name: crmngx
+    role: nginx
+    image: "nginx"
+    imageTag: latest
+    ports:
+    - port: 8080
+      name: nginx
+      protocol: TCP
+    service:
+      type: ClusterIP
+
+crmsdk:
+    name: crmsdk
+    role: qilin-crm-sdk
+    cmd: ["sdk","-c","configs/sdk.yaml","-b",":8080","-d"]
+    image: "p1hub/qilin-crm-api"
+    imageTag: latest
+    ports: 
+    - port: 8080
+      name: crmsdk
+      protocol: TCP
+    healthPort: 8081
+    replicas: 1
+    service:
+      type: ClusterIP
+    env:
+
+crmdev:
+    name: crmdev
+    role: qilin-crm-dev
+    cmd: ["sdk","-c","configs/sdk-dev.yaml","-b",":8080","-d"]
+    image: "p1hub/qilin-crm-api"
+    imageTag: latest
+    ports: 
+    - port: 8080
+      name: crmdev
+      protocol: TCP
+    - port: 1443
+      name: 
+    ingressPort: 8080
+    healthPort: 8081
+    replicas: 1
+    service:
+      type: ClusterIP
+    env:
+
+crmparent:
+    name: parent
+    role: qilin-crm-parent
+    cmd: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080","-d"]
+    image: "p1hub/qilin-crm-api"
+    imageTag: latest
+    port: 8080
+    ingressPort: 8080
+    healthPort: 8081
+    replicas: 1
+    service:
+      type: ClusterIP
+      port: 8080
+      protocol: TCP
+    env:
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+#  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

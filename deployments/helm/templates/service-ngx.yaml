@@ -1,0 +1,27 @@
+{{- $deployment := .Values.crmngx -}}
+{{- $svcName := printf "%s-%s" .Release.Name $deployment.name}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $svcName }}
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role: {{ $deployment.role }}
+spec:
+  type: {{ $deployment.service.type }}
+  ports:
+    {{- range $port := $deployment.ports -}}
+    - name: $port.name
+      port: {{ $port.port }}
+      targetPort: {{ $port.port }}
+      protocol: {{ $port.protocol }}
+    {{- end -}}
+  selector:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role: {{ $deployment.role }}

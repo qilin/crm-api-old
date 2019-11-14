@@ -1,0 +1,60 @@
+{{- $deployment := .Values.crmngx -}}
+{{- $deploymentName := printf "%s-%s" .Release.Name $deployment.name }}
+
+{{- $crmDevSvcName := printf "%s-%s" .Release.Name .Values.crmdev.name}}
+{{- $crmSdkSvcName := printf "%s-%s" .Release.Name .Values.crmsdk.name}}
+{{- $crmParentSvcName := printf "%s-%s" .Release.Name .Values.crmparent.name}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $deploymentName }}-configmap
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }} 
+    role: {{ $deployment.role }}
+data:
+  {{ .Values.ingress.hostname }}.conf: |
+      server {
+        server_name {{ .Values.ingress.hostname }};
+        listen 8080 default_server;
+
+        location = /_healthz {
+          add_header Content-Type text/plain;
+          return 200 'ok';
+        }
+        # parent
+        location ~* ^/integration/demo/parent/(.*)& {
+            rewrite ^/integration/demo/parent/(.*)& /$1 break;
+            proxy_pass {{ $crmParentSvcName }}:8080;
+        }
+        location /integration/demo/iframe {
+            proxy_pass {{ $crmParentSvcName }}:8080;
+        }
+        location /integration/game/billing {
+            proxy_pass {{ $crmParentSvcName }}:8080;
+        }
+
+        # dev
+        location ~* ^/integration/demo/dev/(.*)& {
+            rewrite ^/integration/demo/dev/(.*)& /$1 break;
+            proxy_pass {{ $crmDevSvcName }}:8080;
+        }
+
+        # qilin (sdk)
+        location ~* ^/integration/demo/qilin/(.*)& {
+            rewrite ^//integration/demo/qilin/(.*)& /$1 break;
+            proxy_pass {{ $crmSdkSvcName }}:8080;
+        }
+
+      }
+      server {
+        server_name {{ .Values.ingressProxy.hostname }};
+        listen 8080 default_server;
+        
+        location / {
+            proxy_pass {{ $crmDevSvcName }}:1443;
+        }
+      }
