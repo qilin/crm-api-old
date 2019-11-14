@@ -14,7 +14,7 @@ spec:
   type: {{ $deployment.service.type }}
   ports:
     {{- range $port := $deployment.ports }}
-    - name: $port.name
+    - name: {{ $port.name }}
       port: {{ $port.port }}
       targetPort: {{ $port.port }}
       protocol: {{ $port.protocol }}
