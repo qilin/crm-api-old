@@ -52,7 +52,7 @@ data:
       }
       server {
         server_name {{ .Values.ingressProxy.hostname }};
-        listen 8080 default_server;
+        listen 8080;
         
         location / {
             proxy_pass http://{{ $crmDevSvcName }}:1443;
