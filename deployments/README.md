@@ -34,7 +34,16 @@ https://tst.qilin.super.com/integration/demo/parent/{pattern}
 ```
 нужно прокинуть в демон в контейнере (на порту 8080):
 ```
-:8080/{pattern}
+<host>:8080/{pattern}
+```
+```
+https://tst.qilin.super.com/integration/game/iframe 
+https://tst.qilin.super.com/integration/game/billing
+```
+нужно прокинуть соответственно в 
+```
+<host>:8080/integration/game/iframe
+<host>:8080/integration/game/billing
 ```
 
 Режима `dev`
