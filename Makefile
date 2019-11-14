@@ -166,7 +166,7 @@ github-build: github-docker-image docker-push docker-clean ## build application 
 github-test: test-with-coverage ## test application in CI
 .PHONY: github-test
 
-github-demo-build: dev-build-test-plugins build github-docker-image docker-push ## build docker image for demo
+github-demo-build: dev-build-test-plugins build docker-image docker-push ## build docker image for demo
 .PHONY: github-demo-build
 
 go-depends: ## view final versions that will be used in a build for all direct and indirect dependencies
