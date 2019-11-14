@@ -19,10 +19,12 @@ metadata:
 spec:
   tls:
     - hosts:
-        - {{printf "%s%s" .Values.ingress.hostnamePrefix .Values.ingress.hostname }}
+#        - {{printf "%s%s" .Values.ingress.hostnamePrefix .Values.ingress.hostname }}
+        - {{printf "%s" .Values.ingress.hostname }}
       secretName: {{ .Release.Name}}-ssl-secret
   rules:
     - host: {{printf "%s%s" .Values.ingress.hostnamePrefix .Values.ingress.hostname }}
+    - host: {{printf "%s" .Values.ingress.hostname }}    
       http:
         paths:
           - path: /

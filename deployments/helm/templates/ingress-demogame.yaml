@@ -19,10 +19,12 @@ metadata:
 spec:
   tls:
     - hosts:
-        - {{printf "%s%s" .Values.ingressProxy.hostnamePrefix .Values.ingressProxy.hostname }}
+#        - {{printf "%s%s" .Values.ingressProxy.hostnamePrefix .Values.ingressProxy.hostname }}
+        - {{printf "%s" .Values.ingressProxy.hostname }}
       secretName: {{ .Release.Name}}-demogame-ssl-secret
   rules:
-    - host: {{printf "%s%s" .Values.ingressProxy.hostnamePrefix .Values.ingressProxy.hostname }}
+#    - host: {{printf "%s%s" .Values.ingressProxy.hostnamePrefix .Values.ingressProxy.hostname }}
+    - host: {{printf "%s" .Values.ingressProxy.hostname }}
       http:
         paths:
           - path: /
