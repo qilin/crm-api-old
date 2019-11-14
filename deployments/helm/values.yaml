@@ -69,14 +69,14 @@ crmparent:
     cmd: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080","-d"]
     image: "p1hub/qilin-crm-api"
     imageTag: latest
-    port: 8080
-    ingressPort: 8080
+    ports: 
+    - port: 8080
+      name: crmsdk
+      protocol: TCP
     healthPort: 8081
     replicas: 1
     service:
       type: ClusterIP
-      port: 8080
-      protocol: TCP
     env:
 
 
