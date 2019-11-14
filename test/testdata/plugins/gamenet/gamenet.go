@@ -71,7 +71,7 @@ func run(port, url string) {
 		mux.HandleFunc("/sdk/v1/auth", func(w http.ResponseWriter, r *http.Request) {
 			var rs = common.AuthResponse{
 				Meta: map[string]string{
-					"url": "/games/khanwars/iframe?wmode=opaque",
+					"url": "/integration/demo/game/games/khanwars/iframe?wmode=opaque",
 				},
 			}
 			data, err := json.Marshal(&rs)
@@ -266,7 +266,7 @@ parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcel
 </head>
 <body>
   <script>
-    const helper = qilinGameProxy('/sdk/v1');  
+    const helper = qilinGameProxy('/integration/demo/dev/sdk/v1');  
     helper.init()
       .then(() => console.log('Adapter was started'))
       .catch(err => console.log(err));
