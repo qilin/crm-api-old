@@ -44,9 +44,9 @@ spec:
         - name: {{ $deployment.name }}
           image: {{ $deployment.image }}:{{ $deployment.imageTag }}
           ports:
-            {{- range $port := $deployment.ports -}}
+            {{- range $port := $deployment.ports }}
             - containerPort: {{ $port.port }}
-            {{- end -}}
+            {{- end }}
           volumeMounts:
           - name: {{ $deploymentName }}-configmap
             mountPath: "/etc/nginx/conf.d/"

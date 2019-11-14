@@ -41,9 +41,9 @@ spec:
           image: {{ $deployment.image }}:{{ $deployment.imageTag }}
           args: ["sdk","-c","configs/sdk.yaml","-b",":8080","-d"]
           ports:
-            {{- range $port := $deployment.ports -}}
+            {{- range $port := $deployment.ports }}
             - containerPort: {{ $port.port }}
-            {{- end -}}
+            {{- end }}
           #livenessProbe:
           #  httpGet:
           #    path: /health

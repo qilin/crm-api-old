@@ -13,12 +13,12 @@ metadata:
 spec:
   type: {{ $deployment.service.type }}
   ports:
-    {{- range $port := $deployment.ports -}}
+    {{- range $port := $deployment.ports }}
     - name: $port.name
       port: {{ $port.port }}
       targetPort: {{ $port.port }}
       protocol: {{ $port.protocol }}
-    {{- end -}}
+    {{- end }}
   selector:
     app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
