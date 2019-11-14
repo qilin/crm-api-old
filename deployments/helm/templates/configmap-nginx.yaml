@@ -28,25 +28,25 @@ data:
         # parent
         location ~* ^/integration/demo/parent/(.*)& {
             rewrite ^/integration/demo/parent/(.*)& /$1 break;
-            proxy_pass {{ $crmParentSvcName }}:8080;
+            proxy_pass http://{{ $crmParentSvcName }}:8080;
         }
         location /integration/demo/iframe {
-            proxy_pass {{ $crmParentSvcName }}:8080;
+            proxy_pass http://{{ $crmParentSvcName }}:8080;
         }
         location /integration/game/billing {
-            proxy_pass {{ $crmParentSvcName }}:8080;
+            proxy_pass http://{{ $crmParentSvcName }}:8080;
         }
 
         # dev
         location ~* ^/integration/demo/dev/(.*)& {
             rewrite ^/integration/demo/dev/(.*)& /$1 break;
-            proxy_pass {{ $crmDevSvcName }}:8080;
+            proxy_pass http://{{ $crmDevSvcName }}:8080;
         }
 
         # qilin (sdk)
         location ~* ^/integration/demo/qilin/(.*)& {
             rewrite ^//integration/demo/qilin/(.*)& /$1 break;
-            proxy_pass {{ $crmSdkSvcName }}:8080;
+            proxy_pass http://{{ $crmSdkSvcName }}:8080;
         }
 
       }
@@ -55,6 +55,6 @@ data:
         listen 8080 default_server;
         
         location / {
-            proxy_pass {{ $crmDevSvcName }}:1443;
+            proxy_pass http://{{ $crmDevSvcName }}:1443;
         }
       }
