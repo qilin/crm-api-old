@@ -169,7 +169,7 @@ github-test: test-with-coverage ## test application in CI
 build-jenkins: dev-build-test-plugins build
 .PHONY: build-jenkins
 
-docker-image-jenkins: docker-image docker-push
+docker-image-jenkins: docker-image
 .PHONY: docker-image-jenkins
 
 go-depends: ## view final versions that will be used in a build for all direct and indirect dependencies
