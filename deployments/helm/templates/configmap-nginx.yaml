@@ -26,11 +26,11 @@ data:
           return 200 'ok';
         }
         # parent
-        location ~* ^/integration/demo/parent/(.*)& {
-            rewrite ^/integration/demo/parent/(.*)& /$1 break;
+        location ~* ^/integration/demo/parent/.*$ {
+            rewrite ^/integration/demo/parent/(.*)$ /$1 break;
             proxy_pass http://{{ $crmParentSvcName }}:8080;
         }
-        location /integration/demo/iframe {
+        location /integration/game/iframe {
             proxy_pass http://{{ $crmParentSvcName }}:8080;
         }
         location /integration/game/billing {
@@ -38,14 +38,14 @@ data:
         }
 
         # dev
-        location ~* ^/integration/demo/dev/(.*)& {
-            rewrite ^/integration/demo/dev/(.*)& /$1 break;
+        location ~* ^/integration/demo/dev/.*$ {
+            rewrite ^/integration/demo/dev/(.*)$ /$1 break;
             proxy_pass http://{{ $crmDevSvcName }}:8080;
         }
 
         # qilin (sdk)
-        location ~* ^/integration/demo/qilin/(.*)& {
-            rewrite ^//integration/demo/qilin/(.*)& /$1 break;
+        location ~* ^/integration/demo/qilin/.*$ {
+            rewrite ^//integration/demo/qilin/(.*)$ /$1 break;
             proxy_pass http://{{ $crmSdkSvcName }}:8080;
         }
 
