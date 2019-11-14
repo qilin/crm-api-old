@@ -55,7 +55,7 @@ crmdev:
       name: crmdev
       protocol: TCP
     - port: 1443
-      name: 
+      name: demogame
     ingressPort: 8080
     healthPort: 8081
     replicas: 1
