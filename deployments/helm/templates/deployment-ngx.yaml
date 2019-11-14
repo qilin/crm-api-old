@@ -39,7 +39,7 @@ spec:
       volumes:
       - name: {{ $deploymentName }}-configmap
         configMap:
-          name: {{ $deploymentName }}
+          name: {{ $deploymentName }}-configmap
       containers:
         - name: {{ $deployment.name }}
           image: {{ $deployment.image }}:{{ $deployment.imageTag }}
