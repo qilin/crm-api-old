@@ -36,6 +36,7 @@ https://tst.qilin.super.com/integration/demo/parent/{pattern}
 ```
 <host>:8080/{pattern}
 ```
+Дополнительно:
 ```
 https://tst.qilin.super.com/integration/game/iframe 
 https://tst.qilin.super.com/integration/game/billing
