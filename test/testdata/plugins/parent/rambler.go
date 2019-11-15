@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"path"
@@ -55,46 +54,33 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 			log.Emergency("plugin: can not cast context config to map[string]string")
 		}
 
-		// fake auth
-		if fake, ok := cfg["parent_auth_fake"]; ok && fake == "true" {
-			url, ok := cfg["parent_iframe_url"]
-			if !ok {
-				url = "%parent_iframe_url%"
-			}
-			return common.AuthResponse{
-				Meta: map[string]interface{}{
-					"url": url,
-				},
-			}, nil
-		}
+		// // get http request from context
+		// req, ok := ctx.Value("request").(*http.Request)
+		// if !ok {
+		// 	log.Emergency("can't extract *http.Request from context")
+		// }
 
-		// get http request from context
-		req, ok := ctx.Value("request").(*http.Request)
-		if !ok {
-			log.Emergency("can't extract *http.Request from context")
-		}
+		// // get cookie
+		// cookie, err := req.Cookie(cfg["parent_auth_cookie_name"])
+		// if err != nil {
+		// 	return response, err
+		// }
 
-		// get cookie
-		cookie, err := req.Cookie(cfg["parent_auth_cookie_name"])
-		if err != nil {
-			return response, err
-		}
-
-		authToken := cookie.Value
-		// todo: verify authToken
-		if len(authToken) == 0 {
-			return response, errors.New("not authenticated")
-		}
+		// authToken := cookie.Value
+		// // todo: verify authToken
+		// if len(authToken) == 0 {
+		// 	return response, errors.New("not authenticated")
+		// }
 
 		// issue JWT
-		jwt, err := utils.IssueJWT("", "", "", "3d4ff5f9-8614-4524-ba4b-378a9fdb4594", 0, keyPair.Private)
+		jwt, err := utils.IssueJWT("", "", "", request.QilinProductUUID, 0, keyPair.Private)
 		if err != nil {
 			return response, err
 		}
 		// url to return
 		response.Meta = map[string]interface{}{
-			"url":    utils.AddURLParams(cfg["parent_iframe_url"], map[string]string{"jwt": string(jwt)}),
-			"cookie": authToken,
+			"url": utils.AddURLParams(cfg["parent_iframe_url"], map[string]string{"jwt": string(jwt)}),
+			// "cookie": authToken,
 		}
 		return
 	}
