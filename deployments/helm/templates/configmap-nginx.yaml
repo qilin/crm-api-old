@@ -45,7 +45,7 @@ data:
 
         # qilin (sdk)
         location ~* ^/integration/demo/qilin/.*$ {
-            rewrite ^//integration/demo/qilin/(.*)$ /$1 break;
+            rewrite ^/integration/demo/qilin/(.*)$ /$1 break;
             proxy_pass http://{{ $crmSdkSvcName }}:8080;
         }
 
