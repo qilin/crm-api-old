@@ -127,8 +127,7 @@ func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, 
 	}
 	buf := &bytes.Buffer{}
 	err = tpl.ExecuteTemplate(buf, tplName, map[string]interface{}{
-		"QilinGameProxyURL": "",
-		"IframeURL":         "",
+		"GameUUID": ctx.QueryParam("uuid"),
 	})
 	if err != nil {
 		return err
