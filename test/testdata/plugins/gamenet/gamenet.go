@@ -192,7 +192,7 @@ func auth(login, password string) (string, error) {
 	form.Add("mid", "175419290")
 	form.Add("browserhwid", "1ba8e830bc511735b9676f94455feab9")
 	form.Add("rp", "")
-	form.Add("trustedLocation", "0")
+	form.Add("trustedLocation", "1")
 	form.Add("code2fa", "")
 	form.Add("json", "1")
 	form.Add("2fa", "1")
