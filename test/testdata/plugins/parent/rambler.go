@@ -125,7 +125,6 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
 	r.GET("/integration/game/billing", p.billingCallback)
-	r.POST("/integration/game/billing", p.billingCallback)
 	r.POST("/api/v2/svc/payment/create", p.createOrder)
 }
 
