@@ -196,7 +196,7 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 	switch ctx.QueryParam("notification_type") {
 	case "get_item":
 		if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
-			"item", "app_id", "user_id", "receiver_id", "lang") {
+			"item", "app_id", "user_id", "receiver_id", "lang", "notification_type") {
 			fmt.Println("bad signature", ctx.Request().RequestURI)
 			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 		}
@@ -210,7 +210,7 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 		})
 	case "order_status_change":
 		if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
-			"item", "app_id", "user_id", "receiver_id", "lang", "order_id", "item_price", "status") {
+			"item", "app_id", "user_id", "receiver_id", "lang", "order_id", "item_price", "status", "notification_type") {
 			fmt.Println("bad signature", ctx.Request().RequestURI)
 			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 		}
