@@ -39,7 +39,7 @@ spec:
       containers:
         - name: {{ $deployment.name }}
           image: {{ $deployment.image }}:{{ $deployment.imageTag }}
-          args: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080","-d"]
+          args: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080"]
           ports:
             {{- range $port := $deployment.ports }}
             - containerPort: {{ $port.port }}
