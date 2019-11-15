@@ -57,7 +57,7 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 
 	url, ok := cfg["entryurl"]
 	if !ok {
-		log.Error("plugin: can not find entryURL in config")
+		log.Error("plugin: can not find entryurl in config")
 	}
 
 	run(port, url)
