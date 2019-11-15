@@ -1,4 +1,4 @@
-package utils
+package sdk
 
 import (
 	"crypto/ecdsa"
@@ -11,7 +11,7 @@ type KeyPair struct {
 	Private *ecdsa.PrivateKey
 }
 
-func DecodePemECDSA(pemPriv, pemPub string) (KeyPair, error) {
+func decodePemECDSA(pemPriv, pemPub string) (KeyPair, error) {
 	block, _ := pem.Decode([]byte(pemPriv))
 	x509Encoded := block.Bytes
 	privateKey, err := x509.ParseECPrivateKey(x509Encoded)

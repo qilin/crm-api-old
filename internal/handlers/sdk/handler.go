@@ -72,10 +72,10 @@ func (h *SDKGroup) postAuth(ctx echo.Context) error {
 	var err error
 
 	switch h.sdk.Mode() {
-	case common2.ParentMode:
+	case common2.StoreMode:
 		// pass it into plugin
 		resp, err = h.parentMode(context.WithValue(context.Background(), "request", ctx.Request()), r)
-	case common2.DeveloperMode:
+	case common2.ProviderMode:
 		// parse, verify and pass into plugin
 		resp, err = h.devMode(context.Background(), r)
 	default:

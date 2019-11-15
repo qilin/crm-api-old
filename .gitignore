@@ -9,6 +9,7 @@
 *.dylib
 
 /bin
+/plugins
 
 # Test binary, built with `go test -c`
 *.test

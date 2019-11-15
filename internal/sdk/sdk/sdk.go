@@ -3,14 +3,13 @@ package sdk
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"html/template"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -23,32 +22,10 @@ import (
 	"github.com/qilin/crm-api/internal/sdk/repo"
 )
 
-type Config struct {
-	Debug          bool `fallback:"shared.debug"`
-	Mode           common.SDKMode
-	Iframes        map[string]string // todo: it's temporary
-	IframeTemplate string
-	Plugins        []string
-	PluginsConfig  map[string]string
-	JWT            JWT
-}
-
-type JWT struct {
-	Subject    string
-	Iss        string
-	Exp        int // time expiration in minutes
-	PrivateKey string
-	PublicKey  string
-}
-
-type KeyPair struct {
-	Public  *ecdsa.PublicKey
-	Private *ecdsa.PrivateKey
-}
-
 type SDK struct {
 	ctx           context.Context
-	cfg           Config
+	cfg           *Config
+	pluginsCfg    *PluginsConfig
 	pm            *plugins.PluginManager
 	authenticator common.Authenticate
 	orderer       common.Order
@@ -59,7 +36,8 @@ type SDK struct {
 }
 
 func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
-	return s.authenticator(context.WithValue(ctx, "config", s.cfg.PluginsConfig), request, token, log)
+	spew.Dump(s.pluginsCfg.PluginsConfig)
+	return s.authenticator(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, token, log)
 }
 
 func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
@@ -129,11 +107,11 @@ func (s *SDK) Mode() common.SDKMode {
 }
 
 func (s *SDK) Order(ctx context.Context, request common.OrderRequest, log logger.Logger) (response common.OrderResponse, err error) {
-	return s.orderer(context.WithValue(ctx, "config", s.cfg.PluginsConfig), request, log)
+	return s.orderer(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, log)
 }
 
 func (s *SDK) PluginsRoute(echo *echo.Echo) {
-	s.pm.Http(context.WithValue(context.Background(), "config", s.cfg.PluginsConfig), echo, s.L())
+	s.pm.Http(context.WithValue(context.Background(), "config", s.pluginsCfg.PluginsConfig), echo, s.L())
 }
 
 func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
@@ -142,9 +120,9 @@ func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
 	return jwt.ECDSACheck(token, s.keyPair.Public)
 }
 
-func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config) *SDK {
+func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config, pluginsCfg *PluginsConfig) *SDK {
 	pm := plugins.NewPluginManager()
-	if cfg.Mode == common.ParentMode || cfg.Mode == common.DeveloperMode {
+	if cfg.Mode == common.StoreMode || cfg.Mode == common.ProviderMode {
 		for _, p := range cfg.Plugins {
 			err := pm.Load(p)
 			if err != nil {
@@ -155,14 +133,15 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 		}
 	}
 
-	pm.Init(ctx, cfg.PluginsConfig, set.L())
+	pm.Init(ctx, pluginsCfg.PluginsConfig, set.L())
 
 	sdk := &SDK{
-		ctx:  ctx,
-		cfg:  *cfg,
-		repo: repo,
-		pm:   pm,
-		LMT:  &set,
+		ctx:        ctx,
+		cfg:        cfg,
+		pluginsCfg: pluginsCfg,
+		repo:       repo,
+		pm:         pm,
+		LMT:        &set,
 	}
 
 	// load keys
@@ -180,48 +159,21 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 	}
 
 	sdk.keyPair, err = decodePemECDSA(cfg.JWT.PrivateKey, cfg.JWT.PublicKey)
+	if err != nil {
+		set.L().Emergency(err.Error())
+	}
 
 	switch cfg.Mode {
-	case common.ParentMode:
-		// todo: configure parent sdk
+	case common.StoreMode:
 		sdk.authenticator = pm.Auth(nil)
 		break
-	case common.DeveloperMode:
-		// todo: configure developer sdk
-		// todo: load plugins and build chain
+	case common.ProviderMode:
 		sdk.authenticator = pm.Auth(nil)
 		break
 	default:
-		// todo: default qilin mode
-		if err != nil {
-			set.L().Emergency(err.Error())
-		}
-
 		qln := qilin.NewQilinAuthenticator()
 		sdk.authenticator = qln.Auth
 		sdk.orderer = qln.Order
 	}
 	return sdk
-}
-
-func decodePemECDSA(pemPriv, pemPub string) (KeyPair, error) {
-	block, _ := pem.Decode([]byte(pemPriv))
-	x509Encoded := block.Bytes
-	privateKey, err := x509.ParseECPrivateKey(x509Encoded)
-	if err != nil {
-		return KeyPair{}, err
-	}
-
-	blockPub, _ := pem.Decode([]byte(pemPub))
-	x509EncodedPub := blockPub.Bytes
-	genericPublicKey, err := x509.ParsePKIXPublicKey(x509EncodedPub)
-	if err != nil {
-		return KeyPair{}, err
-	}
-	publicKey := genericPublicKey.(*ecdsa.PublicKey)
-
-	return KeyPair{
-		Public:  publicKey,
-		Private: privateKey,
-	}, nil
 }

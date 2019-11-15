@@ -17,8 +17,10 @@ const (
 type SDKMode string
 
 const (
-	ParentMode    SDKMode = "parent"
-	DeveloperMode SDKMode = "dev"
+	// todo: rename string const here and in configs
+	StoreMode SDKMode = "parent"
+	// todo: rename string const here and in configs
+	ProviderMode SDKMode = "dev"
 )
 
 const (

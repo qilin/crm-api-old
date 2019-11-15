@@ -21,7 +21,7 @@ import (
 
 func Cfg(cfg config.Configurator) (*Config, func(), error) {
 	c := &Config{}
-	e := cfg.UnmarshalKey(common.UnmarshalKey, c)
+	e := cfg.UnmarshalKeyOnReload(common.UnmarshalKey, c)
 	return c, func() {}, e
 }
 
@@ -30,9 +30,20 @@ func CfgTest() (*Config, func(), error) {
 	return &Config{}, func() {}, nil
 }
 
+func PluginsCfg(cfg config.Configurator) (*PluginsConfig, func(), error) {
+	c := &PluginsConfig{}
+	e := cfg.UnmarshalKeyOnReload(common.UnmarshalKey, c)
+	return c, func() {}, e
+}
+
+func PluginsCfgTest(cfg config.Configurator) (*PluginsConfig, func(), error) {
+	c := &PluginsConfig{}
+	return c, func() {}, nil
+}
+
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, repo *sdkRepo.Repo, cfg *Config) (*SDK, func(), error) {
-	g := New(ctx, set, repo, cfg)
+func Provider(ctx context.Context, set provider.AwareSet, repo *sdkRepo.Repo, cfg *Config, pluginsCfg *PluginsConfig) (*SDK, func(), error) {
+	g := New(ctx, set, repo, cfg, pluginsCfg)
 	return g, func() {}, nil
 }
 
@@ -59,6 +70,7 @@ var (
 
 	WireSet = wire.NewSet(
 		Cfg,
+		PluginsCfg,
 		Provider,
 		ProviderSDKRepo,
 		resolver.ValidatorsProduction,
@@ -69,6 +81,7 @@ var (
 
 	WireTestSet = wire.NewSet(
 		CfgTest,
+		PluginsCfgTest,
 		Provider,
 		ProviderSDKTestRepo,
 		resolver.ValidatorsTest,
