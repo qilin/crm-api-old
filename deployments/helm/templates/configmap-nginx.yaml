@@ -27,8 +27,8 @@ data:
           add_header Content-Type text/plain;
           return 200 'ok';
         }
-        # parent
-        location ~* ^/integration/demo/parent/.*$ {
+        # store
+        location /integration/demo/parent {
             rewrite ^/integration/demo/parent/(.*)$ /$1 break;
             proxy_pass http://{{ $crmParentSvcName }}:8080;
         }
@@ -39,15 +39,15 @@ data:
             proxy_pass http://{{ $crmParentSvcName }}:8080;
         }
 
-        # dev
-        location ~* ^/integration/demo/dev/.*$ {
+        # gamenet provider
+        location /integration/demo/dev {
             rewrite ^/integration/demo/dev/(.*)$ /$1 break;
             proxy_pass http://{{ $crmDevSvcName }}:8080;
         }
 
-        # qilin (sdk)
-        location ~* ^/integration/demo/qilin/.*$ {
-            rewrite ^//integration/demo/qilin/(.*)$ /$1 break;
+        # qilin hub
+        location /integration/demo/qilin {
+            rewrite ^/integration/demo/qilin/(.*)$ /$1 break;
             proxy_pass http://{{ $crmSdkSvcName }}:8080;
         }
 
