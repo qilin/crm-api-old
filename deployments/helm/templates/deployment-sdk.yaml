@@ -38,7 +38,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}
       containers:
         - name: {{ $deployment.name }}
-          image: {{ $deployment.image }}:{{ $deployment.imageTag }}
+          image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
           args: ["sdk","-c","configs/sdk.yaml","-b",":8080"]
           ports:
             {{- range $port := $deployment.ports }}

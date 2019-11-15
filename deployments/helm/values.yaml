@@ -16,6 +16,10 @@ ingressProxy:
 certIssuer:
   email: admin@protocol.one
 
+backend:
+    image: "p1hub/qilin-crm-api"
+    imageTag: latest
+
 crmngx:
     name: crmngx
     role: nginx
