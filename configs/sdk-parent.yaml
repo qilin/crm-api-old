@@ -30,7 +30,8 @@ sdk:
   plugins:
     - plugins/rambler.so
   pluginsConfig:
-    parent_iframe_url: "/integration/demo/qilin/sdk/v1/iframe" # ?jwt=eyJhbGciOiJFUzUxMiJ9.eyJleHAiOjE1NzM0OTM0MTEsImlzcyI6IlFpbGluIiwicWlsaW5Qcm9kdWN0VVVJRCI6ImZhMTRiMzk5LWFlOWItNDExMS05YzdmLTBmMWZlMmNjMWViOCIsInN1YiI6IlFpbGluU3ViamVjdCIsInVzZXJJRCI6IjFjM2U0M2E1LTg1MTMtNDJiMy04Nzc0LTU5NmM3ODA3OWJiMiJ9.v_R1yU3nXgCb2THSU9udRMa3jiC8zmJy1QD7AiyagZkpa3lkcyo6bPlKoKqT2TaY-1GMBrUBoklUW4YZPtQX9RMBOaGcwwcAXqBO7MCB9J3vDK9DOXufKOWdT-CXWukp" #"http://localhost:8084/parent/iframe/game?jwt=<...>"
+    parent_iframe_url: "https://tst.qilin.super.com/integration/demo/qilin/sdk/v1/iframe"
+    # parent_iframe_url: "http://localhost:8086/sdk/v1/iframe"
     parent_iframe_route: "/game"
     parent_iframe_template: "configs/sdk/parent-index.html"
     parent_index_route: "/store"

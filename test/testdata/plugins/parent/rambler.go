@@ -73,7 +73,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		// }
 
 		// issue JWT
-		jwt, err := utils.IssueJWT("", "", "", request.QilinProductUUID, 0, keyPair.Private)
+		jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, keyPair.Private)
 		if err != nil {
 			return response, err
 		}
