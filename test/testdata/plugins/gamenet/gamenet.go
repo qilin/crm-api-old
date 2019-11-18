@@ -71,7 +71,8 @@ func run(port, url string) {
 		mux.HandleFunc("/sdk/v1/auth", func(w http.ResponseWriter, r *http.Request) {
 			var rs = common.AuthResponse{
 				Meta: map[string]string{
-					"url": "/games/khanwars/iframe?wmode=opaque",
+					// "url": "/games/khanwars/iframe?wmode=opaque",
+					"url": "/games/skyfire/iframe?wmode=opaque",
 				},
 			}
 			data, err := json.Marshal(&rs)
@@ -91,13 +92,20 @@ func run(port, url string) {
 	}()
 }
 
+const (
+	// gnhost  = "gamenet.ru"
+	// gnlogin = "gnlogin.ru"
+	gnhost  = "www.stg.gamenet.ru"
+	gnlogin = "gnlogin.stg.gamenet.ru"
+)
+
 // eyJhbGciOiJFUzUxMiJ9.eyJleHAiOjE1NzM0ODM2NjUsImlzcyI6IlFpbGluIiwicWlsaW5Qcm9kdWN0VVVJRCI6IjNkNGZmNWY5LTg2MTQtNDUyNC1iYTRiLTM3OGE5ZmRiNDU5NCIsInN1YiI6IlFpbGluU3ViamVjdCIsInVzZXJJRCI6IjEwMDUwMCJ9.QDwRpjt93j0oFdHUq9MZEQ8RBJ01QdFeCUz3qppb61b60qq0g_gOQCd-8NuwADtgwUfC4IRwMVfzCixXpJ5ug83lHTprQmXfyyUsSg-nlZ89CFuiCC_PuZkH2CJQKqU5
 func root(proxyurl string) http.HandlerFunc {
-	target, _ := url.Parse("https://gamenet.ru")
+	target, _ := url.Parse("https://" + gnhost)
 	targetQuery := target.RawQuery
 	proxy := &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
-			req.Host = "gamenet.ru"
+			req.Host = "" + gnhost
 			// follow lines of code copied from httputil.NewReverseProxy
 			req.URL.Scheme = target.Scheme
 			req.URL.Host = target.Host
@@ -116,8 +124,8 @@ func root(proxyurl string) http.HandlerFunc {
 			fmt.Println(res.Request.RequestURI)
 			for _, v := range res.Header {
 				for i := range v {
-					if strings.Contains(v[i], "https://gamenet.ru") {
-						v[i] = strings.Replace(v[i], "https://gamenet.ru", proxyurl, -1)
+					if strings.Contains(v[i], "https://"+gnhost) {
+						v[i] = strings.Replace(v[i], "https://"+gnhost, proxyurl, -1)
 					}
 				}
 			}
@@ -197,7 +205,7 @@ func auth(login, password string) (string, error) {
 	form.Add("json", "1")
 	form.Add("2fa", "1")
 
-	req, err := http.NewRequest(http.MethodPost, "https://gnlogin.ru/", strings.NewReader(form.Encode()))
+	req, err := http.NewRequest(http.MethodPost, "https://"+gnlogin+"/", strings.NewReader(form.Encode()))
 	if err != nil {
 		return "", err
 	}
@@ -266,6 +274,7 @@ parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcel
 </head>
 <body>
   <script>
+  	window.isFlashEnabled = true
     const helper = qilinGameProxy('/sdk/v1');
     helper.init()
       .then(() => console.log('Adapter was started'))
