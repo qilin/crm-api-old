@@ -119,15 +119,33 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		//	return response, errors.New("not authenticated")
 		//}
 
+		// // get http request from context
+		// req, ok := ctx.Value("request").(*http.Request)
+		// if !ok {
+		// 	log.Emergency("can't extract *http.Request from context")
+		// }
+
+		// // get cookie
+		// cookie, err := req.Cookie(cfg["parent_auth_cookie_name"])
+		// if err != nil {
+		// 	return response, err
+		// }
+
+		// authToken := cookie.Value
+		// // todo: verify authToken
+		// if len(authToken) == 0 {
+		// 	return response, errors.New("not authenticated")
+		// }
+
 		// issue JWT
-		jwt, err := utils.IssueJWT("", "", "", "3d4ff5f9-8614-4524-ba4b-378a9fdb4594", 0, keyPair.Private)
+		jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, keyPair.Private)
 		if err != nil {
 			return response, err
 		}
 		// url to return
 		response.Meta = map[string]interface{}{
 			"url": utils.AddURLParams(cfg["parent_iframe_url"], map[string]string{"jwt": string(jwt)}),
-			//"cookie": authToken,
+			// "cookie": authToken,
 		}
 		return
 	}
@@ -146,25 +164,22 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	}
 	// todo: remove iframe provider?
 	// Parent Iframe provider
-	//iframeProviderRoute, ok := cfg["parent_iframe_route"]
-	//if !ok {
-	//	log.Emergency("plugin: can not find parent_iframe_route in config")
-	//}
+	iframeProviderRoute, ok := cfg["parent_iframe_route"]
+	if !ok {
+		log.Emergency("plugin: can not find parent_iframe_route in config")
+	}
 
 	r.GET(indexRoute, func(c echo.Context) error {
-		return p.indexHandler(c, cfg, log)
+		return p.IndexHandler(c, cfg, log)
 	})
-	// todo: remove iframe provider?
-	//r.GET(iframeProviderRoute, func(c echo.Context) error {
-	//	return p.IframeProviderHandler(c, cfg, log)
-	//})
+	r.GET(iframeProviderRoute, func(c echo.Context) error {
+		return p.IframeProviderHandler(c, cfg, log)
+	})
 	r.GET("/integration/game/iframe", p.runTestGame)
 	r.GET("/integration/game/billing", p.billingCallback)
-	r.POST("/integration/game/billing", p.billingCallback)
 	r.POST("/api/v2/svc/payment/create", p.createOrder)
 }
 
-// todo: remove iframe provider?
 func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
 	tplPath, ok := cfg["parent_iframe_template"]
 	if !ok {
@@ -178,8 +193,7 @@ func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, 
 	}
 	buf := &bytes.Buffer{}
 	err = tpl.ExecuteTemplate(buf, tplName, map[string]interface{}{
-		"QilinGameProxyURL": "",
-		"IframeURL":         "",
+		"GameUUID": ctx.QueryParam("uuid"),
 	})
 	if err != nil {
 		return err
@@ -187,7 +201,7 @@ func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, 
 	return ctx.HTML(http.StatusOK, buf.String())
 }
 
-func (p *plugin) indexHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
+func (p *plugin) IndexHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
 	tplPath, ok := cfg["parent_index_template"]
 	if !ok {
 		log.Emergency("plugin: can not find parent_index_template in config")

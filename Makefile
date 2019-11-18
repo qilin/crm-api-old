@@ -81,6 +81,7 @@ dev-build-test-plugins: ## build plugins for tests
     else \
         go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/rambler.so" "$(ROOT_DIR)/test/testdata/plugins/store/rambler.go" ;\
         go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/gamenet.so" "$(ROOT_DIR)/test/testdata/plugins/gamenet/gamenet.go" ;\
+        go build -buildmode=plugin -v -o "$(ROOT_DIR)/test/testdata/plugins/so/rgames.so" "$(ROOT_DIR)/test/testdata/plugins/rgames/rgames.go" ;\
     fi;
 .PHONY: dev-build-test-plugins
 

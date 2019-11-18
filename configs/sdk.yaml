@@ -28,7 +28,8 @@ dispatcher:
 sdk:
   mode:
   iframes:
-    "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb8": "https://demo-game.tst.qilin.super.com/" #games/khanwars/iframe/?wmode=opaque"
+    "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7": "https://demo-game.tst.qilin.super.com/"
+    "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb8": "https://tst.qilin.super.com/integration/demo/dev/rgames/iframe"
   iframeTemplate: "./configs/sdk/qilin-adapter-iframe.html"
   plugins:
   jwt:
