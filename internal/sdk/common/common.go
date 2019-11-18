@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	Prefix       = "pkg.sdk"
-	UnmarshalKey = "sdk"
+	Prefix                   = "pkg.sdk"
+	UnmarshalKey             = "sdk"
+	UnmarshalKeyPluginConfig = "sdk.plugin"
 )
 
 type SDKMode string

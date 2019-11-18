@@ -42,8 +42,8 @@ func PluginsCfgTest(cfg config.Configurator) (*PluginsConfig, func(), error) {
 }
 
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, repo *sdkRepo.Repo, cfg *Config, pluginsCfg *PluginsConfig) (*SDK, func(), error) {
-	g := New(ctx, set, repo, cfg, pluginsCfg)
+func Provider(ctx context.Context, set provider.AwareSet, repo *sdkRepo.Repo, cfg *Config, pCfg *PluginsConfig, init config.Initial) (*SDK, func(), error) {
+	g := New(ctx, set, repo, cfg, pCfg, init)
 	return g, func() {}, nil
 }
 

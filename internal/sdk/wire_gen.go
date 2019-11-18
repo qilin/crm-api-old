@@ -155,7 +155,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	sdkSDK, cleanup13, err := sdk.Provider(ctx, awareSet, repoRepo, sdkConfig, pluginsConfig)
+	sdkSDK, cleanup13, err := sdk.Provider(ctx, awareSet, repoRepo, sdkConfig, pluginsConfig, initial)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -418,7 +418,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	sdkSDK, cleanup13, err := sdk.Provider(ctx, awareSet, repoRepo, sdkConfig, pluginsConfig)
+	sdkSDK, cleanup13, err := sdk.Provider(ctx, awareSet, repoRepo, sdkConfig, pluginsConfig, initial)
 	if err != nil {
 		cleanup12()
 		cleanup11()

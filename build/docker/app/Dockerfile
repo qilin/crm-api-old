@@ -8,6 +8,7 @@ COPY ./build/docker/app/files /
 COPY ./api api
 COPY ./assets assets
 COPY ./configs configs
+COPY ./web web
 COPY ./bin bin
 COPY ./test/testdata/plugins/so plugins
 

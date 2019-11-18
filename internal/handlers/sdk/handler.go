@@ -43,7 +43,7 @@ func (h *SDKGroup) Route(groups *common.Groups) {
 	groups.SDK.POST(sdkAuthRoute, h.postAuth)
 	groups.SDK.POST(sdkOrderRoute, h.postOrder)
 	groups.SDK.POST(sdkHealthRoute, h.getHealth)
-	groups.SDK.GET(sdkQilinIframe, h.qilinIframe)
+	groups.SDK.GET(sdkQilinIframe, h.hubIframe)
 }
 
 // POST /sdk/v1/auth
@@ -70,17 +70,18 @@ func (h *SDKGroup) postAuth(ctx echo.Context) error {
 
 	var resp common2.AuthResponse
 	var err error
+	c := context.WithValue(context.Background(), "request", ctx.Request())
 
 	switch h.sdk.Mode() {
 	case common2.StoreMode:
 		// pass it into plugin
-		resp, err = h.parentMode(context.WithValue(context.Background(), "request", ctx.Request()), r)
+		resp, err = h.storeMode(c, r)
 	case common2.ProviderMode:
 		// parse, verify and pass into plugin
-		resp, err = h.devMode(context.Background(), r)
+		resp, err = h.providerMode(c, r)
 	default:
 		// parse, verify and pass into adapter
-		resp, err = h.qilinMode(context.Background(), r)
+		resp, err = h.hubMode(c, r)
 	}
 
 	if err != nil {
@@ -121,7 +122,7 @@ func (h *SDKGroup) getHealth(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (h *SDKGroup) qilinIframe(ctx echo.Context) error {
+func (h *SDKGroup) hubIframe(ctx echo.Context) error {
 	// todo: extract product uuid from request
 	html, err := h.sdk.IframeHtml("")
 	if err != nil {
@@ -130,12 +131,12 @@ func (h *SDKGroup) qilinIframe(ctx echo.Context) error {
 	return ctx.HTML(http.StatusOK, html)
 }
 
-func (h *SDKGroup) parentMode(ctx context.Context, r common2.AuthRequest) (common2.AuthResponse, error) {
+func (h *SDKGroup) storeMode(ctx context.Context, r common2.AuthRequest) (common2.AuthResponse, error) {
 	claims := &jwt.Claims{}
 	return h.sdk.Authenticate(ctx, r, claims, h.L())
 }
 
-func (h *SDKGroup) devMode(ctx context.Context, r common2.AuthRequest) (common2.AuthResponse, error) {
+func (h *SDKGroup) providerMode(ctx context.Context, r common2.AuthRequest) (common2.AuthResponse, error) {
 	u, err := url.Parse(r.URL)
 	if err != nil {
 		return common2.AuthResponse{}, err
@@ -172,7 +173,7 @@ func (h *SDKGroup) devMode(ctx context.Context, r common2.AuthRequest) (common2.
 	return h.sdk.Authenticate(ctx, r, claims, h.L())
 }
 
-func (h *SDKGroup) qilinMode(ctx context.Context, r common2.AuthRequest) (common2.AuthResponse, error) {
+func (h *SDKGroup) hubMode(ctx context.Context, r common2.AuthRequest) (common2.AuthResponse, error) {
 	u, err := url.Parse(r.URL)
 	if err != nil {
 		return common2.AuthResponse{}, err

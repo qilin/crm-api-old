@@ -29,72 +29,77 @@ sdk:
   mode: "parent"
   plugins:
     - plugins/rambler.so
+  plugin:
+    store:
+      routes:
+        index: "/store"
+        iframe: "/game"
+      url:
+        iframe: "https://tst.qilin.super.com/integration/demo/qilin/sdk/v1/iframe"
+      auth:
+        fake: true
+        cookieName: "qlsid"
+        rsidCookieName: "rsid"
+      keys:
+        jwt:
+          publicKey: |
+            -----BEGIN PUBLIC KEY-----
+            MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEfQa/uwg5YlO8DTa98hwwt795y4F3ST4A
+            T1/2WtQTdggoYIzdgNTgQ7lX9+ZLjorowANuooooeuO+51Sw1hZTKbtEa7oOHxr+
+            o78UMCziRQeQzRBnIBjHt8Z2H9DUxrHb
+            -----END PUBLIC KEY-----
+
+          privateKey: |
+            -----BEGIN PRIVATE KEY-----
+            MIGkAgEBBDAEk3lnN3fagRuoi7SZnpiq6+KW9uU7OLgfvONA+gTzToFWYel8qW3L
+            4PFpjFPb0MmgBwYFK4EEACKhZANiAAR9Br+7CDliU7wNNr3yHDC3v3nLgXdJPgBP
+            X/Za1BN2CChgjN2A1OBDuVf35kuOiujAA26iiih6477nVLDWFlMpu0Rrug4fGv6j
+            vxQwLOJFB5DNEGcgGMe3xnYf0NTGsds=
+            -----END PRIVATE KEY-----
+
+        ramblerID:
+          kid: ""
+          rsaPrivateKey: |
+            -----BEGIN PRIVATE KEY-----
+            MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQCwSWzuBzLSN0St
+            B4BgLUIzdM9NcFaAq9/8NojOV4x5Mm1EsNbtXRaxdQY4XAkS9vsaSPxGIpacLuJg
+            m8UBomdoHh2JZop01xmO4UNSxfV/S+2xV+tsI+68tRkLn84eO/i51/g3a0J/coeA
+            ofYtaemXwVeKjNOH13bsDjYaT4Tsa2bksO813MgtuakGKyQB3wqutX1o8Q6UUAz3
+            ed9rnbTXQWB1jVbqApngnqAk98BmaZChUGD2bhwU5aNle3ilepGWMRMMdCLfqVeb
+            NmFfqwFuEnEK9x8IrnfTjGwHnR+898HMX2EL7RQXnFTNOuhr8Sz/ai3VhHWAYzSg
+            todVX07ZAgMBAAECggEBAKDy+NQ9mEXblgUQM0IcMDQAswA1z5R81+xS8gbKYgOJ
+            ab/sYN6oPf7ZJEuyo8o/2rR97G4wSCfimmav8WdzmkuyKy92gnT4qmoL+saI3IJT
+            lXl0FwpNqDt8cJhvV+W8xXMP3pziff0UWOi1dqix6UbXjBCAUOTWcMpGk1jkPy0F
+            wOaaMpyAxaQn/S/dMoJfU+QcCjV0AV1wSqkihdjxsDOx0KUpjH4DN8GtIV236hz/
+            SBJ8gPta0kcUMnFSAd7xSHvZGSuVbV87zpoKh1cYlFx6SQRbTMikOlAMXWg1si43
+            y+u1JJnDShTQgzNK9jndVUEyqX9lnA4teyztWboB9bECgYEA5k4CEToiKP8Y9Uj8
+            3GGduyH8ZV2pnNPDziytP3WXAuH5MtaaIkMsV690M2HtwdKvmb5BpVYBu/hIkTDv
+            oQpcyDZ6Sl3g/vTbYyHi/pkB5l9k7fcHTdP3f0H1vs/UeKcgP2uKWi+n+RT+TvvO
+            pnGVaTC72vtJFKHMgVFYyPCmQxUCgYEAw/SNLG39z0fUTGyNVQYLQ7Nq3rcZmgpN
+            CQlANO8eVB4df9gKZFhji9U36iEPiA1RWibfXUiWhQJn+CFZ7eAYy8/hEU0Wj6Qa
+            R1SotGfkxVAikVxeicTpIsLssDOosO0TuBVQMWfTBquMc34ChuIDBE+du7H4sEPo
+            gKbRwll2nbUCgYEAjmqo7pxDaZSui2gyLdoTnxgaK1jrPTba+9E25WpDEx5Iav64
+            W/2sGyE9u1SQoW429tznXWW9Ns8HmPlpBe4RiCHgJ8K8Ew256SiYZZaazSoqkNlU
+            4/TzNPfGDtQYcO/wiidna/PSbL5lsNQYa2cL3Pus/3KrM54Gh+WVANWICy0CgYEA
+            kxxYk/9raZ8iWdGw9SDZehULaXKKzONo3BzO0C6oVTxapyzY+GaHLWaAWMxDLb/Z
+            0FWYoR6qqeaZiWX4bqYr128UJ/n4sxPfCqgbE31f+WXk3b471zA2Wnt+V/Ygcds6
+            T5vonX61pa9KfTYfzYWGAEmJQG0nJ6WDunoCxeaGL3UCgYEAkTAE44yEW5qHZIGo
+            Y7PYZ3b/RRHJlFHMYCoa79iCFroQuMrQQQzKbH09wdkIXVaygqCFbVqpvM2E+Iqm
+            SmVX+NJ8+HRw/YCyo2c8M3Sgb8yqZl92F9KajhXpmWYbBZPiNZ5HxyBjdq+My7Pk
+            rQYntvw3aZu+PZVm4niCtKzYng8=
+            -----END PRIVATE KEY-----
+
+          rsaPublicKey: |
+            -----BEGIN PUBLIC KEY-----
+            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsEls7gcy0jdErQeAYC1C
+            M3TPTXBWgKvf/DaIzleMeTJtRLDW7V0WsXUGOFwJEvb7Gkj8RiKWnC7iYJvFAaJn
+            aB4diWaKdNcZjuFDUsX1f0vtsVfrbCPuvLUZC5/OHjv4udf4N2tCf3KHgKH2LWnp
+            l8FXiozTh9d27A42Gk+E7Gtm5LDvNdzILbmpBiskAd8KrrV9aPEOlFAM93nfa520
+            10FgdY1W6gKZ4J6gJPfAZmmQoVBg9m4cFOWjZXt4pXqRljETDHQi36lXmzZhX6sB
+            bhJxCvcfCK5304xsB50fvPfBzF9hC+0UF5xUzTroa/Es/2ot1YR1gGM0oLaHVV9O
+            2QIDAQAB
+            -----END PUBLIC KEY-----
   pluginsConfig:
-    parent_iframe_url: "https://tst.qilin.super.com/integration/demo/qilin/sdk/v1/iframe"
-    # parent_iframe_url: "http://localhost:8086/sdk/v1/iframe"
-    parent_iframe_route: "/game"
-    parent_iframe_template: "configs/sdk/parent-index.html"
-    parent_index_route: "/store"
-    parent_index_template: "configs/sdk/store.html"
-    parent_app_secret: "rambler's app secret key"
-    parent_auth_cookie_name: "qpssid"
-    parent_auth_fake: "true"
-    store_public_key: |
-      -----BEGIN PUBLIC KEY-----
-      MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEfQa/uwg5YlO8DTa98hwwt795y4F3ST4A
-      T1/2WtQTdggoYIzdgNTgQ7lX9+ZLjorowANuooooeuO+51Sw1hZTKbtEa7oOHxr+
-      o78UMCziRQeQzRBnIBjHt8Z2H9DUxrHb
-      -----END PUBLIC KEY-----
-
-    store_private_key: |
-      -----BEGIN PRIVATE KEY-----
-      MIGkAgEBBDAEk3lnN3fagRuoi7SZnpiq6+KW9uU7OLgfvONA+gTzToFWYel8qW3L
-      4PFpjFPb0MmgBwYFK4EEACKhZANiAAR9Br+7CDliU7wNNr3yHDC3v3nLgXdJPgBP
-      X/Za1BN2CChgjN2A1OBDuVf35kuOiujAA26iiih6477nVLDWFlMpu0Rrug4fGv6j
-      vxQwLOJFB5DNEGcgGMe3xnYf0NTGsds=
-      -----END PRIVATE KEY-----
-
-    store_rsa_private_key: |
-      -----BEGIN PRIVATE KEY-----
-      MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQCwSWzuBzLSN0St
-      B4BgLUIzdM9NcFaAq9/8NojOV4x5Mm1EsNbtXRaxdQY4XAkS9vsaSPxGIpacLuJg
-      m8UBomdoHh2JZop01xmO4UNSxfV/S+2xV+tsI+68tRkLn84eO/i51/g3a0J/coeA
-      ofYtaemXwVeKjNOH13bsDjYaT4Tsa2bksO813MgtuakGKyQB3wqutX1o8Q6UUAz3
-      ed9rnbTXQWB1jVbqApngnqAk98BmaZChUGD2bhwU5aNle3ilepGWMRMMdCLfqVeb
-      NmFfqwFuEnEK9x8IrnfTjGwHnR+898HMX2EL7RQXnFTNOuhr8Sz/ai3VhHWAYzSg
-      todVX07ZAgMBAAECggEBAKDy+NQ9mEXblgUQM0IcMDQAswA1z5R81+xS8gbKYgOJ
-      ab/sYN6oPf7ZJEuyo8o/2rR97G4wSCfimmav8WdzmkuyKy92gnT4qmoL+saI3IJT
-      lXl0FwpNqDt8cJhvV+W8xXMP3pziff0UWOi1dqix6UbXjBCAUOTWcMpGk1jkPy0F
-      wOaaMpyAxaQn/S/dMoJfU+QcCjV0AV1wSqkihdjxsDOx0KUpjH4DN8GtIV236hz/
-      SBJ8gPta0kcUMnFSAd7xSHvZGSuVbV87zpoKh1cYlFx6SQRbTMikOlAMXWg1si43
-      y+u1JJnDShTQgzNK9jndVUEyqX9lnA4teyztWboB9bECgYEA5k4CEToiKP8Y9Uj8
-      3GGduyH8ZV2pnNPDziytP3WXAuH5MtaaIkMsV690M2HtwdKvmb5BpVYBu/hIkTDv
-      oQpcyDZ6Sl3g/vTbYyHi/pkB5l9k7fcHTdP3f0H1vs/UeKcgP2uKWi+n+RT+TvvO
-      pnGVaTC72vtJFKHMgVFYyPCmQxUCgYEAw/SNLG39z0fUTGyNVQYLQ7Nq3rcZmgpN
-      CQlANO8eVB4df9gKZFhji9U36iEPiA1RWibfXUiWhQJn+CFZ7eAYy8/hEU0Wj6Qa
-      R1SotGfkxVAikVxeicTpIsLssDOosO0TuBVQMWfTBquMc34ChuIDBE+du7H4sEPo
-      gKbRwll2nbUCgYEAjmqo7pxDaZSui2gyLdoTnxgaK1jrPTba+9E25WpDEx5Iav64
-      W/2sGyE9u1SQoW429tznXWW9Ns8HmPlpBe4RiCHgJ8K8Ew256SiYZZaazSoqkNlU
-      4/TzNPfGDtQYcO/wiidna/PSbL5lsNQYa2cL3Pus/3KrM54Gh+WVANWICy0CgYEA
-      kxxYk/9raZ8iWdGw9SDZehULaXKKzONo3BzO0C6oVTxapyzY+GaHLWaAWMxDLb/Z
-      0FWYoR6qqeaZiWX4bqYr128UJ/n4sxPfCqgbE31f+WXk3b471zA2Wnt+V/Ygcds6
-      T5vonX61pa9KfTYfzYWGAEmJQG0nJ6WDunoCxeaGL3UCgYEAkTAE44yEW5qHZIGo
-      Y7PYZ3b/RRHJlFHMYCoa79iCFroQuMrQQQzKbH09wdkIXVaygqCFbVqpvM2E+Iqm
-      SmVX+NJ8+HRw/YCyo2c8M3Sgb8yqZl92F9KajhXpmWYbBZPiNZ5HxyBjdq+My7Pk
-      rQYntvw3aZu+PZVm4niCtKzYng8=
-      -----END PRIVATE KEY-----
-
-    store_rsa_public_key: |
-      -----BEGIN PUBLIC KEY-----
-      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsEls7gcy0jdErQeAYC1C
-      M3TPTXBWgKvf/DaIzleMeTJtRLDW7V0WsXUGOFwJEvb7Gkj8RiKWnC7iYJvFAaJn
-      aB4diWaKdNcZjuFDUsX1f0vtsVfrbCPuvLUZC5/OHjv4udf4N2tCf3KHgKH2LWnp
-      l8FXiozTh9d27A42Gk+E7Gtm5LDvNdzILbmpBiskAd8KrrV9aPEOlFAM93nfa520
-      10FgdY1W6gKZ4J6gJPfAZmmQoVBg9m4cFOWjZXt4pXqRljETDHQi36lXmzZhX6sB
-      bhJxCvcfCK5304xsB50fvPfBzF9hC+0UF5xUzTroa/Es/2ot1YR1gGM0oLaHVV9O
-      2QIDAQAB
-      -----END PUBLIC KEY-----
-
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----

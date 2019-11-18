@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+
 	"github.com/davecgh/go-spew/spew"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -22,13 +24,17 @@ import (
 	"github.com/qilin/crm-api/internal/sdk/repo"
 )
 
+type interfaces struct {
+	authenticator common.Authenticate
+	orderer       common.Order
+}
+
 type SDK struct {
 	ctx           context.Context
 	cfg           *Config
 	pluginsCfg    *PluginsConfig
-	pm            *plugins.PluginManager
-	authenticator common.Authenticate
-	orderer       common.Order
+	pluginManager *plugins.PluginManager
+	interfaces    interfaces
 	keyRegister   jwt.KeyRegister
 	repo          *repo.Repo
 	keyPair       KeyPair
@@ -37,7 +43,7 @@ type SDK struct {
 
 func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 	spew.Dump(s.pluginsCfg.PluginsConfig)
-	return s.authenticator(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, token, log)
+	return s.interfaces.authenticator(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, token, log)
 }
 
 func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
@@ -107,11 +113,11 @@ func (s *SDK) Mode() common.SDKMode {
 }
 
 func (s *SDK) Order(ctx context.Context, request common.OrderRequest, log logger.Logger) (response common.OrderResponse, err error) {
-	return s.orderer(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, log)
+	return s.interfaces.orderer(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, log)
 }
 
 func (s *SDK) PluginsRoute(echo *echo.Echo) {
-	s.pm.Http(context.WithValue(context.Background(), "config", s.pluginsCfg.PluginsConfig), echo, s.L())
+	s.pluginManager.Http(context.WithValue(context.Background(), "config", s.pluginsCfg.PluginsConfig), echo, s.L())
 }
 
 func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
@@ -120,7 +126,7 @@ func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
 	return jwt.ECDSACheck(token, s.keyPair.Public)
 }
 
-func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config, pluginsCfg *PluginsConfig) *SDK {
+func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config, pCfg *PluginsConfig, init config.Initial) *SDK {
 	pm := plugins.NewPluginManager()
 	if cfg.Mode == common.StoreMode || cfg.Mode == common.ProviderMode {
 		for _, p := range cfg.Plugins {
@@ -133,15 +139,15 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 		}
 	}
 
-	pm.Init(ctx, pluginsCfg.PluginsConfig, set.L())
+	pm.Init(ctx, init.Viper.Sub(common.UnmarshalKeyPluginConfig), set.L())
 
 	sdk := &SDK{
-		ctx:        ctx,
-		cfg:        cfg,
-		pluginsCfg: pluginsCfg,
-		repo:       repo,
-		pm:         pm,
-		LMT:        &set,
+		ctx:           ctx,
+		cfg:           cfg,
+		pluginsCfg:    pCfg,
+		repo:          repo,
+		pluginManager: pm,
+		LMT:           &set,
 	}
 
 	// load keys
@@ -165,15 +171,15 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 
 	switch cfg.Mode {
 	case common.StoreMode:
-		sdk.authenticator = pm.Auth(nil)
+		sdk.interfaces.authenticator = pm.Auth(nil)
 		break
 	case common.ProviderMode:
-		sdk.authenticator = pm.Auth(nil)
+		sdk.interfaces.authenticator = pm.Auth(nil)
 		break
 	default:
 		qln := qilin.NewQilinAuthenticator()
-		sdk.authenticator = qln.Auth
-		sdk.orderer = qln.Order
+		sdk.interfaces.authenticator = qln.Auth
+		sdk.interfaces.orderer = qln.Order
 	}
 	return sdk
 }

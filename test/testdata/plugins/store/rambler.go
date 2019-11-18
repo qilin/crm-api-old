@@ -3,11 +3,17 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
+	"crypto/rsa"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"path"
 	"text/template"
+
+	"github.com/spf13/viper"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
@@ -18,133 +24,126 @@ import (
 )
 
 type plugin struct {
-	//
+	config storeConfig
 }
 
-var (
-	Plugin     plugin
-	keyPair    utils.KeyPair
-	rsaKeyPair utils.RSAKeyPair
+type Auth struct {
+	Fake           bool
+	CookieName     string
+	RsidCookieName string
+}
+
+type JWT struct {
+	PublicKey  *ecdsa.PublicKey
+	PrivateKey *ecdsa.PrivateKey
+}
+
+type RamblerID struct {
+	Kid           string
+	RsaPublicKey  *rsa.PublicKey
+	RsaPrivateKey *rsa.PrivateKey
+}
+
+type Keys struct {
+	JWT       JWT
+	RamblerID RamblerID
+}
+
+type Routes struct {
+	Index  string
+	Iframe string
+}
+
+type URL struct {
+	Iframe string
+}
+
+type storeConfig struct {
+	Auth   Auth
+	Keys   Keys
+	Routes Routes
+	URL    URL
+}
+
+const (
+	PluginName             = "store"
+	storeIndexTpl          = "./web/store/store.html"
+	storeIframeProviderTpl = "./web/store/iframe.html"
 )
 
-func (p *plugin) Init(ctx context.Context, cfg map[string]string, log logger.Logger) {
-	// load encryption keys
-	sk, ok := cfg["store_private_key"]
-	if !ok {
-		log.Emergency("plugin: can not load store_jwt_private_key")
-	}
-	pk, ok := cfg["store_public_key"]
-	if !ok {
-		log.Emergency("plugin: can not load store_jwt_public_key")
-	}
+var (
+	Plugin         plugin
+	jwtKeyPair     utils.KeyPair
+	ramblerKeyPair utils.RSAKeyPair
+)
 
-	// load rsa encryption keys
-	rsk, ok := cfg["store_rsa_private_key"]
-	if !ok {
-		log.Emergency("plugin: can not load store_rsa_private_key")
-	}
-	rpk, ok := cfg["store_rsa_public_key"]
-	if !ok {
-		log.Emergency("plugin: can not load parent_public_key")
-	}
-
-	var err error
-	keyPair, err = utils.DecodePemECDSA(sk, pk)
-	if err != nil {
-		log.Emergency("plugin: can not parse key pair")
-	}
-
-	rsaKeyPair, err = utils.DecodePemRSA(rsk, rpk)
-	if err != nil {
-		log.Emergency("plugin: can not parse rsa key pair")
-	}
+func (p *plugin) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) {
+	config := storeConfig{}
+	cfg.UnmarshalKey(PluginName, &config)
+	p.config = config
 }
 
 func (p *plugin) Name() string {
-	return "rambler.plugin"
+	return PluginName
 }
 
 func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
-		cfg, ok := ctx.Value("config").(map[string]string)
-		if !ok {
-			log.Emergency("plugin: can not cast context config to map[string]string")
-		}
-
 		// fake auth
-		if fake, ok := cfg["parent_auth_fake"]; ok && fake == "true" {
-			url, ok := cfg["parent_iframe_url"]
-			if !ok {
-				url = "%parent_iframe_url%"
+		if p.config.Auth.Fake {
+			jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, jwtKeyPair.Private)
+			if err != nil {
+				return response, err
 			}
 			return common.AuthResponse{
 				Meta: map[string]interface{}{
-					"url": url,
+					"url": utils.AddURLParams(p.config.URL.Iframe, map[string]string{"jwt": string(jwt)}),
 				},
 			}, nil
 		}
 
-		var rsid string
-		if rsid, ok = cfg["rsid"]; !ok {
-			errMsg := "Can't find rsid in request.meta"
-			log.Error(errMsg)
-			return common.AuthResponse{}, errors.New(errMsg)
-		}
+		// real auth
 
-		// get http request from context
+		// get rsid from meta
+		//meta, ok := request.Meta.(map[string]interface{})
+		//if !ok {
+		//	return common.AuthResponse{}, errors.New("bad request. request.meta must be map[string]interface{}")
+		//}
+		//rsid, ok := meta["rsid"].(string)
+		//if !ok {
+		//	return common.AuthResponse{}, errors.New("bad request. request.meta[rsid] is undefined")
+		//}
+
+		// get rsid from cookie
 		req, ok := ctx.Value("request").(*http.Request)
 		if !ok {
 			log.Emergency("can't extract *http.Request from context")
 		}
-
-		id := utils.IDClient{
-			KID: "__todo__",
-			Key: rsaKeyPair.Private,
+		rsidCookie, err := req.Cookie(p.config.Auth.RsidCookieName)
+		if err != nil {
+			return common.AuthResponse{}, errors.New("bad request. rsid cookie is undefined")
 		}
 
+		rsid := rsidCookie.Value
+
+		id := utils.IDClient{
+			KID: p.config.Keys.RamblerID.Kid,
+			Key: ramblerKeyPair.Private,
+		}
 		info := id.RamblerIdGetProfileInfo(rsid, req.RemoteAddr, req.UserAgent())
 
 		//todo: parse info
 		log.Info(info)
-
-		//// get cookie
-		//cookie, err := req.Cookie(cfg["parent_auth_cookie_name"])
-		//if err != nil {
-		//	return response, err
-		//}
-		//
-		//authToken := cookie.Value
-		//// todo: verify authToken
-		//if len(authToken) == 0 {
-		//	return response, errors.New("not authenticated")
-		//}
-
-		// // get http request from context
-		// req, ok := ctx.Value("request").(*http.Request)
-		// if !ok {
-		// 	log.Emergency("can't extract *http.Request from context")
-		// }
-
-		// // get cookie
-		// cookie, err := req.Cookie(cfg["parent_auth_cookie_name"])
-		// if err != nil {
-		// 	return response, err
-		// }
-
-		// authToken := cookie.Value
-		// // todo: verify authToken
-		// if len(authToken) == 0 {
-		// 	return response, errors.New("not authenticated")
-		// }
+		// todo: set auth cookie?, but we also have rsid cookie
 
 		// issue JWT
-		jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, keyPair.Private)
+		jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, jwtKeyPair.Private)
 		if err != nil {
 			return response, err
 		}
 		// url to return
 		response.Meta = map[string]interface{}{
-			"url": utils.AddURLParams(cfg["parent_iframe_url"], map[string]string{"jwt": string(jwt)}),
+			"url": utils.AddURLParams(p.config.URL.Iframe, map[string]string{"jwt": string(jwt)}),
 			// "cookie": authToken,
 		}
 		return
@@ -152,38 +151,26 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 }
 
 func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
-	cfg, ok := ctx.Value("config").(map[string]string)
-	if !ok {
-		log.Emergency("plugin: can not cast context config to map[string]string")
-	}
-
-	// Parent Iframe provider
-	indexRoute, ok := cfg["parent_index_route"]
-	if !ok {
-		log.Emergency("plugin: can not find parent_index_route in config")
-	}
-	// todo: remove iframe provider?
-	// Parent Iframe provider
-	iframeProviderRoute, ok := cfg["parent_iframe_route"]
-	if !ok {
-		log.Emergency("plugin: can not find parent_iframe_route in config")
-	}
-
-	r.GET(indexRoute, func(c echo.Context) error {
-		return p.IndexHandler(c, cfg, log)
+	r.GET(p.config.Routes.Index, func(c echo.Context) error {
+		return p.IndexHandler(c, log)
 	})
-	r.GET(iframeProviderRoute, func(c echo.Context) error {
-		return p.IframeProviderHandler(c, cfg, log)
+	r.GET(p.config.Routes.Iframe, func(c echo.Context) error {
+		log.Info(p.config.Routes.Iframe)
+		return p.IframeProviderHandler(c, log)
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
 	r.GET("/integration/game/billing", p.billingCallback)
 	r.POST("/api/v2/svc/payment/create", p.createOrder)
 }
 
-func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
-	tplPath, ok := cfg["parent_iframe_template"]
-	if !ok {
-		log.Emergency("plugin: can not find parent_iframe_template in config")
+func (p *plugin) IframeProviderHandler(ctx echo.Context, log logger.Logger) error {
+	dir, _ := os.Getwd()
+	log.Info(dir)
+	log.Info(storeIframeProviderTpl)
+	tplPath := storeIframeProviderTpl
+	d, _ := ioutil.ReadDir("./web/store/")
+	for _, f := range d {
+		log.Info(f.Name())
 	}
 
 	tplName := path.Base(tplPath)
@@ -201,11 +188,8 @@ func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, 
 	return ctx.HTML(http.StatusOK, buf.String())
 }
 
-func (p *plugin) IndexHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
-	tplPath, ok := cfg["parent_index_template"]
-	if !ok {
-		log.Emergency("plugin: can not find parent_index_template in config")
-	}
+func (p *plugin) IndexHandler(ctx echo.Context, log logger.Logger) error {
+	tplPath := storeIndexTpl
 
 	tplName := path.Base(tplPath)
 	tpl, err := template.New(tplName).ParseFiles(tplPath)

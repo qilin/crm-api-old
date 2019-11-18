@@ -3,6 +3,8 @@ package plugins
 import (
 	"context"
 
+	"github.com/spf13/viper"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/qilin/crm-api/internal/sdk/common"
@@ -25,5 +27,5 @@ type Orderer interface {
 
 type Initable interface {
 	Name() string
-	Init(ctx context.Context, cfg map[string]string, log logger.Logger)
+	Init(ctx context.Context, cfg *viper.Viper, log logger.Logger)
 }

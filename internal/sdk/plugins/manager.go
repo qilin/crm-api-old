@@ -6,6 +6,8 @@ import (
 	"os"
 	"plugin"
 
+	"github.com/spf13/viper"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/qilin/crm-api/internal/sdk/common"
@@ -65,7 +67,7 @@ func (m *PluginManager) Load(path string) error {
 	return nil
 }
 
-func (m *PluginManager) Init(ctx context.Context, cfg map[string]string, log logger.Logger) {
+func (m *PluginManager) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) {
 	for _, p := range m.init {
 		p.Init(ctx, cfg, log)
 	}
