@@ -62,7 +62,7 @@ func (id IDClient) post(body []byte) []byte {
 
 	r, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	r.Header.Set("Content-Type", "application/json")
-	r.Header.Set("Authorization", "Bearer "+JWT)
+	r.Header.Set("X-RID-Signature", JWT)
 
 	client := &http.Client{
 		Timeout: time.Second * time.Duration(30),
