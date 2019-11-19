@@ -7,8 +7,9 @@ type AuthRequest struct {
 }
 
 type OrderRequest struct {
-	UserId   string `json:"user_id" form:"user_id" query:"user_id"`
-	ItemId   string `json:"item_id" form:"item_id" query:"item_id"`
-	Currency string `json:"currency" form:"currency" query:"currency"`
-	Data     string `json:"data" form:"data" query:"url"`
+	UserID string `json:"user_id" form:"user_id" query:"user_id"`
+	ItemID string `json:"item_id" form:"item_id" query:"item_id"`
+	GameID string `json:"game_id" form:"game_id" query:"game_id"`
+	// Currency string `json:"currency" form:"currency" query:"currency"`
+	// Data     string `json:"data" form:"data" query:"url"`
 }

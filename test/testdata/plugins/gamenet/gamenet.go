@@ -52,7 +52,7 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	}
 	_ = cfg
 
-	r.GET("/gamenet/iframe", func(ctx echo.Context) error {
+	r.GET("/gamenet/sdk/v1/iframe", func(ctx echo.Context) error {
 		// TODO user from jws token
 		u, err := rambler.SignUrl(
 			"https://gameplatform.stg.gamenet.ru/iframe/1095/qilin/?game_id=1&slug=protocolone&timestamp=1573646629488&user_id=1683086",

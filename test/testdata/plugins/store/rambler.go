@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
 	"github.com/qilin/crm-api/internal/sdk/common"
+	"github.com/qilin/crm-api/pkg/qilin"
 	"github.com/qilin/crm-api/test/testdata/plugins/store/rambler"
 	"github.com/qilin/crm-api/test/testdata/plugins/store/utils"
 )
@@ -81,7 +82,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 			// url to return
 			return common.AuthResponse{
 				Meta: map[string]interface{}{
-					"url": utils.AddURLParams(cfg["parent_iframe_url"], map[string]string{"jwt": string(jwt)}),
+					"url": utils.AddURLParams(qilin.IframeURL(cfg["qilin"]), map[string]string{"jwt": string(jwt)}),
 				},
 			}, nil
 		}
@@ -146,7 +147,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		}
 		// url to return
 		response.Meta = map[string]interface{}{
-			"url": utils.AddURLParams(cfg["parent_iframe_url"], map[string]string{"jwt": string(jwt)}),
+			"url": utils.AddURLParams(qilin.IframeURL(cfg["qilin"]), map[string]string{"jwt": string(jwt)}),
 			// "cookie": authToken,
 		}
 		return
@@ -160,26 +161,23 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	}
 
 	// Parent Iframe provider
-	indexRoute, ok := cfg["parent_index_route"]
+	qilin, ok := cfg["qilin"]
 	if !ok {
-		log.Emergency("plugin: can not find parent_index_route in config")
-	}
-	// todo: remove iframe provider?
-	// Parent Iframe provider
-	iframeProviderRoute, ok := cfg["parent_iframe_route"]
-	if !ok {
-		log.Emergency("plugin: can not find parent_iframe_route in config")
+		log.Emergency("plugin: can not find qilin in config")
 	}
 
-	r.GET(indexRoute, func(c echo.Context) error {
+	r.GET("/store", func(c echo.Context) error {
 		return p.IndexHandler(c, cfg, log)
 	})
-	r.GET(iframeProviderRoute, func(c echo.Context) error {
+	r.GET("/game", func(c echo.Context) error {
 		return p.IframeProviderHandler(c, cfg, log)
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
 	r.GET("/integration/game/billing", p.billingCallback)
 	r.POST("/api/v2/svc/payment/create", p.createOrder)
+	r.POST("/confirmPayment", func(c echo.Context) error {
+		return p.confirmPayment(c, qilin)
+	})
 }
 
 func (p *plugin) IframeProviderHandler(ctx echo.Context, cfg map[string]string, log logger.Logger) error {
@@ -277,5 +275,40 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 }
 
 func (p *plugin) createOrder(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, map[string]interface{}{})
+}
+
+func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
+
+	var params = make(map[string]string)
+	if err := ctx.Bind(&params); err != nil {
+		return err
+	}
+
+	fmt.Println(params)
+
+	// issue JWT
+	jwt, err := utils.IssueJWT("", "", "123", params["gameId"], 0, keyPair.Private)
+	if err != nil {
+		return err
+	}
+	url := utils.AddURLParams(qilin.OrderURL(entry), map[string]string{
+		"jwt":    string(jwt),
+		"itemId": params["itemId"],
+	})
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "payment proceeding failed",
+		})
+	}
+
 	return ctx.JSON(http.StatusOK, map[string]interface{}{})
 }

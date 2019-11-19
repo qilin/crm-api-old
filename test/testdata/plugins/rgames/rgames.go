@@ -74,10 +74,10 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	}
 	_ = cfg
 
-	r.GET("/rgames/iframe", func(ctx echo.Context) error {
+	r.GET("/rgames/sdk/v1/iframe", func(ctx echo.Context) error {
 		return ctx.HTML(http.StatusOK, string(index))
 	})
-	r.POST("/rgames/sdk/v1/auth", func(ctx echo.Context) error {
+	r.POST("/rgames/sdk/v1/sdk/v1/auth", func(ctx echo.Context) error {
 		url, err := p.getGameUrl()
 		if err != nil {
 			return err
