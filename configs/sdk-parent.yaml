@@ -33,7 +33,7 @@ sdk:
     parent_iframe_url: "https://tst.qilin.super.com/integration/demo/qilin/sdk/v1/iframe"
     # parent_iframe_url: "http://localhost:8086/sdk/v1/iframe"
     parent_iframe_route: "/game"
-    parent_iframe_template: "configs/sdk/parent-index.html"
+    parent_iframe_template: "configs/sdk/store-index.html"
     parent_index_route: "/store"
     parent_index_template: "configs/sdk/store.html"
     parent_app_secret: "rambler's app secret key"

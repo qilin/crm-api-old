@@ -73,13 +73,15 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 
 		// fake auth
 		if fake, ok := cfg["parent_auth_fake"]; ok && fake == "true" {
-			url, ok := cfg["parent_iframe_url"]
-			if !ok {
-				url = "%parent_iframe_url%"
+			// issue JWT
+			jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, keyPair.Private)
+			if err != nil {
+				return response, err
 			}
+			// url to return
 			return common.AuthResponse{
 				Meta: map[string]interface{}{
-					"url": url,
+					"url": utils.AddURLParams(cfg["parent_iframe_url"], map[string]string{"jwt": string(jwt)}),
 				},
 			}, nil
 		}
