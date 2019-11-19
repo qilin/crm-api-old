@@ -1,7 +1,9 @@
 package sdk
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -10,8 +12,10 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
+
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	common2 "github.com/qilin/crm-api/internal/sdk/common"
+	"github.com/qilin/crm-api/pkg/qilin"
 )
 
 const (
@@ -104,14 +108,47 @@ func (h *SDKGroup) postOrder(ctx echo.Context) error {
 		})
 	}
 
-	if len(r.Data) == 0 {
-		return ctx.JSON(http.StatusBadRequest, common2.ErrorResponse{
-			Code: errOrderRequestDataEmpty,
-			Msg:  StatusText(errOrderRequestDataEmpty),
+	product, err := h.sdk.GetProductByUUID(r.GameID)
+	if err != nil {
+		return err
+	}
+
+	// todo: check mapping (iss+userID) & userID Qilin
+	// todo: tmp fix, hardcoded userID as uuidV4; prod needs logic fix inside MapExternalUserToUser
+	userId := h.sdk.MapExternalUserToUser(0, r.UserID)
+
+	qilin.OrderURL(product.URL)
+
+	req := common2.OrderRequest{
+		GameID: r.GameID,
+		UserID: userId,
+		ItemID: r.ItemID,
+	}
+	data, err := json.Marshal(&req)
+	if err != nil {
+		h.L().Error(err.Error())
+		return ctx.JSON(http.StatusInternalServerError, common2.ErrorResponse{
+			Code: errInternalServerError,
+			Msg:  StatusText(errInternalServerError),
 		})
 	}
 
-	// @todo
+	resp, err := http.Post(qilin.OrderURL(product.URL), "application/json;charset=utf-8", bytes.NewReader(data))
+	if err != nil {
+		h.L().Error(err.Error())
+		return ctx.JSON(http.StatusInternalServerError, common2.ErrorResponse{
+			Code: errInternalServerError,
+			Msg:  StatusText(errInternalServerError),
+		})
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		h.L().Error("request failed")
+		return ctx.JSON(http.StatusInternalServerError, common2.ErrorResponse{
+			Code: errInternalServerError,
+			Msg:  StatusText(errInternalServerError),
+		})
+	}
 
 	return ctx.JSON(http.StatusOK, common2.OrderResponse{
 		//Data: r.Data,
@@ -219,7 +256,7 @@ func (h *SDKGroup) hubMode(ctx context.Context, r common2.AuthRequest) (common2.
 		return common2.AuthResponse{}, err
 	}
 
-	iframe, err := url.Parse(product.URL)
+	iframe, err := url.Parse(qilin.IframeURL(product.URL))
 	if err != nil {
 		return common2.AuthResponse{}, err
 	}

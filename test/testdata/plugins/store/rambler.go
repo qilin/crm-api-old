@@ -3,13 +3,10 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
-	"crypto/rsa"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"path"
 	"text/template"
 
@@ -19,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
 	"github.com/qilin/crm-api/internal/sdk/common"
+	"github.com/qilin/crm-api/pkg/qilin"
 	"github.com/qilin/crm-api/test/testdata/plugins/store/rambler"
 	"github.com/qilin/crm-api/test/testdata/plugins/store/utils"
 )
@@ -34,14 +32,14 @@ type Auth struct {
 }
 
 type JWT struct {
-	PublicKey  *ecdsa.PublicKey
-	PrivateKey *ecdsa.PrivateKey
+	PublicKey  string
+	PrivateKey string
 }
 
 type RamblerID struct {
 	Kid           string
-	RsaPublicKey  *rsa.PublicKey
-	RsaPrivateKey *rsa.PrivateKey
+	RsaPublicKey  string
+	RsaPrivateKey string
 }
 
 type Keys struct {
@@ -56,6 +54,7 @@ type Routes struct {
 
 type URL struct {
 	Iframe string
+	Qilin  string
 }
 
 type storeConfig struct {
@@ -68,7 +67,7 @@ type storeConfig struct {
 const (
 	PluginName             = "store"
 	storeIndexTpl          = "./web/store/store.html"
-	storeIframeProviderTpl = "./web/store/iframe.html"
+	storeIframeProviderTpl = "./web/store/game.html"
 )
 
 var (
@@ -81,6 +80,17 @@ func (p *plugin) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) 
 	config := storeConfig{}
 	cfg.UnmarshalKey(PluginName, &config)
 	p.config = config
+
+	var err error
+	jwtKeyPair, err = utils.DecodePemECDSA(p.config.Keys.JWT.PrivateKey, p.config.Keys.JWT.PublicKey)
+	if err != nil {
+		log.Emergency("plugin: can not parse key pair")
+	}
+
+	ramblerKeyPair, err = utils.DecodePemRSA(p.config.Keys.RamblerID.RsaPrivateKey, p.config.Keys.RamblerID.RsaPublicKey)
+	if err != nil {
+		log.Emergency("plugin: can not parse rsa key pair")
+	}
 }
 
 func (p *plugin) Name() string {
@@ -91,13 +101,15 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 	return func(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 		// fake auth
 		if p.config.Auth.Fake {
+			// issue JWT
 			jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, jwtKeyPair.Private)
 			if err != nil {
 				return response, err
 			}
+			// url to return
 			return common.AuthResponse{
 				Meta: map[string]interface{}{
-					"url": utils.AddURLParams(p.config.URL.Iframe, map[string]string{"jwt": string(jwt)}),
+					"url": utils.AddURLParams(qilin.IframeURL(p.config.URL.Qilin), map[string]string{"jwt": string(jwt)}),
 				},
 			}, nil
 		}
@@ -143,7 +155,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		}
 		// url to return
 		response.Meta = map[string]interface{}{
-			"url": utils.AddURLParams(p.config.URL.Iframe, map[string]string{"jwt": string(jwt)}),
+			"url": utils.AddURLParams(qilin.IframeURL(p.config.URL.Qilin), map[string]string{"jwt": string(jwt)}),
 			// "cookie": authToken,
 		}
 		return
@@ -151,30 +163,23 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 }
 
 func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
-	r.GET(p.config.Routes.Index, func(c echo.Context) error {
+	r.GET("/store", func(c echo.Context) error {
 		return p.IndexHandler(c, log)
 	})
-	r.GET(p.config.Routes.Iframe, func(c echo.Context) error {
-		log.Info(p.config.Routes.Iframe)
+	r.GET("/game", func(c echo.Context) error {
 		return p.IframeProviderHandler(c, log)
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
 	r.GET("/integration/game/billing", p.billingCallback)
 	r.POST("/api/v2/svc/payment/create", p.createOrder)
+	r.POST("/confirmPayment", func(c echo.Context) error {
+		return p.confirmPayment(c, p.config.URL.Qilin)
+	})
 }
 
 func (p *plugin) IframeProviderHandler(ctx echo.Context, log logger.Logger) error {
-	dir, _ := os.Getwd()
-	log.Info(dir)
-	log.Info(storeIframeProviderTpl)
-	tplPath := storeIframeProviderTpl
-	d, _ := ioutil.ReadDir("./web/store/")
-	for _, f := range d {
-		log.Info(f.Name())
-	}
-
-	tplName := path.Base(tplPath)
-	tpl, err := template.New(tplName).ParseFiles(tplPath)
+	tplName := path.Base(storeIframeProviderTpl)
+	tpl, err := template.New(tplName).ParseFiles(storeIframeProviderTpl)
 	if err != nil {
 		return err
 	}
@@ -260,4 +265,42 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 
 func (p *plugin) createOrder(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, map[string]interface{}{})
+}
+
+func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
+
+	var params = make(map[string]string)
+	if err := ctx.Bind(&params); err != nil {
+		return err
+	}
+
+	fmt.Println(params)
+
+	req := common.OrderRequest{
+		GameID: params["gameId"],
+		UserID: "123",
+		ItemID: params["itemId"],
+	}
+	data, err := json.Marshal(&req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	resp, err := http.Post(qilin.OrderURL(entry), "application/json;charset=utf-8", bytes.NewReader(data))
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "payment proceeding failed",
+		})
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{})
+
 }

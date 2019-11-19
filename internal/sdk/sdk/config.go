@@ -8,13 +8,12 @@ import (
 )
 
 type Config struct {
-	Debug          bool `fallback:"shared.debug"`
-	Mode           common.SDKMode
-	Iframes        map[string]string // todo: it's temporary
-	IframeTemplate string
-	Plugins        []string
-	JWT            JWT
-	invoker        *invoker.Invoker
+	Debug   bool `fallback:"shared.debug"`
+	Mode    common.SDKMode
+	Iframes map[string]string // todo: it's temporary
+	Plugins []string
+	JWT     JWT
+	invoker *invoker.Invoker
 }
 
 type PluginsConfig struct {

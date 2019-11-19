@@ -41,6 +41,10 @@ type SDK struct {
 	provider.LMT
 }
 
+const (
+	IframeTemplate = "./web/hub/hub-adapter-iframe.html"
+)
+
 func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 	spew.Dump(s.pluginsCfg.PluginsConfig)
 	return s.interfaces.authenticator(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, token, log)
@@ -63,8 +67,8 @@ func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
 
 func (s *SDK) IframeHtml(qiliProductUUID string) (string, error) {
 	// in qilin mode no difference, always same html for all products
-	tplName := path.Base(s.cfg.IframeTemplate)
-	tpl, err := template.New(tplName).ParseFiles(s.cfg.IframeTemplate)
+	tplName := path.Base(IframeTemplate)
+	tpl, err := template.New(tplName).ParseFiles(IframeTemplate)
 	if err != nil {
 		return "", err
 	}

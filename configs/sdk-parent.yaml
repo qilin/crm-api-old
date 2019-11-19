@@ -36,6 +36,7 @@ sdk:
         iframe: "/game"
       url:
         iframe: "https://tst.qilin.super.com/integration/demo/qilin/sdk/v1/iframe"
+        qilin: "https://tst.qilin.super.com/integration/demo/qilin/"
       auth:
         fake: true
         cookieName: "qlsid"
@@ -48,7 +49,6 @@ sdk:
             T1/2WtQTdggoYIzdgNTgQ7lX9+ZLjorowANuooooeuO+51Sw1hZTKbtEa7oOHxr+
             o78UMCziRQeQzRBnIBjHt8Z2H9DUxrHb
             -----END PUBLIC KEY-----
-
           privateKey: |
             -----BEGIN PRIVATE KEY-----
             MIGkAgEBBDAEk3lnN3fagRuoi7SZnpiq6+KW9uU7OLgfvONA+gTzToFWYel8qW3L
@@ -56,7 +56,6 @@ sdk:
             X/Za1BN2CChgjN2A1OBDuVf35kuOiujAA26iiih6477nVLDWFlMpu0Rrug4fGv6j
             vxQwLOJFB5DNEGcgGMe3xnYf0NTGsds=
             -----END PRIVATE KEY-----
-
         ramblerID:
           kid: ""
           rsaPrivateKey: |
