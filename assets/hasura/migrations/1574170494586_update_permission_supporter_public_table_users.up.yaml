@@ -1,0 +1,29 @@
+- args:
+    role: supporter
+    table:
+      name: users
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - auth_timestamp
+      - created_at
+      - email
+      - first_name
+      - id
+      - last_name
+      - picture
+      - role
+      - status
+      - updated_at
+      computed_fields: []
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+    role: supporter
+    table:
+      name: users
+      schema: public
+  type: create_select_permission

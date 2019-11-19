@@ -1,0 +1,27 @@
+- args:
+    role: user
+    table:
+      name: users
+      schema: public
+  type: drop_select_permission
+- args:
+    permission:
+      allow_aggregations: false
+      columns:
+      - auth_timestamp
+      - created_at
+      - first_name
+      - id
+      - last_name
+      - picture
+      - status
+      - updated_at
+      computed_fields: []
+      filter:
+        tenant_id:
+          _eq: X-Hasura-Tenant-Id
+    role: user
+    table:
+      name: users
+      schema: public
+  type: create_select_permission
