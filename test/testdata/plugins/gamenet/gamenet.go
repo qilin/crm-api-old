@@ -17,6 +17,7 @@ import (
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/internal/sdk/common"
+	"github.com/qilin/crm-api/test/testdata/plugins/store/rambler"
 )
 
 type plugin struct {
@@ -49,18 +50,32 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	if !ok {
 		log.Error("plugin: can not cast context config to map[string]string")
 	}
+	_ = cfg
 
-	port, ok := cfg["port"]
-	if !ok {
-		port = "1443"
-	}
+	r.GET("/gamenet/iframe", func(ctx echo.Context) error {
+		// TODO user from jws token
+		u, err := rambler.SignUrl(
+			"https://gameplatform.stg.gamenet.ru/iframe/1095/qilin/?game_id=1&slug=protocolone&timestamp=1573646629488&user_id=1683086",
+			"msBzPSaWYQ0piSLZJJNg")
+		if err != nil {
+			log.Error(err.Error())
+			return ctx.HTML(http.StatusInternalServerError, "Internal Server Error")
+		}
 
-	url, ok := cfg["entryurl"]
-	if !ok {
-		log.Error("plugin: can not find entryurl in config")
-	}
+		return ctx.Redirect(http.StatusTemporaryRedirect, u)
+	})
 
-	run(port, url)
+	// port, ok := cfg["port"]
+	// if !ok {
+	// 	port = "1443"
+	// }
+
+	// url, ok := cfg["entryurl"]
+	// if !ok {
+	// 	log.Error("plugin: can not find entryurl in config")
+	// }
+
+	// run(port, url)
 
 }
 
@@ -179,6 +194,7 @@ func root(proxyurl string) http.HandlerFunc {
 			})
 			w.WriteHeader(http.StatusOK)
 			w.Write(index)
+
 			return
 		}
 		proxy.ServeHTTP(w, r)
