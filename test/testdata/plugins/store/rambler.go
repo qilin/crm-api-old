@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -287,17 +288,19 @@ func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
 
 	fmt.Println(params)
 
-	// issue JWT
-	jwt, err := utils.IssueJWT("", "", "123", params["gameId"], 0, keyPair.Private)
-	if err != nil {
-		return err
+	req := common.OrderRequest{
+		GameID: params["gameId"],
+		UserID: "123",
+		ItemID: params["itemId"],
 	}
-	url := utils.AddURLParams(qilin.OrderURL(entry), map[string]string{
-		"jwt":    string(jwt),
-		"itemId": params["itemId"],
-	})
+	data, err := json.Marshal(&req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
 
-	resp, err := http.Get(url)
+	resp, err := http.Post(qilin.OrderURL(entry), "application/json;charset=utf-8", bytes.NewReader(data))
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
@@ -311,4 +314,5 @@ func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{})
+
 }

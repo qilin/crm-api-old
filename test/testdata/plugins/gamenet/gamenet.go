@@ -1,16 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
-	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
@@ -65,197 +60,49 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 		return ctx.Redirect(http.StatusTemporaryRedirect, u)
 	})
 
-	// port, ok := cfg["port"]
-	// if !ok {
-	// 	port = "1443"
-	// }
-
-	// url, ok := cfg["entryurl"]
-	// if !ok {
-	// 	log.Error("plugin: can not find entryurl in config")
-	// }
-
-	// run(port, url)
-
-}
-
-func run(port, url string) {
-	// starting proxy server
-	go func() {
-		mux := http.NewServeMux()
-		mux.HandleFunc("/sdk/v1/auth", func(w http.ResponseWriter, r *http.Request) {
-			var rs = common.AuthResponse{
-				Meta: map[string]string{
-					// "url": "/games/khanwars/iframe?wmode=opaque",
-					"url": "/games/skyfire/iframe?wmode=opaque",
-				},
-			}
-			data, err := json.Marshal(&rs)
-			if err != nil {
-				fmt.Println(err.Error())
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			w.Write(data)
-		})
-		mux.HandleFunc("/", root(url))
-		if err := http.ListenAndServe(":"+port, mux); err != nil {
-			fmt.Println("gamenet plugin:", err.Error())
-		}
-	}()
-}
-
-const (
-	// gnhost  = "gamenet.ru"
-	// gnlogin = "gnlogin.ru"
-	gnhost  = "www.stg.gamenet.ru"
-	gnlogin = "gnlogin.stg.gamenet.ru"
-)
-
-// eyJhbGciOiJFUzUxMiJ9.eyJleHAiOjE1NzM0ODM2NjUsImlzcyI6IlFpbGluIiwicWlsaW5Qcm9kdWN0VVVJRCI6IjNkNGZmNWY5LTg2MTQtNDUyNC1iYTRiLTM3OGE5ZmRiNDU5NCIsInN1YiI6IlFpbGluU3ViamVjdCIsInVzZXJJRCI6IjEwMDUwMCJ9.QDwRpjt93j0oFdHUq9MZEQ8RBJ01QdFeCUz3qppb61b60qq0g_gOQCd-8NuwADtgwUfC4IRwMVfzCixXpJ5ug83lHTprQmXfyyUsSg-nlZ89CFuiCC_PuZkH2CJQKqU5
-func root(proxyurl string) http.HandlerFunc {
-	target, _ := url.Parse("https://" + gnhost)
-	targetQuery := target.RawQuery
-	proxy := &httputil.ReverseProxy{
-		Director: func(req *http.Request) {
-			req.Host = "" + gnhost
-			// follow lines of code copied from httputil.NewReverseProxy
-			req.URL.Scheme = target.Scheme
-			req.URL.Host = target.Host
-			req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
-			if targetQuery == "" || req.URL.RawQuery == "" {
-				req.URL.RawQuery = targetQuery + req.URL.RawQuery
-			} else {
-				req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
-			}
-			if _, ok := req.Header["User-Agent"]; !ok {
-				// explicitly disable User-Agent so it's not set to default value
-				req.Header.Set("User-Agent", "")
-			}
-		},
-		ModifyResponse: func(res *http.Response) error {
-			fmt.Println(res.Request.RequestURI)
-			for _, v := range res.Header {
-				for i := range v {
-					if strings.Contains(v[i], "https://"+gnhost) {
-						v[i] = strings.Replace(v[i], "https://"+gnhost, proxyurl, -1)
-					}
-				}
-			}
-			res.Header.Del("X-Frame-Options")
-
-			if res.Header.Get("Content-Encoding") == "gzip" {
-
-				gr, err := gzip.NewReader(res.Body)
-				if err != nil {
-					return err
-				}
-
-				data, err := ioutil.ReadAll(gr)
-				if err != nil {
-					return err
-				}
-				res.Body.Close()
-
-				if bytes.Contains(data, []byte("window.top")) {
-					// fmt.Println("replace in", res.Request.RequestURI)
-					data = bytes.ReplaceAll(data, []byte("window.top"), []byte("window.parent"))
-				}
-				var buf bytes.Buffer
-				w := gzip.NewWriter(&buf)
-				w.Write(data)
-				w.Close()
-
-				res.Body = ioutil.NopCloser(&buf)
-			}
-			return nil
-		},
-	}
-
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
-			jwt := r.URL.Query().Get("jwt")
-			_ = jwt
-
-			// TODO user from jws token
-			session, err := auth("aleksandr.barsukov@protocol.one", "password")
-			if err != nil {
-				fmt.Println(err)
-				w.WriteHeader(http.StatusUnauthorized)
-				w.Write([]byte("Unauthorized"))
-				return
-			}
-
-			http.SetCookie(w, &http.Cookie{
-				Name:  "PHPSESSID",
-				Value: session,
+	r.POST("/gamenet/sdk/v1/order", func(ctx echo.Context) error {
+		var params = make(map[string]string)
+		if err := ctx.Bind(&params); err != nil {
+			log.Error(err.Error())
+			return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+				"error": "bad request",
 			})
-			w.WriteHeader(http.StatusOK)
-			w.Write(index)
-
-			return
 		}
-		proxy.ServeHTTP(w, r)
-		return
-	}
-}
 
-func auth(login, password string) (string, error) {
-	var c = &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
+		fmt.Println(params)
+		u, err := rambler.SignUrl(fmt.Sprintf(
+			"https://api.stg.gamenet.ru/?method=gameplatform.qilin&notification_type=order_status_change&item=%s&app_id=1&user_id=1683086&receiver_id=1683086&lang=ru_RU&order_id=%d&item_price=115.0&status=chargeable",
+			params["item_id"],
+			time.Now().Unix()-1574170567, // order_id
+		), "msBzPSaWYQ0piSLZJJNg")
 
-	form := make(url.Values)
-	form.Add("login", login)
-	form.Add("password", password)
-	form.Add("captcha", "")
-	form.Add("mid", "175419290")
-	form.Add("browserhwid", "1ba8e830bc511735b9676f94455feab9")
-	form.Add("rp", "")
-	form.Add("trustedLocation", "1")
-	form.Add("code2fa", "")
-	form.Add("json", "1")
-	form.Add("2fa", "1")
-
-	req, err := http.NewRequest(http.MethodPost, "https://"+gnlogin+"/", strings.NewReader(form.Encode()))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := c.Do(req)
-	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("not authorized")
-	}
-	return ssid(resp)
-}
-
-func ssid(resp *http.Response) (string, error) {
-	for _, c := range resp.Cookies() {
-		if c.Name == "PHPSESSID" {
-			return c.Value, nil
+		if err != nil {
+			log.Error(err.Error())
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": "internal error",
+			})
 		}
-	}
-	return "", fmt.Errorf("session not found")
-}
 
-func singleJoiningSlash(a, b string) string {
-	aslash := strings.HasSuffix(a, "/")
-	bslash := strings.HasPrefix(b, "/")
-	switch {
-	case aslash && bslash:
-		return a + b[1:]
-	case !aslash && !bslash:
-		return a + "/" + b
-	}
-	return a + b
+		fmt.Println(u)
+		resp, err := http.Get(u)
+		if err != nil {
+			log.Error(err.Error())
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": "internal error",
+			})
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			fmt.Println(resp.Status)
+			data, _ := ioutil.ReadAll(resp.Body)
+			fmt.Println(string(data))
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": "payment failed",
+			})
+		}
+
+		return ctx.JSON(http.StatusOK, map[string]interface{}{})
+	})
 }
 
 var index = []byte(`<!DOCTYPE html>

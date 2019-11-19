@@ -30,9 +30,6 @@ sdk:
   plugins:
     - plugins/gamenet.so
     - plugins/rgames.so
-  pluginsConfig:
-    port: "1443"
-    entryurl: "https://demo-game.tst.qilin.super.com"
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----

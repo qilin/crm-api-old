@@ -30,7 +30,7 @@ sdk:
   plugins:
     - plugins/rambler.so
   pluginsConfig:
-    # qilin: "http://localhost:8086/"
+    # qilin: "http://192.168.1.64:8086/"
     qilin: "https://tst.qilin.super.com/integration/demo/qilin/"
     parent_iframe_template: "configs/sdk/game.html"
     parent_index_template: "configs/sdk/store.html"

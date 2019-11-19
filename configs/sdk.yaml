@@ -28,8 +28,8 @@ dispatcher:
 sdk:
   mode:
   iframes:
-    # "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7": "http://localhost:8085/gamenet/"
-    # "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb8": "http://localhost:8085/rgames/"
+    # "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7": "http://192.168.1.64:8085/gamenet/"
+    # "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb8": "http://192.168.1.64:8085/rgames/"
     "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7": "https://tst.qilin.super.com/integration/demo/dev/gamenet/"
     "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb8": "https://tst.qilin.super.com/integration/demo/dev/rgames/"
   iframeTemplate: "./configs/sdk/qilin-adapter-iframe.html"
