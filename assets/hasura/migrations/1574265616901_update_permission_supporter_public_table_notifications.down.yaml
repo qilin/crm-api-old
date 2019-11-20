@@ -1,0 +1,14 @@
+- args:
+    role: supporter
+    table:
+      name: notifications
+      schema: public
+  type: drop_delete_permission
+- args:
+    permission:
+      filter: {}
+    role: supporter
+    table:
+      name: notifications
+      schema: public
+  type: create_delete_permission

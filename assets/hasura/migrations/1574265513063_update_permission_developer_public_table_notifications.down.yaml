@@ -1,0 +1,20 @@
+- args:
+    role: developer
+    table:
+      name: notifications
+      schema: public
+  type: drop_update_permission
+- args:
+    permission:
+      columns:
+      - viewed
+      filter: {}
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: developer
+    table:
+      name: notifications
+      schema: public
+  type: create_update_permission

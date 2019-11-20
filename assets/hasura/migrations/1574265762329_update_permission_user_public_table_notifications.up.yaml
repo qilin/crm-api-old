@@ -1,0 +1,21 @@
+- args:
+    permission:
+      allow_upsert: true
+      check: {}
+      columns:
+      - text
+      localPresets:
+      - key: user_id
+        value: x-hasura-User-Id
+      - key: tenant_id
+        value: x-hasura-Tenant_id
+      - key: ""
+        value: ""
+      set:
+        tenant_id: x-hasura-Tenant_id
+        user_id: x-hasura-User-Id
+    role: user
+    table:
+      name: notifications
+      schema: public
+  type: create_insert_permission

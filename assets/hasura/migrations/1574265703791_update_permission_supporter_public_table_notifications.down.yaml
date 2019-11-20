@@ -1,0 +1,20 @@
+- args:
+    role: supporter
+    table:
+      name: notifications
+      schema: public
+  type: drop_insert_permission
+- args:
+    permission:
+      check: {}
+      columns:
+      - text
+      localPresets:
+      - key: ""
+        value: ""
+      set: {}
+    role: supporter
+    table:
+      name: notifications
+      schema: public
+  type: create_insert_permission

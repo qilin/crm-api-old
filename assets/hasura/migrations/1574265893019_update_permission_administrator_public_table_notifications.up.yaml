@@ -1,0 +1,26 @@
+- args:
+    role: administrator
+    table:
+      name: notifications
+      schema: public
+  type: drop_insert_permission
+- args:
+    permission:
+      check: {}
+      columns:
+      - text
+      localPresets:
+      - key: tenant_id
+        value: x-hasura-Tenant-Id
+      - key: user_id
+        value: x-hasura-User-Id
+      - key: ""
+        value: ""
+      set:
+        tenant_id: x-hasura-Tenant-Id
+        user_id: x-hasura-User-Id
+    role: administrator
+    table:
+      name: notifications
+      schema: public
+  type: create_insert_permission
