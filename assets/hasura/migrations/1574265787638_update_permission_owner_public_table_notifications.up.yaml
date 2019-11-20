@@ -13,11 +13,11 @@
       - key: user_id
         value: x-hasura-User-Id
       - key: tenant_id
-        value: x-hasura-Tenant_id
+        value: x-hasura-Tenant-id
       - key: ""
         value: ""
       set:
-        tenant_id: x-hasura-Tenant_id
+        tenant_id: x-hasura-Tenant-id
         user_id: x-hasura-User-Id
     role: owner
     table:
