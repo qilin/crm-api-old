@@ -42,7 +42,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 }
 
 func (p *plugin) getGameUrl() (string, error) {
-	r, err := http.NewRequest(http.MethodGet, "https://games.rambler.ru/api/v2/svc/games/45/run", nil)
+	r, err := http.NewRequest(http.MethodGet, "https://games.rambler.ru/api/v2/svc/games/1069/run", nil)
 	if err != nil {
 		return "", err
 	}
