@@ -57,7 +57,7 @@ sdk:
             vxQwLOJFB5DNEGcgGMe3xnYf0NTGsds=
             -----END PRIVATE KEY-----
         ramblerID:
-          kid: ""
+          kid: "rambler_games"
           rsaPrivateKey: |
             -----BEGIN PRIVATE KEY-----
             MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQCwSWzuBzLSN0St

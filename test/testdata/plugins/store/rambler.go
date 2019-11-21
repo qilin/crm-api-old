@@ -179,6 +179,9 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	r.GET("/items", func(c echo.Context) error {
 		return p.getItem(c, p.config.URL.Qilin)
 	})
+
+	r.GET("/rsid", p.runTestRsid)
+	r.GET("/rsidx", p.runTestRsidx)
 }
 
 func (p *plugin) IframeProviderHandler(ctx echo.Context, log logger.Logger) error {
@@ -330,4 +333,33 @@ func (p *plugin) getItem(ctx echo.Context, entry string) error {
 	}
 
 	return ctx.JSONBlob(http.StatusOK, d)
+}
+
+func (p *plugin) runTestRsid(ctx echo.Context) error {
+	id := utils.IDClient{
+		KID: p.config.Keys.RamblerID.Kid,
+		Key: ramblerKeyPair.Private,
+	}
+	rsid := ctx.QueryParam("rsid")
+	info := id.RamblerIdGetProfileInfo(rsid, ctx.Request().RemoteAddr, ctx.Request().UserAgent())
+	return ctx.HTML(http.StatusOK, info)
+}
+
+func (p *plugin) runTestRsidx(ctx echo.Context) error {
+	id := utils.IDClient{
+		KID: p.config.Keys.RamblerID.Kid,
+		Key: ramblerKeyPair.Private,
+	}
+	rsidx := ctx.QueryParam("rsidx")
+	info := id.RamblerIdGetProfileInfoX(rsidx, ctx.Request().RemoteAddr, ctx.Request().UserAgent())
+	return ctx.HTML(http.StatusOK, info)
+}
+
+func (p *plugin) runTestMeta(ctx echo.Context) error {
+	id := utils.IDClient{
+		KID: p.config.Keys.RamblerID.Kid,
+		Key: ramblerKeyPair.Private,
+	}
+	info := id.RamblerMeta(ctx.Request().RemoteAddr, ctx.Request().UserAgent())
+	return ctx.HTML(http.StatusOK, info)
 }
