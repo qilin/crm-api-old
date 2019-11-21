@@ -7,3 +7,7 @@ func IframeURL(entry string) string {
 func OrderURL(entry string) string {
 	return entry + "sdk/v1/order"
 }
+
+func ItemsURL(entry string) string {
+	return entry + "sdk/v1/items"
+}

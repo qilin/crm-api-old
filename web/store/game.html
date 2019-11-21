@@ -102,20 +102,26 @@
 
   // create PayFormCallback
   const showPayment = (...args) => new Promise(resolve => {
-    const status = confirm(args);
-    if (status) {
-      fetch('confirmPayment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify({
-          itemId: args[2],
-          gameId: '{{.GameUUID}}'
-        })
+    let itemId = args[2]
+    fetch('items?game_id={{.GameUUID}}&item_id=' + itemId).
+    then(response => {
+      response.json().then(data => {
+        const status = confirm([data.title, data.photo_url, data.price]);
+        if (status) {
+          fetch('confirmPayment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+              itemId: itemId,
+              gameId: '{{.GameUUID}}'
+            })
+          })
+        }
+        resolve(status);
       })
-    }
-    resolve(status);
+    })
   });
 
   const showError = (err) => {

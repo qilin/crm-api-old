@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"text/template"
@@ -175,6 +176,9 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	r.POST("/confirmPayment", func(c echo.Context) error {
 		return p.confirmPayment(c, p.config.URL.Qilin)
 	})
+	r.GET("/items", func(c echo.Context) error {
+		return p.getItem(c, p.config.URL.Qilin)
+	})
 }
 
 func (p *plugin) IframeProviderHandler(ctx echo.Context, log logger.Logger) error {
@@ -303,4 +307,27 @@ func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{})
 
+}
+
+func (p *plugin) getItem(ctx echo.Context, entry string) error {
+	var gameId = ctx.QueryParam("game_id")
+	var itemId = ctx.QueryParam("item_id")
+
+	u := fmt.Sprintf("%s?item_id=%s&game_id=%s", qilin.ItemsURL(entry), itemId, gameId)
+
+	resp, err := http.Get(u)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("provider error")
+	}
+
+	d, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSONBlob(http.StatusOK, d)
 }

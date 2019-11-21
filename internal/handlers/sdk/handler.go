@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -21,6 +23,7 @@ import (
 const (
 	sdkAuthRoute   = "/auth"
 	sdkOrderRoute  = "/order"
+	sdkItemsRoute  = "/items"
 	sdkQilinIframe = "/iframe"
 	sdkHealthRoute = "/health"
 )
@@ -48,6 +51,7 @@ func (h *SDKGroup) Route(groups *common.Groups) {
 	groups.SDK.POST(sdkOrderRoute, h.postOrder)
 	groups.SDK.POST(sdkHealthRoute, h.getHealth)
 	groups.SDK.GET(sdkQilinIframe, h.hubIframe)
+	groups.SDK.GET(sdkItemsRoute, h.getItems)
 }
 
 // POST /sdk/v1/auth
@@ -96,6 +100,44 @@ func (h *SDKGroup) postAuth(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, resp)
+}
+
+// GET /sdk/v1/items
+func (h *SDKGroup) getItems(ctx echo.Context) error {
+	var gameId = ctx.QueryParam("game_id")
+	var itemId = ctx.QueryParam("item_id")
+
+	product, err := h.sdk.GetProductByUUID(gameId)
+	if err != nil {
+		return err
+	}
+
+	u, err := url.Parse(qilin.ItemsURL(product.URL))
+	if err != nil {
+		return err
+	}
+
+	u.RawQuery = url.Values{
+		"game_id": []string{gameId},
+		"item_id": []string{itemId},
+	}.Encode()
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("provider error")
+	}
+
+	d, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSONBlob(http.StatusOK, d)
+
 }
 
 // POST /sdk/v1/order
