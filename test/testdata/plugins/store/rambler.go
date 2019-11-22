@@ -283,6 +283,18 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 		}
 		fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
+		req := common.OrderRequest{
+			GameID: "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7",
+			UserID: "123",
+			ItemID: ctx.QueryParam("item"),
+		}
+
+		if err := p.confirmBuy(p.config.URL.Qilin, req); err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"response": map[string]interface{}{
 				"order_id": ctx.QueryParam("order_id"),
@@ -310,28 +322,33 @@ func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
 		UserID: "123",
 		ItemID: params["itemId"],
 	}
-	data, err := json.Marshal(&req)
-	if err != nil {
+
+	if err := p.confirmBuy(entry, req); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
-		})
-	}
-
-	resp, err := http.Post(qilin.OrderURL(entry), "application/json;charset=utf-8", bytes.NewReader(data))
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": err.Error(),
-		})
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "payment proceeding failed",
 		})
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{})
 
+}
+
+func (p *plugin) confirmBuy(entry string, req common.OrderRequest) error {
+	data, err := json.Marshal(&req)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.Post(qilin.OrderURL(entry), "application/json;charset=utf-8", bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("payment proceeding failed")
+	}
+
+	return nil
 }
 
 func (p *plugin) getItem(ctx echo.Context, entry string) error {
