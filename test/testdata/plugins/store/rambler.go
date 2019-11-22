@@ -172,7 +172,7 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 		return p.IframeProviderHandler(c, log)
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
-	r.GET("/integration/game/sdk/v1/auth", func(c echo.Context) error {
+	r.POST("/integration/game/sdk/v1/auth", func(c echo.Context) error {
 		jwt, err := utils.IssueJWT("", "", "123", "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7", 0, jwtKeyPair.Private)
 		if err != nil {
 			return err
