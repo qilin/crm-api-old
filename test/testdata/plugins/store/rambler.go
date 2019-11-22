@@ -363,9 +363,9 @@ func (p *plugin) getItem(ctx echo.Context, entry string) error {
 }
 
 type Item struct {
-	Title     string  `json:"title"`
-	Photo_url string  `json:"photo_url"`
-	Price     float32 `json:"price"`
+	Title     string `json:"title"`
+	Photo_url string `json:"photo_url"`
+	Price     string `json:"price"`
 }
 
 func (p *plugin) queryItem(entry, gameId, itemId string) (*Item, error) {
