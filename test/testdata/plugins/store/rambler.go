@@ -172,6 +172,18 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 		return p.IframeProviderHandler(c, log)
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
+	r.GET("/integration/game/sdk/v1/auth", func(c echo.Context) error {
+		jwt, err := utils.IssueJWT("", "", "123", "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7", 0, jwtKeyPair.Private)
+		if err != nil {
+			return err
+		}
+		// url to return
+		return c.JSON(http.StatusOK, &common.AuthResponse{
+			Meta: map[string]interface{}{
+				"url": utils.AddURLParams(qilin.IframeURL(p.config.URL.Qilin), map[string]string{"jwt": string(jwt)}),
+			},
+		})
+	})
 	r.GET("/integration/game/billing", p.billingCallback)
 	r.POST("/api/v2/svc/payment/create", p.createOrder)
 	r.POST("/confirmPayment", func(c echo.Context) error {
@@ -251,12 +263,18 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 		}
 		fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
+
+		item, err := p.queryItem(p.config.URL.Qilin, "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7", ctx.QueryParam("item"))
+		if err != nil {
+			return err
+		}
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
-			"response": map[string]interface{}{
-				"title":     "50 золотых монет",
-				"photo_url": "https://ihcdn3.ioimg.org/iov6live/images/payments/payment_new/payment_packs_images/small_diamond.png",
-				"price":     50.0,
-			},
+			"response": item,
+			// map[string]interface{}{
+			// 	"title":     "50 золотых монет",
+			// 	"photo_url": "https://ihcdn3.ioimg.org/iov6live/images/payments/payment_new/payment_packs_images/small_diamond.png",
+			// 	"price":     50.0,
+			// },
 		})
 	case "order_status_change":
 		if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
@@ -319,24 +337,40 @@ func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
 func (p *plugin) getItem(ctx echo.Context, entry string) error {
 	var gameId = ctx.QueryParam("game_id")
 	var itemId = ctx.QueryParam("item_id")
+	item, err := p.queryItem(entry, gameId, itemId)
+	if err != nil {
+		return err
+	}
 
+	return ctx.JSON(http.StatusOK, item)
+}
+
+type Item struct {
+	Title     string  `json:"title"`
+	Photo_url string  `json:"photo_url"`
+	Price     float32 `json:"price"`
+}
+
+func (p *plugin) queryItem(entry, gameId, itemId string) (*Item, error) {
 	u := fmt.Sprintf("%s?item_id=%s&game_id=%s", qilin.ItemsURL(entry), itemId, gameId)
 
 	resp, err := http.Get(u)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("provider error")
+		return nil, fmt.Errorf("provider error")
 	}
 
 	d, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return ctx.JSONBlob(http.StatusOK, d)
+	var item Item
+	err = json.Unmarshal(d, &item)
+	return &item, err
 }
 
 func (p *plugin) runTestRsid(ctx echo.Context) error {

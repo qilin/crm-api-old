@@ -104,9 +104,19 @@
   // create PayFormCallback
   const showPayment = (...args) => new Promise(resolve => {    
     let itemId = args[2]
+    rgames.addCallback('onOrderSuccess' , () => {
+      console.log("order paid")
+      resolve(true)
+    } ) ;
+    rgames.addCallback('onOrderBoxUserClose' , () => {
+      console.log("order closed")
+      resolve(false)
+    } ) ;
+      console.log("show order")
+
         rgames.showOrderBox( {
           item : itemId,
-          type : '' ,
+          type : ''
         } ) ;
   });
 
