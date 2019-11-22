@@ -138,6 +138,9 @@ rgames.init().then(() => {
             const fullscreenButton = document.querySelector('#fullscreen');
             const closeIframeButton = document.querySelector('#closeFrame');
 
+              gameIframe.style.display = 'block';
+              gameIframe.querySelector('iframe').src = url;
+              
             fullscreenButton.onclick = (event) => {
               if (!helper.checkFullscreenSupport()) return;
 
