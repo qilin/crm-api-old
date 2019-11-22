@@ -66,9 +66,10 @@ type storeConfig struct {
 }
 
 const (
-	PluginName             = "store"
-	storeIndexTpl          = "./web/store/store.html"
-	storeIframeProviderTpl = "./web/store/game.html"
+	PluginName                    = "store"
+	storeIndexTpl                 = "./web/store/store.html"
+	storeIframeProviderTpl        = "./web/store/game.html"
+	storeIframeProviderTplSandbox = "./web/store/game-sandbox.html"
 )
 
 var (
@@ -224,18 +225,21 @@ func (p *plugin) runTestGame(ctx echo.Context) error {
 		fmt.Println("bad signature", ctx.Request().RequestURI)
 		return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 	}
-	fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
-	return ctx.HTML(http.StatusOK, `
-<script src="//sandbox.games.rambler.ru/assets/ext/rgames.js" ></script>
-<script>
-rgames.init().then(() => {
-	rgames.showOrderBox( {
-		item : 100500 ,
-		type : '' ,
-	} ) ;
-} ) ;	
-</script>
-		`)
+	fmt.Println("run successfully verified", ctx.Request().RequestURI)
+
+	tplName := path.Base(storeIframeProviderTplSandbox)
+	tpl, err := template.New(tplName).ParseFiles(storeIframeProviderTplSandbox)
+	if err != nil {
+		return err
+	}
+	buf := &bytes.Buffer{}
+	err = tpl.ExecuteTemplate(buf, tplName, map[string]interface{}{
+		"GameUUID": "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7",
+	})
+	if err != nil {
+		return err
+	}
+	return ctx.HTML(http.StatusOK, buf.String())
 }
 
 func (p *plugin) billingCallback(ctx echo.Context) error {
