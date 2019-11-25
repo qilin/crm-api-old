@@ -65,6 +65,6 @@ data:
         listen 8080;
         
         location / {
-            proxy_pass http://{{ $crmParentSvcName }}:8080/payment;
+            proxy_pass http://{{ $crmParentSvcName }}:8080/payment/;
         }
       }
