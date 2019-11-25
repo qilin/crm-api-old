@@ -233,8 +233,8 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
 </div>
 <script>
   // create PayFormCallback
-  const showPayment = (...args) => new Promise(resolve => {
-    let itemId = args[2]
+  const showPayment = (args) => new Promise(resolve => {
+    const { itemId } = args;
     fetch('items?game_id={{.GameUUID}}&item_id=' + itemId).
     then(response => {
       response.json().then(data => {
