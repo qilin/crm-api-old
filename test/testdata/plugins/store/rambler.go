@@ -3,13 +3,17 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path"
+	"strconv"
 	"text/template"
+	"time"
 
 	"github.com/spf13/viper"
 
@@ -58,11 +62,18 @@ type URL struct {
 	Qilin  string
 }
 
+type Billing struct {
+	ShopID int
+	ScID   int
+	Secret string
+}
+
 type storeConfig struct {
-	Auth   Auth
-	Keys   Keys
-	Routes Routes
-	URL    URL
+	Auth    Auth
+	Keys    Keys
+	Routes  Routes
+	URL     URL
+	Billing Billing
 }
 
 const (
@@ -172,20 +183,9 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 		return p.IframeProviderHandler(c, log)
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
-	r.POST("/integration/game/sdk/v1/auth", func(c echo.Context) error {
-		jwt, err := utils.IssueJWT("", "", "123", "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7", 0, jwtKeyPair.Private)
-		if err != nil {
-			return err
-		}
-		// url to return
-		return c.JSON(http.StatusOK, &common.AuthResponse{
-			Meta: map[string]interface{}{
-				"url": utils.AddURLParams(qilin.IframeURL(p.config.URL.Qilin), map[string]string{"jwt": string(jwt)}),
-			},
-		})
-	})
 	r.GET("/integration/game/billing", p.billingCallback)
-	r.POST("/api/v2/svc/payment/create", p.createOrder)
+
+	r.POST("/order", p.createOrder)
 	r.POST("/confirmPayment", func(c echo.Context) error {
 		return p.confirmPayment(c, p.config.URL.Qilin)
 	})
@@ -304,8 +304,87 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 	return ctx.HTML(http.StatusNotFound, "method not found")
 }
 
+type CreateOrderRequest struct {
+	GameId string `json:"game_id" query:"game_id" form:"game_id"`
+	ItemId string `json:"item_id" query:"item_id" form:"item_id"`
+}
+
 func (p *plugin) createOrder(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, map[string]interface{}{})
+	var req CreateOrderRequest
+	if err := ctx.Bind(&req); err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+	fmt.Println(req)
+
+	item, err := p.queryItem(p.config.URL.Qilin, req.GameId, req.ItemId)
+	if err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	price, err := strconv.ParseFloat(item.Price, 64)
+	if err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	orderId := fmt.Sprintf("%d", time.Now().Unix()-1574170567) // TODO
+
+	order := map[string]interface{}{
+		"shopId":      p.config.Billing.ShopID,
+		"scId":        p.config.Billing.ScID,
+		"orderNumber": orderId,
+		"orderAmount": item.Price,
+
+		"customerNumber": "1683086",                         //TODO
+		"cpsEmail":       "aleksandr.barsukov@protocol.one", // TODO
+		"cpsPhone":       "",
+		"productName":    item.Title,
+		"productImage":   item.Photo_url,
+		// "gameTitle":   req.GameId, //TODO
+
+		"requestSign": p.signPaymentRequest(orderId, item.Price),
+		"addData": map[string]interface{}{
+			"game_id":      req.GameId,
+			"game_name":    req.GameId, // TODO
+			"product_id":   req.ItemId,
+			"product_name": item.Title,
+		},
+		"orderParams": map[string]interface{}{
+			"positions": []map[string]interface{}{
+				map[string]interface{}{
+					"name":     item.Title,
+					"quantity": 1,
+					"price":    item.Price,
+					"tax":      3,
+					"taxValue": price * 20 / 120,
+				},
+			},
+		},
+	}
+	return ctx.JSON(http.StatusOK, order)
+}
+
+func (p *plugin) signPaymentRequest(orderId, amount string) string {
+	str := fmt.Sprintf("%d;%d;%s;%s;%s",
+		p.config.Billing.ShopID,
+		p.config.Billing.ScID,
+		orderId,
+		amount,
+		// "*!Mk8vL.8L!!Drt-Bwxo",
+		p.config.Billing.Secret,
+	)
+	fmt.Println(str)
+	hash := sha256.Sum256([]byte(str))
+
+	return hex.EncodeToString(hash[:])
 }
 
 func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
