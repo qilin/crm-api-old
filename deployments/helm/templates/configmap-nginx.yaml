@@ -60,3 +60,11 @@ data:
             proxy_pass http://{{ $crmDevSvcName }}:1443;
         }
       }
+      server {
+        server_name {{ .Values.ingressStore.hostname }};
+        listen 8080;
+        
+        location / {
+            proxy_pass http://{{ $crmParentSvcName }}:8080/payment;
+        }
+      }

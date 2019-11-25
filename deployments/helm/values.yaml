@@ -13,6 +13,11 @@ ingressProxy:
   path: /
   hostnamePrefix:
 
+ingressStore:
+  hostname: store.tst.qilin.super.com
+  path: /
+  hostnamePrefix:
+
 certIssuer:
   email: admin@protocol.one
 
