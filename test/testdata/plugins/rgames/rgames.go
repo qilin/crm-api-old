@@ -117,7 +117,10 @@ parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcel
   <style>
     html, body {
       height: 100%;
-      overflow: hidden;
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+			border: 0;
     }
   </style>
   <title>Document</title>
