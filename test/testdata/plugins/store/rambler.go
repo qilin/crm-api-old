@@ -378,9 +378,9 @@ func (p *plugin) signPaymentRequest(orderId, amount string) string {
 		p.config.Billing.ScID,
 		orderId,
 		amount,
-		// "*!Mk8vL.8L!!Drt-Bwxo",
 		p.config.Billing.Secret,
 	)
+
 	fmt.Println(str)
 	hash := sha256.Sum256([]byte(str))
 
