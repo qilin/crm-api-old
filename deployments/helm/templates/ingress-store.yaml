@@ -20,11 +20,11 @@ spec:
   tls:
     - hosts:
 #        - {{printf "%s%s" .Values.ingressProxy.hostnamePrefix .Values.ingressProxy.hostname }}
-        - {{printf "%s" .Values.ingressProxy.hostname }}
+        - {{printf "%s" .Values.ingressStore.hostname }}
       secretName: {{ .Release.Name}}-store-ssl-secret
   rules:
 #    - host: {{printf "%s%s" .Values.ingressProxy.hostnamePrefix .Values.ingressProxy.hostname }}
-    - host: {{printf "%s" .Values.ingressProxy.hostname }}
+    - host: {{printf "%s" .Values.ingressStore.hostname }}
       http:
         paths:
           - path: /
