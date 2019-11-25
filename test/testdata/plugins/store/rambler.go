@@ -186,8 +186,8 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	r.GET("/integration/game/billing", p.billingCallback)
 
 	r.POST("/order", p.createOrder)
-	r.GET("/payment/v1/rambler/chackOrder", p.checkOrder)
-	r.POST("/payment/v1/rambler/chackOrder", p.checkOrder)
+	r.GET("/payment/v1/rambler/checkOrder", p.checkOrder)
+	r.POST("/payment/v1/rambler/checkOrder", p.checkOrder)
 	r.GET("/payment/v1/rambler/paymentAviso", p.paymentAviso)
 	r.POST("/payment/v1/rambler/paymentAviso", p.paymentAviso)
 	r.GET("/payment/v1/rambler/notification", p.paymentNotification)
@@ -395,7 +395,18 @@ func (p *plugin) signPaymentRequest(orderId, amount string) string {
 }
 
 func (p *plugin) checkOrder(ctx echo.Context) error {
-	var v = map[string]interface{}{}
+	var req = make(map[string]interface{})
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+	}
+	var v = map[string]interface{}{
+		"checkResponse": map[string]interface{}{
+			"operationUid":      req["operationUid"],
+			"operationDatetime": req["operationDatetime"],
+			"orderAmount":       req["orderAmount"],
+			"code":              0,
+		},
+	}
 	return ctx.JSON(http.StatusOK, v)
 }
 
