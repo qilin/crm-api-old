@@ -44,6 +44,14 @@ spec:
             {{- range $port := $deployment.ports }}
             - containerPort: {{ $port.port }}
             {{- end }}
+          env:
+            {{- range $deployment.env }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $deploymentName }}-env
+                  key: {{ . }}
+            {{- end }}            
           #livenessProbe:
           #  httpGet:
           #    path: /health

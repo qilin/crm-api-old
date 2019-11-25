@@ -87,6 +87,8 @@ crmparent:
     service:
       type: ClusterIP
     env:
+    - APP_SDK_PLUGIN_STORE_BILLING_SECRET
+
 
 
 resources: {}
