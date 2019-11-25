@@ -186,6 +186,13 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	r.GET("/integration/game/billing", p.billingCallback)
 
 	r.POST("/order", p.createOrder)
+	r.GET("/payment/v1/rambler/chackOrder", p.checkOrder)
+	r.POST("/payment/v1/rambler/chackOrder", p.checkOrder)
+	r.GET("/payment/v1/rambler/paymentAviso", p.paymentAviso)
+	r.POST("/payment/v1/rambler/paymentAviso", p.paymentAviso)
+	r.GET("/payment/v1/rambler/notification", p.paymentNotification)
+	r.POST("/payment/v1/rambler/notification", p.paymentNotification)
+
 	r.POST("/confirmPayment", func(c echo.Context) error {
 		return p.confirmPayment(c, p.config.URL.Qilin)
 	})
@@ -385,6 +392,21 @@ func (p *plugin) signPaymentRequest(orderId, amount string) string {
 	hash := sha256.Sum256([]byte(str))
 
 	return hex.EncodeToString(hash[:])
+}
+
+func (p *plugin) checkOrder(ctx echo.Context) error {
+	var v = map[string]interface{}{}
+	return ctx.JSON(http.StatusOK, v)
+}
+
+func (p *plugin) paymentAviso(ctx echo.Context) error {
+	var v = map[string]interface{}{}
+	return ctx.JSON(http.StatusOK, v)
+}
+
+func (p *plugin) paymentNotification(ctx echo.Context) error {
+	var v = map[string]interface{}{}
+	return ctx.JSON(http.StatusOK, v)
 }
 
 func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
