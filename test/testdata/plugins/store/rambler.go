@@ -11,6 +11,8 @@ import (
 	"path"
 	"text/template"
 
+	"github.com/qilin/crm-api/test/testdata/plugins/store/id"
+
 	"github.com/spf13/viper"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -116,38 +118,28 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		}
 
 		// real auth
-
-		// get rsid from meta
-		//meta, ok := request.Meta.(map[string]interface{})
-		//if !ok {
-		//	return common.AuthResponse{}, errors.New("bad request. request.meta must be map[string]interface{}")
-		//}
-		//rsid, ok := meta["rsid"].(string)
-		//if !ok {
-		//	return common.AuthResponse{}, errors.New("bad request. request.meta[rsid] is undefined")
-		//}
-
-		// get rsid from cookie
 		req, ok := ctx.Value("request").(*http.Request)
 		if !ok {
 			log.Emergency("can't extract *http.Request from context")
 		}
-		rsidCookie, err := req.Cookie(p.config.Auth.RsidCookieName)
+
+		// get rsid from cookie
+		rsid, err := p.getRSIDCookieValue(req)
 		if err != nil {
 			return common.AuthResponse{}, errors.New("bad request. rsid cookie is undefined")
 		}
 
-		rsid := rsidCookie.Value
-
-		id := utils.IDClient{
+		id := id.Client{
 			KID: p.config.Keys.RamblerID.Kid,
 			Key: ramblerKeyPair.Private,
 		}
-		info := id.RamblerIdGetProfileInfo(rsid, req.RemoteAddr, req.UserAgent())
+		profile, err := id.RamblerIdGetProfileInfo(rsid, req.RemoteAddr, req.UserAgent())
+		if err != nil {
+			return common.AuthResponse{}, err
+		}
+		log.Debug("Rambler profile found: " + profile.Email)
 
-		//todo: parse info
-		log.Info(info)
-		// todo: set auth cookie?, but we also have rsid cookie
+		// todo: add user to JWT (?)
 
 		// issue JWT
 		jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, jwtKeyPair.Private)
@@ -157,7 +149,6 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		// url to return
 		response.Meta = map[string]interface{}{
 			"url": utils.AddURLParams(qilin.IframeURL(p.config.URL.Qilin), map[string]string{"jwt": string(jwt)}),
-			// "cookie": authToken,
 		}
 		return
 	}
@@ -179,9 +170,6 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	r.GET("/items", func(c echo.Context) error {
 		return p.getItem(c, p.config.URL.Qilin)
 	})
-
-	r.GET("/rsid", p.runTestRsid)
-	r.GET("/rsidx", p.runTestRsidx)
 }
 
 func (p *plugin) IframeProviderHandler(ctx echo.Context, log logger.Logger) error {
@@ -335,31 +323,10 @@ func (p *plugin) getItem(ctx echo.Context, entry string) error {
 	return ctx.JSONBlob(http.StatusOK, d)
 }
 
-func (p *plugin) runTestRsid(ctx echo.Context) error {
-	id := utils.IDClient{
-		KID: p.config.Keys.RamblerID.Kid,
-		Key: ramblerKeyPair.Private,
+func (p *plugin) getRSIDCookieValue(r *http.Request) (string, error) {
+	rsidCookie, err := r.Cookie(p.config.Auth.CookieName)
+	if err != nil {
+		return "", err
 	}
-	rsid := ctx.QueryParam("rsid")
-	info := id.RamblerIdGetProfileInfo(rsid, ctx.Request().RemoteAddr, ctx.Request().UserAgent())
-	return ctx.HTML(http.StatusOK, info)
-}
-
-func (p *plugin) runTestRsidx(ctx echo.Context) error {
-	id := utils.IDClient{
-		KID: p.config.Keys.RamblerID.Kid,
-		Key: ramblerKeyPair.Private,
-	}
-	rsidx := ctx.QueryParam("rsidx")
-	info := id.RamblerIdGetProfileInfoX(rsidx, ctx.Request().RemoteAddr, ctx.Request().UserAgent())
-	return ctx.HTML(http.StatusOK, info)
-}
-
-func (p *plugin) runTestMeta(ctx echo.Context) error {
-	id := utils.IDClient{
-		KID: p.config.Keys.RamblerID.Kid,
-		Key: ramblerKeyPair.Private,
-	}
-	info := id.RamblerMeta(ctx.Request().RemoteAddr, ctx.Request().UserAgent())
-	return ctx.HTML(http.StatusOK, info)
+	return rsidCookie.Value, nil
 }
