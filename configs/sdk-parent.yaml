@@ -43,7 +43,7 @@ sdk:
         qilin: "https://tst.qilin.super.com/integration/demo/qilin/"
         # qilin: "http://192.168.1.64:8086/"
       auth:
-        fake: true
+        fake: false
         cookieName: "qlsid"
         rsidCookieName: "rsid"
       keys:
