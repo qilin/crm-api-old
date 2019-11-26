@@ -75,6 +75,37 @@
       background-color: #343b4c;
     }
 
+    #flash_popup_wrapper {
+      position: fixed;
+      display: none;
+      overflow: auto;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      text-align: center;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 10;
+    }
+
+    #flash_popup {
+      position: absolute;
+      width: 385px;
+      top: 50%;
+      left: 50%;
+      padding: 30px 0 35px;
+      transform: translate(-50%, -50%);
+      border-radius: 1px;
+      background-color: #fff;
+    }
+
+    #flash_popup_close {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      cursor: pointer;
+    }
+
   </style>
   <script>
 parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcelRequire,u="function"==typeof require&&require;function f(t,n){if(!r[t]){if(!e[t]){var i="function"==typeof parcelRequire&&parcelRequire;if(!n&&i)return i(t,!0);if(o)return o(t,!0);if(u&&"string"==typeof t)return u(t);var c=new Error("Cannot find module '"+t+"'");throw c.code="MODULE_NOT_FOUND",c}p.resolve=function(r){return e[t][1][r]||r},p.cache={};var l=r[t]=new f.Module(t);e[t][0].call(l.exports,p,l,l.exports,this)}return r[t].exports;function p(e){return f(p.resolve(e))}}f.isParcelRequire=!0,f.Module=function(e){this.id=e,this.bundle=f,this.exports={}},f.modules=e,f.cache=r,f.parent=o,f.register=function(r,t){e[r]=[function(e,r){r.exports=t},{}]};for(var c=0;c<t.length;c++)try{f(t[c])}catch(e){i||(i=e)}if(t.length){var l=f(t[t.length-1]);"object"==typeof exports&&"undefined"!=typeof module?module.exports=l:"function"==typeof define&&define.amd?define(function(){return l}):n&&(this[n]=l)}if(parcelRequire=f,i)throw i;return f}({"eKDL":[function(require,module,exports) {
@@ -230,10 +261,32 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
     </div>
     <iframe style="width: 98vw; height: 96vh" frameborder="0" allowfullscreen></iframe>
   </div>
+  <div id="flash_popup_wrapper">
+    <div id="flash_popup">
+      <div id="flash_popup_close">X</div>
+      <p>
+        Для игры нужно установить<br>
+        последнюю версию Adobe Flash Player<br>
+        или разрешить его работу
+      </p>
+      <a id="enable_flash" href="https://get.adobe.com/ru/flashplayer/" target="_blank" rel="noopener noreferrer">
+        Включить&nbsp;ADOBE FLASH PLAYER
+      </a>
+    </div>
+  </div>
 </div>
+
 <script>
-  // const mockGameId = 'fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7';
-  // const mockItemId = '1_640000393680';
+  const USER_CLICKED_PLAY = 'USER_CLICKED_PLAY';
+  const isUserClickPlay = localStorage.getItem(USER_CLICKED_PLAY);
+  const isFlashEnabled = qilinStore.checkFlashEnabled();
+  const flashPopup = document.querySelector('#flash_popup_wrapper');
+  const closeFlashPopupButton = document.querySelector('#flash_popup_close');
+  const openFlashPopup = () => flashPopup.style.display = 'block';
+  const closeFlashPopup = () => flashPopup.style.display = 'none';
+  
+  closeFlashPopupButton.onclick = closeFlashPopup;
+
   const orderUrl = 'order';
 
   const getOrder = (gameId, itemId, url) => {
@@ -299,6 +352,18 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
       const fullscreenButton = document.querySelector('#fullscreen');
       const closeIframeButton = document.querySelector('#closeFrame');
 
+
+      const openIframe = () => {
+        if (!isFlashEnabled) {
+          localStorage.setItem(USER_CLICKED_PLAY, 'click');
+          openFlashPopup();
+          return;
+        }
+        
+        gameIframe.style.display = 'block';
+        gameIframe.querySelector('iframe').src = url;
+      };
+
       qilinStore.onFullscreenModeEnabled(() => {
         fullscreenButton.style.display = 'block';
       });
@@ -313,16 +378,18 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
           qilinStore.setFullscreen(false);
         }
       };
-      showIframeButton.onclick = () => {
-        gameIframe.style.display = 'block';
-        gameIframe.querySelector('iframe').src = url;
-      };
+      showIframeButton.onclick = openIframe;
 
       closeIframeButton.onclick = () => {
         gameIframe.style.display = 'none';
         gameIframe.querySelector('iframe').src = url;
       };
       qilinStore.onShowPayForm(showPayment);
+
+      if (isFlashEnabled && isUserClickPlay) {
+        localStorage.removeItem(USER_CLICKED_PLAY);
+        openIframe();
+      }
     })
     .catch(err => showError(err));
 </script>
