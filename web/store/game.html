@@ -232,6 +232,27 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
   </div>
 </div>
 <script>
+  // const mockGameId = 'fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7';
+  // const mockItemId = '1_640000393680';
+  const orderUrl = 'order';
+
+  const getOrder = (gameId, itemId, url) => {
+    const request = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_id: gameId, item_id: itemId }),
+    };
+
+    fetch(orderUrl, request)
+      .then(res => res.json())
+      .then(json => alert(`Order created.
+        ${JSON.stringify(json)}`))
+      .catch(err => {
+        alert('Order not created, see the console.');
+        console.log(err);
+      });
+  };
+
   // create PayFormCallback
   const showPayment = (args) => new Promise(resolve => {
     const { itemId } = args;
@@ -253,7 +274,9 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
         }
         resolve(status);
       })
-    })
+    });
+
+    // getOrder('{{.GameUUID}}', itemId, 'order');
   });
 
   const showError = (err) => {
