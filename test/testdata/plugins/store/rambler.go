@@ -102,9 +102,12 @@ func (p *plugin) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) 
 		log.Emergency("plugin: can not parse key pair")
 	}
 
-	ramblerKeyPair, err = utils.DecodePemRSA(p.config.Keys.RamblerID.RsaPrivateKey, p.config.Keys.RamblerID.RsaPublicKey)
-	if err != nil {
-		log.Emergency("plugin: can not parse rsa key pair")
+	// if auth is not a fake
+	if !p.config.Auth.Fake {
+		ramblerKeyPair, err = utils.DecodePemRSA(p.config.Keys.RamblerID.RsaPrivateKey, p.config.Keys.RamblerID.RsaPublicKey)
+		if err != nil {
+			log.Emergency("plugin: can not parse rsa key pair")
+		}
 	}
 }
 
