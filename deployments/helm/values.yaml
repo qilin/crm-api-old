@@ -13,6 +13,11 @@ ingressProxy:
   path: /
   hostnamePrefix:
 
+ingressStore:
+  hostname: store.tst.qilin.super.com
+  path: /
+  hostnamePrefix:
+
 certIssuer:
   email: admin@protocol.one
 
@@ -82,6 +87,8 @@ crmparent:
     service:
       type: ClusterIP
     env:
+    - APP_SDK_PLUGIN_STORE_BILLING_SECRET
+
 
 
 resources: {}

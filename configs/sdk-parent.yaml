@@ -31,12 +31,17 @@ sdk:
     - plugins/rambler.so
   plugin:
     store:
+      billing:
+        shopId: 76
+        scId: 188
+        secret: "don't put password here"
       routes:
         index: "/store"
         iframe: "/game"
       url:
         iframe: "https://tst.qilin.super.com/integration/demo/qilin/sdk/v1/iframe"
         qilin: "https://tst.qilin.super.com/integration/demo/qilin/"
+        # qilin: "http://192.168.1.64:8086/"
       auth:
         fake: true
         cookieName: "qlsid"

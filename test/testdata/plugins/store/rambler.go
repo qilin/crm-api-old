@@ -3,13 +3,17 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path"
+	"strconv"
 	"text/template"
+	"time"
 
 	"github.com/qilin/crm-api/test/testdata/plugins/store/id"
 
@@ -60,17 +64,25 @@ type URL struct {
 	Qilin  string
 }
 
+type Billing struct {
+	ShopID int
+	ScID   int
+	Secret string
+}
+
 type storeConfig struct {
-	Auth   Auth
-	Keys   Keys
-	Routes Routes
-	URL    URL
+	Auth    Auth
+	Keys    Keys
+	Routes  Routes
+	URL     URL
+	Billing Billing
 }
 
 const (
-	PluginName             = "store"
-	storeIndexTpl          = "./web/store/store.html"
-	storeIframeProviderTpl = "./web/store/game.html"
+	PluginName                    = "store"
+	storeIndexTpl                 = "./web/store/store.html"
+	storeIframeProviderTpl        = "./web/store/game.html"
+	storeIframeProviderTplSandbox = "./web/store/game-sandbox.html"
 )
 
 var (
@@ -163,7 +175,15 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	})
 	r.GET("/integration/game/iframe", p.runTestGame)
 	r.GET("/integration/game/billing", p.billingCallback)
-	r.POST("/api/v2/svc/payment/create", p.createOrder)
+
+	r.POST("/order", p.createOrder)
+	r.GET("/payment/v1/rambler/checkOrder", p.checkOrder)
+	r.POST("/payment/v1/rambler/checkOrder", p.checkOrder)
+	r.GET("/payment/v1/rambler/paymentAviso", p.paymentAviso)
+	r.POST("/payment/v1/rambler/paymentAviso", p.paymentAviso)
+	r.GET("/payment/v1/rambler/notification", p.paymentNotification)
+	r.POST("/payment/v1/rambler/notification", p.paymentNotification)
+
 	r.POST("/confirmPayment", func(c echo.Context) error {
 		return p.confirmPayment(c, p.config.URL.Qilin)
 	})
@@ -212,18 +232,21 @@ func (p *plugin) runTestGame(ctx echo.Context) error {
 		fmt.Println("bad signature", ctx.Request().RequestURI)
 		return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 	}
-	fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
-	return ctx.HTML(http.StatusOK, `
-<script src="//sandbox.games.rambler.ru/assets/ext/rgames.js" ></script>
-<script>
-rgames.init().then(() => {
-	rgames.showOrderBox( {
-		item : 100500 ,
-		type : '' ,
-	} ) ;
-} ) ;	
-</script>
-		`)
+	fmt.Println("run successfully verified", ctx.Request().RequestURI)
+
+	tplName := path.Base(storeIframeProviderTplSandbox)
+	tpl, err := template.New(tplName).ParseFiles(storeIframeProviderTplSandbox)
+	if err != nil {
+		return err
+	}
+	buf := &bytes.Buffer{}
+	err = tpl.ExecuteTemplate(buf, tplName, map[string]interface{}{
+		"GameUUID": "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7",
+	})
+	if err != nil {
+		return err
+	}
+	return ctx.HTML(http.StatusOK, buf.String())
 }
 
 func (p *plugin) billingCallback(ctx echo.Context) error {
@@ -235,12 +258,18 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 		}
 		fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
+
+		item, err := p.queryItem(p.config.URL.Qilin, "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7", ctx.QueryParam("item"))
+		if err != nil {
+			return err
+		}
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
-			"response": map[string]interface{}{
-				"title":     "50 золотых монет",
-				"photo_url": "https://ihcdn3.ioimg.org/iov6live/images/payments/payment_new/payment_packs_images/small_diamond.png",
-				"price":     50.0,
-			},
+			"response": item,
+			// map[string]interface{}{
+			// 	"title":     "50 золотых монет",
+			// 	"photo_url": "https://ihcdn3.ioimg.org/iov6live/images/payments/payment_new/payment_packs_images/small_diamond.png",
+			// 	"price":     50.0,
+			// },
 		})
 	case "order_status_change":
 		if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
@@ -249,6 +278,18 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 			return ctx.HTML(http.StatusUnauthorized, "Wrong Signature")
 		}
 		fmt.Println("billing callback successfully verified", ctx.Request().RequestURI)
+		req := common.OrderRequest{
+			GameID: "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7",
+			UserID: "123",
+			ItemID: ctx.QueryParam("item"),
+		}
+
+		if err := p.confirmBuy(p.config.URL.Qilin, req); err != nil {
+			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"response": map[string]interface{}{
 				"order_id": ctx.QueryParam("order_id"),
@@ -258,8 +299,113 @@ func (p *plugin) billingCallback(ctx echo.Context) error {
 	return ctx.HTML(http.StatusNotFound, "method not found")
 }
 
+type CreateOrderRequest struct {
+	GameId string `json:"game_id" query:"game_id" form:"game_id"`
+	ItemId string `json:"item_id" query:"item_id" form:"item_id"`
+}
+
 func (p *plugin) createOrder(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, map[string]interface{}{})
+	var req CreateOrderRequest
+	if err := ctx.Bind(&req); err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+	fmt.Println(req)
+
+	item, err := p.queryItem(p.config.URL.Qilin, req.GameId, req.ItemId)
+	if err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	price, err := strconv.ParseFloat(item.Price, 64)
+	if err != nil {
+		fmt.Println(err)
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	orderId := fmt.Sprintf("%d", time.Now().Unix()-1574170567) // TODO
+
+	order := map[string]interface{}{
+		"shopId":      p.config.Billing.ShopID,
+		"scId":        p.config.Billing.ScID,
+		"orderNumber": orderId,
+		"orderAmount": item.Price,
+
+		"customerNumber": "1683086",                         //TODO
+		"cpsEmail":       "aleksandr.barsukov@protocol.one", // TODO
+		"cpsPhone":       "",
+		"productName":    item.Title,
+		"productImage":   item.Photo_url,
+		// "gameTitle":   req.GameId, //TODO
+
+		"requestSign": p.signPaymentRequest(orderId, item.Price),
+		"addData": map[string]interface{}{
+			"game_id":      req.GameId,
+			"game_name":    req.GameId, // TODO
+			"product_id":   req.ItemId,
+			"product_name": item.Title,
+		},
+		"orderParams": map[string]interface{}{
+			"positions": []map[string]interface{}{
+				map[string]interface{}{
+					"name":     item.Title,
+					"quantity": 1,
+					"price":    item.Price,
+					"tax":      3,
+					"taxValue": price * 20 / 120,
+				},
+			},
+		},
+	}
+	return ctx.JSON(http.StatusOK, order)
+}
+
+func (p *plugin) signPaymentRequest(orderId, amount string) string {
+	str := fmt.Sprintf("%d;%d;%s;%s;%s",
+		p.config.Billing.ShopID,
+		p.config.Billing.ScID,
+		orderId,
+		amount,
+		p.config.Billing.Secret,
+	)
+
+	fmt.Println(str)
+	hash := sha256.Sum256([]byte(str))
+
+	return hex.EncodeToString(hash[:])
+}
+
+func (p *plugin) checkOrder(ctx echo.Context) error {
+	var req = make(map[string]interface{})
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+	}
+	var v = map[string]interface{}{
+		"checkResponse": map[string]interface{}{
+			"operationUid":      req["operationUid"],
+			"operationDatetime": req["operationDatetime"],
+			"orderAmount":       req["orderAmount"],
+			"code":              0,
+		},
+	}
+	return ctx.JSON(http.StatusOK, v)
+}
+
+func (p *plugin) paymentAviso(ctx echo.Context) error {
+	var v = map[string]interface{}{}
+	return ctx.JSON(http.StatusOK, v)
+}
+
+func (p *plugin) paymentNotification(ctx echo.Context) error {
+	var v = map[string]interface{}{}
+	return ctx.JSON(http.StatusOK, v)
 }
 
 func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
@@ -276,23 +422,10 @@ func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
 		UserID: "123",
 		ItemID: params["itemId"],
 	}
-	data, err := json.Marshal(&req)
-	if err != nil {
+
+	if err := p.confirmBuy(entry, req); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": err.Error(),
-		})
-	}
-
-	resp, err := http.Post(qilin.OrderURL(entry), "application/json;charset=utf-8", bytes.NewReader(data))
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": err.Error(),
-		})
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": "payment proceeding failed",
 		})
 	}
 
@@ -300,27 +433,61 @@ func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
 
 }
 
-func (p *plugin) getItem(ctx echo.Context, entry string) error {
-	var gameId = ctx.QueryParam("game_id")
-	var itemId = ctx.QueryParam("item_id")
+func (p *plugin) confirmBuy(entry string, req common.OrderRequest) error {
+	data, err := json.Marshal(&req)
+	if err != nil {
+		return err
+	}
 
-	u := fmt.Sprintf("%s?item_id=%s&game_id=%s", qilin.ItemsURL(entry), itemId, gameId)
-
-	resp, err := http.Get(u)
+	resp, err := http.Post(qilin.OrderURL(entry), "application/json;charset=utf-8", bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("provider error")
+		return errors.New("payment proceeding failed")
 	}
 
-	d, err := ioutil.ReadAll(resp.Body)
+	return nil
+}
+
+func (p *plugin) getItem(ctx echo.Context, entry string) error {
+	var gameId = ctx.QueryParam("game_id")
+	var itemId = ctx.QueryParam("item_id")
+	item, err := p.queryItem(entry, gameId, itemId)
 	if err != nil {
 		return err
 	}
 
-	return ctx.JSONBlob(http.StatusOK, d)
+	return ctx.JSON(http.StatusOK, item)
+}
+
+type Item struct {
+	Title     string `json:"title"`
+	Photo_url string `json:"photo_url"`
+	Price     string `json:"price"`
+}
+
+func (p *plugin) queryItem(entry, gameId, itemId string) (*Item, error) {
+	u := fmt.Sprintf("%s?item_id=%s&game_id=%s", qilin.ItemsURL(entry), itemId, gameId)
+
+	resp, err := http.Get(u)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("provider error")
+	}
+
+	d, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var item Item
+	err = json.Unmarshal(d, &item)
+	return &item, err
 }
 
 func (p *plugin) getRSIDCookieValue(r *http.Request) (string, error) {
