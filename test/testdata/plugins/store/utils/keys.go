@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 
 	"github.com/dgrijalva/jwt-go"
@@ -42,11 +43,20 @@ func DecodePemECDSA(pemPriv, pemPub string) (KeyPair, error) {
 }
 
 func DecodePemRSA(private, public string) (RSAKeyPair, error) {
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(private))
+	pubPem, err := base64.StdEncoding.DecodeString(public)
 	if err != nil {
 		return RSAKeyPair{}, err
 	}
-	publicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(public))
+	privPem, err := base64.StdEncoding.DecodeString(private)
+	if err != nil {
+		return RSAKeyPair{}, err
+	}
+
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privPem)
+	if err != nil {
+		return RSAKeyPair{}, err
+	}
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(pubPem)
 	if err != nil {
 		return RSAKeyPair{}, err
 	}
