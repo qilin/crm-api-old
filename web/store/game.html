@@ -278,9 +278,30 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
 </div>
 
 <script>
-  let widget;
+  const USER_CLICKED_PLAY = 'USER_CLICKED_PLAY';
+  const isUserClickPlay = localStorage.getItem(USER_CLICKED_PLAY);
+  const isFlashEnabled = qilinStore.checkFlashEnabled();
+  const flashPopup = document.querySelector('#flash_popup_wrapper');
+  const closeFlashPopupButton = document.querySelector('#flash_popup_close');
+  const openFlashPopup = () => flashPopup.style.display = 'block';
+  const closeFlashPopup = () => flashPopup.style.display = 'none';
+  
+  closeFlashPopupButton.onclick = closeFlashPopup;
 
-  window.RamblerPayment.buildWidget('PaymentPopup', {
+  const orderUrl = 'order';
+
+  const getOrder = (gameId, itemId, url) => {
+    const request = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_id: gameId, item_id: itemId }),
+    };
+
+    return fetch(orderUrl, request)
+  };
+
+  const showPayWidget = (gameId, itemId, url) => {
+    window.RamblerPayment.buildWidget('PaymentPopup', {
     // Ссылка на логотип
     // logo: 'https://comments.rambler.ru/admin/assets/logo.png',
     // основной цвет
@@ -308,7 +329,18 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
     tab: 'PC'
     }]
     }).then(widget => {
-      window.paymentWidget = widget;
+      getOrder(gameId, itemId, url)
+      .then(res => res.json())
+      .then(json => {
+        if (!widget) return;
+
+        widget.show();
+        widget.initializeOrder(json);
+      })
+      .catch(err => {
+        alert('Order not created, see the console.');
+        console.log(err);
+      });
        // виджет закрыт
       widget.on('close', function () {
         window.showNotify('close');
@@ -331,66 +363,33 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
         window.showNotify('pay');
       });
     }).catch(err => console.log(err));
-
-  const USER_CLICKED_PLAY = 'USER_CLICKED_PLAY';
-  const isUserClickPlay = localStorage.getItem(USER_CLICKED_PLAY);
-  const isFlashEnabled = qilinStore.checkFlashEnabled();
-  const flashPopup = document.querySelector('#flash_popup_wrapper');
-  const closeFlashPopupButton = document.querySelector('#flash_popup_close');
-  const openFlashPopup = () => flashPopup.style.display = 'block';
-  const closeFlashPopup = () => flashPopup.style.display = 'none';
-  
-  closeFlashPopupButton.onclick = closeFlashPopup;
-
-  const orderUrl = 'order';
-
-  const getOrder = (gameId, itemId, url) => {
-    const request = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game_id: gameId, item_id: itemId }),
-    };
-
-    return fetch(orderUrl, request)
-  };
-
-  const showPayWidget = (gameId, itemId, url) => {
-    getOrder(gameId, itemId, url)
-      .then(res => res.json())
-      .then(json => {
-        if (!widget) return;
-
-        widget.show();
-        widget.initializeOrder(json);
-      })
-      .catch(err => {
-        alert('Order not created, see the console.');
-        console.log(err);
-      });
   }
 
   // create PayFormCallback
   const showPayment = (args) => new Promise(resolve => {
     const { itemId } = args;
-    fetch('items?game_id={{.GameUUID}}&item_id=' + itemId).
-    then(response => {
-      response.json().then(data => {
-        const status = confirm([data.title, data.photo_url, data.price]);
-        if (status) {
-          fetch('confirmPayment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify({
-              itemId: itemId,
-              gameId: '{{.GameUUID}}'
-            })
-          })
-        }
-        resolve(status);
-      })
-    });
+
+    showPayWidget('{{.GameUUID}}', itemId, 'order');
+
+    // fetch('items?game_id={{.GameUUID}}&item_id=' + itemId).
+    // then(response => {
+    //   response.json().then(data => {
+    //     const status = confirm([data.title, data.photo_url, data.price]);
+    //     if (status) {
+    //       fetch('confirmPayment', {
+    //         method: 'POST',
+    //         headers: {
+    //           'Content-Type': 'application/json;charset=utf-8'
+    //         },
+    //         body: JSON.stringify({
+    //           itemId: itemId,
+    //           gameId: '{{.GameUUID}}'
+    //         })
+    //       })
+    //     }
+    //     resolve(status);
+    //   })
+    // });
 
     // getOrder('{{.GameUUID}}', itemId, 'order');
   });
