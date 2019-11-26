@@ -245,6 +245,7 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
 "use strict";var r=n(require("./qilinStore")),e=n(require("./qilinGame")),i=require("./constants"),o=n(require("./logError"));function n(r){return r&&r.__esModule?r:{default:r}}if(!window){var w=new Error("SDK only work on web browser");throw(0,o.default)(w),w}window.qilinStore=r.default,window.qilinGame=e.default,window.PAYMENT_FORM_CLOSED=i.PAYMENT_FORM_CLOSED,window.FULLSCREEN_MODE_CHANGED=i.FULLSCREEN_MODE_CHANGED;
 },{"./qilinStore":"lwy4","./qilinGame":"blxw","./constants":"eKDL","./logError":"wr21"}]},{},["QCba"], null)
   </script>
+  <script src="https://payment.rambler.ru/widget/sdk.js"></script>
   <title>Document</title>
 </head>
 <body>
@@ -277,6 +278,60 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
 </div>
 
 <script>
+  let widget;
+
+  window.RamblerPayment.buildWidget('PaymentPopup', {
+    // Ссылка на логотип
+    // logo: 'https://comments.rambler.ru/admin/assets/logo.png',
+    // основной цвет
+    color: '#315efb',
+    // шрифт Roboto/ProximaNova/PtSans
+    font: 'Roboto',
+    // язык ru/en
+    lang: 'ru',
+    // способы оплаты (табы с оплатой)
+    tabs: [{
+    // оплата картой
+    tab: 'AC'
+    }, {
+    // выбор из нескольких способов оплаты
+    tab: 'composite',
+    paymentTypes: [
+    'PC',
+    'MC',
+    'GP',
+    'WM',
+    'SB'
+    ]
+    }, {
+    // оплата банковской картой
+    tab: 'PC'
+    }]
+    }).then(widget => {
+      window.paymentWidget = widget;
+       // виджет закрыт
+      widget.on('close', function () {
+        window.showNotify('close');
+      })
+      // виджет задестроен
+      widget.on('destroy', function () {
+        window.showNotify('destroy');
+      })
+      // фейл платежа
+      widget.on('fail', function () {
+        window.showNotify('fail');
+      })
+      // успех платежа
+      widget.on('success', function () {
+        window.showNotify('success');
+      })
+      // начало оплаты
+      widget.on('pay', function (payment) {
+        console.log('pay', payment);
+        window.showNotify('pay');
+      });
+    }).catch(err => console.log(err));
+
   const USER_CLICKED_PLAY = 'USER_CLICKED_PLAY';
   const isUserClickPlay = localStorage.getItem(USER_CLICKED_PLAY);
   const isFlashEnabled = qilinStore.checkFlashEnabled();
@@ -296,15 +351,23 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
       body: JSON.stringify({ game_id: gameId, item_id: itemId }),
     };
 
-    fetch(orderUrl, request)
+    return fetch(orderUrl, request)
+  };
+
+  const showPayWidget = (gameId, itemId, url) => {
+    getOrder(gameId, itemId, url)
       .then(res => res.json())
-      .then(json => alert(`Order created.
-        ${JSON.stringify(json)}`))
+      .then(json => {
+        if (!widget) return;
+
+        widget.show();
+        widget.initializeOrder(json);
+      })
       .catch(err => {
         alert('Order not created, see the console.');
         console.log(err);
       });
-  };
+  }
 
   // create PayFormCallback
   const showPayment = (args) => new Promise(resolve => {
