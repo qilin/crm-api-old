@@ -45,10 +45,12 @@
     }
   </style>
   <title>Some Store</title>
+  <script src="https://id.rambler.ru/rambler-id-helper/auth_events.js"></script>
 </head>
 <body>
 <div class="container">
   <div>
+    <button id="rambler_auth_btn">Войти</button>
     <a href="game?uuid=fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb7" id="show_iframe">
       <img src="https://gn478.cdn.gamenet.ru/TY0XuxEeJe/6DUyy/o_1HQNxM.png" /><br/>
       www.stg.gamenet.ru
@@ -67,5 +69,11 @@
     </a>
   </div>
 </div>
+<script>
+  const authButton = document.querySelector("#rambler_auth_btn");
+  authButton.onclick = () => {
+    window.ramblerIdHelper.openAuth();
+  };
+</script>
 </body>
 </html>
