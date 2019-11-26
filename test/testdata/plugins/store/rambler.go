@@ -399,7 +399,18 @@ func (p *plugin) checkOrder(ctx echo.Context) error {
 }
 
 func (p *plugin) paymentAviso(ctx echo.Context) error {
-	var v = map[string]interface{}{}
+	var req = make(map[string]interface{})
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
+	}
+	var v = map[string]interface{}{
+		"avisoResponse": map[string]interface{}{
+			"operationUid":      req["operationUid"],
+			"operationDatetime": req["operationDatetime"],
+			"orderAmount":       req["orderAmount"],
+			"code":              0,
+		},
+	}
 	return ctx.JSON(http.StatusOK, v)
 }
 
