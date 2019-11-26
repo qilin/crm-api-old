@@ -23,6 +23,10 @@ URL для открытия страницы с кнопкой играть: `/i
 Режим `parent`
 ---
 
+Перменные окружения (см пример docker-compose ниже):
+- APP_SDK_PLUGIN_STORE_KEYS_RAMBLERID_RSAPRIVATEKEY=...приватный rsa ключ для подписи rambler id...
+- APP_SDK_PLUGIN_STORE_KEYS_RAMBLERID_RSAPUBLICKEY=...публичный rsa ключ для подписи  rambler id...
+
 Команда для запуска в docker-compose:
 ```
 "sdk","-c","configs/sdk-parent.yaml","-b",":8080","-d"
@@ -121,6 +125,9 @@ services:
     ports:
       - 8084:8080
     command: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080","-d"]
+    environment:
+      - APP_SDK_PLUGIN_STORE_KEYS_RAMBLERID_RSAPRIVATEKEY=...rambler id rsa private key...
+      - APP_SDK_PLUGIN_STORE_KEYS_RAMBLERID_RSAPUBLICKEY=...rambler id rsa public key...
     networks:
       - default
 ```
