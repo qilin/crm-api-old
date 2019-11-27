@@ -380,7 +380,7 @@ func (p *plugin) createOrder(ctx echo.Context) error {
 					map[string]interface{}{
 						"name":     item.Title,
 						"quantity": 1,
-						"price":    item.Price,
+						"price":    price,
 						"tax":      3,
 						"taxValue": price * 20 / 120,
 					},
