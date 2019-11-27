@@ -491,7 +491,9 @@ func (p *plugin) paymentAviso(ctx echo.Context) error {
 
 func (p *plugin) paymentNotification(ctx echo.Context) error {
 	var v = map[string]interface{}{}
-	return ctx.JSON(http.StatusOK, v)
+	ctx.Bind(&v)
+	fmt.Printf("payment notification: %#v\n", v)
+	return ctx.JSON(http.StatusOK, map[string]interface{}{})
 }
 
 func (p *plugin) confirmPayment(ctx echo.Context, entry string) error {
