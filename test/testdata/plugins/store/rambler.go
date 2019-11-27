@@ -335,25 +335,6 @@ func (p *plugin) createOrder(ctx echo.Context) error {
 	orderId := fmt.Sprintf("%d", time.Now().Unix()-1574170567) // TODO
 
 	order := map[string]interface{}{
-		"shopId":      p.config.Billing.ShopID,
-		"scId":        p.config.Billing.ScID,
-		"orderNumber": orderId,
-		"orderAmount": price,
-
-		"customerNumber": "1683086",                         //TODO
-		"cpsEmail":       "aleksandr.barsukov@protocol.one", // TODO
-		"cpsPhone":       "",
-		"productName":    item.Title,
-		"productImage":   item.Photo_url,
-		// "gameTitle":   req.GameId, //TODO
-
-		"requestSign": p.signPaymentRequest(orderId, item.Price),
-		"addData": map[string]interface{}{
-			"game_id":      req.GameId,
-			"game_name":    req.GameId, // TODO
-			"product_id":   req.ItemId,
-			"product_name": item.Title,
-		},
 		"products": []map[string]interface{}{
 			{
 				// оффер в формате: https://yandex.ru/support/partnermarket/yml/
@@ -373,14 +354,36 @@ func (p *plugin) createOrder(ctx echo.Context) error {
 				},
 			},
 		},
-		"orderParams": map[string]interface{}{
-			"positions": []map[string]interface{}{
-				map[string]interface{}{
-					"name":     item.Title,
-					"quantity": 1,
-					"price":    item.Price,
-					"tax":      3,
-					"taxValue": price * 20 / 120,
+		"order": map[string]interface{}{
+
+			"shopId":      p.config.Billing.ShopID,
+			"scId":        p.config.Billing.ScID,
+			"orderNumber": orderId,
+			"orderAmount": price,
+
+			"customerNumber": "1683086",                         //TODO
+			"cpsEmail":       "aleksandr.barsukov@protocol.one", // TODO
+			"cpsPhone":       "",
+			"productName":    item.Title,
+			"productImage":   item.Photo_url,
+			// "gameTitle":   req.GameId, //TODO
+
+			"requestSign": p.signPaymentRequest(orderId, item.Price),
+			"addData": map[string]interface{}{
+				"game_id":      req.GameId,
+				"game_name":    req.GameId, // TODO
+				"product_id":   req.ItemId,
+				"product_name": item.Title,
+			},
+			"orderParams": map[string]interface{}{
+				"positions": []map[string]interface{}{
+					map[string]interface{}{
+						"name":     item.Title,
+						"quantity": 1,
+						"price":    item.Price,
+						"tax":      3,
+						"taxValue": price * 20 / 120,
+					},
 				},
 			},
 		},
