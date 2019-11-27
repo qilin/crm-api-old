@@ -184,11 +184,8 @@ func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
 	r.GET("/integration/game/billing", p.billingCallback)
 
 	r.POST("/order", p.createOrder)
-	r.GET("/payment/v1/rambler/checkOrder", p.checkOrder)
 	r.POST("/payment/v1/rambler/checkOrder", p.checkOrder)
-	r.GET("/payment/v1/rambler/paymentAviso", p.paymentAviso)
 	r.POST("/payment/v1/rambler/paymentAviso", p.paymentAviso)
-	r.GET("/payment/v1/rambler/notification", p.paymentNotification)
 	r.POST("/payment/v1/rambler/notification", p.paymentNotification)
 
 	r.POST("/confirmPayment", func(c echo.Context) error {
