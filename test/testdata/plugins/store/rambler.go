@@ -429,10 +429,10 @@ func (p *plugin) checkOrder(ctx echo.Context) error {
 	)
 	fmt.Println("check sign:", sign)
 
-	// if req["requestSign"] != sign {
-	// 	fmt.Println("invalid sign")
-	// 	return ctx.JSON(http.StatusBadRequest, "invalid sign")
-	// }
+	if req["requestSign"] != sign {
+		fmt.Println("invalid sign")
+		return ctx.JSON(http.StatusBadRequest, "invalid sign")
+	}
 
 	var v = map[string]interface{}{
 		"checkResponse": map[string]interface{}{
@@ -465,10 +465,10 @@ func (p *plugin) paymentAviso(ctx echo.Context) error {
 		p.config.Billing.Secret,
 	)
 	fmt.Println("aviso sign:", sign)
-	// if req["requestSign"] != sign {
-	// 	fmt.Println("invalid sign")
-	// 	return ctx.JSON(http.StatusBadRequest, "invalid sign")
-	// }
+	if req["requestSign"] != sign {
+		fmt.Println("invalid sign")
+		return ctx.JSON(http.StatusBadRequest, "invalid sign")
+	}
 
 	var v = map[string]interface{}{
 		"avisoResponse": map[string]interface{}{
