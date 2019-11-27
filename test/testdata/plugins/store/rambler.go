@@ -427,12 +427,12 @@ func (p *plugin) checkOrder(ctx echo.Context) error {
 		fmt.Sprint(req["currencyCode"]),
 		p.config.Billing.Secret,
 	)
-	fmt.Println("sign:", sign)
+	fmt.Println("check sign:", sign)
 
-	if req["requestSign"] != sign {
-		fmt.Println("invalid sign")
-		return ctx.JSON(http.StatusBadRequest, "invalid sign")
-	}
+	// if req["requestSign"] != sign {
+	// 	fmt.Println("invalid sign")
+	// 	return ctx.JSON(http.StatusBadRequest, "invalid sign")
+	// }
 
 	var v = map[string]interface{}{
 		"checkResponse": map[string]interface{}{
@@ -464,11 +464,11 @@ func (p *plugin) paymentAviso(ctx echo.Context) error {
 		fmt.Sprint(req["currencyCode"]),
 		p.config.Billing.Secret,
 	)
-	fmt.Println("sign:", sign)
-	if req["requestSign"] != sign {
-		fmt.Println("invalid sign")
-		return ctx.JSON(http.StatusBadRequest, "invalid sign")
-	}
+	fmt.Println("aviso sign:", sign)
+	// if req["requestSign"] != sign {
+	// 	fmt.Println("invalid sign")
+	// 	return ctx.JSON(http.StatusBadRequest, "invalid sign")
+	// }
 
 	var v = map[string]interface{}{
 		"avisoResponse": map[string]interface{}{
