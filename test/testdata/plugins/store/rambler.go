@@ -315,7 +315,6 @@ func (p *plugin) createOrder(ctx echo.Context) error {
 			"error": err.Error(),
 		})
 	}
-	fmt.Println(req)
 
 	item, err := p.queryItem(p.config.URL.Qilin, req.GameId, req.ItemId)
 	if err != nil {
@@ -339,7 +338,7 @@ func (p *plugin) createOrder(ctx echo.Context) error {
 		"shopId":      p.config.Billing.ShopID,
 		"scId":        p.config.Billing.ScID,
 		"orderNumber": orderId,
-		"orderAmount": item.Price,
+		"orderAmount": price,
 
 		"customerNumber": "1683086",                         //TODO
 		"cpsEmail":       "aleksandr.barsukov@protocol.one", // TODO
@@ -354,6 +353,25 @@ func (p *plugin) createOrder(ctx echo.Context) error {
 			"game_name":    req.GameId, // TODO
 			"product_id":   req.ItemId,
 			"product_name": item.Title,
+		},
+		"products": []map[string]interface{}{
+			{
+				// оффер в формате: https://yandex.ru/support/partnermarket/yml/
+				"offer": map[string]interface{}{
+					"name": item.Title,
+					// Описание товара
+					"description": "Item 1",
+					// Ссылка на товар
+					"picture": item.Photo_url,
+				},
+				// количество покупаемого товара
+				"count": 1,
+				// итоговая цена
+				"total": map[string]interface{}{
+					"price":      price,
+					"currencyId": "RUB",
+				},
+			},
 		},
 		"orderParams": map[string]interface{}{
 			"positions": []map[string]interface{}{
@@ -379,7 +397,6 @@ func (p *plugin) signPaymentRequest(orderId, amount string) string {
 		p.config.Billing.Secret,
 	)
 
-	fmt.Println(str)
 	hash := sha256.Sum256([]byte(str))
 
 	return hex.EncodeToString(hash[:])
