@@ -334,35 +334,13 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
       .then(json => {
         if (!widget) return;
 
-        json.orderAmount = +json.orderAmount;
-        json.orderParams.positions[0].price = +json.orderParams.positions[0].price;
+        const { order, products } = json;
 
         widget.show();
         widget.initializeOrder({
+          order,
+          products,
           canSaveCard: false,
-          order: json,
-          products: [{
-            offer: {
-              name: json.productName,
-              // Описание товара
-              description: json.productName,
-              // Ссылка на товар
-              picture: json.productImage,
-            },
-            // количество покупаемого товара
-            count: 1,
-            // итоговая цена
-            total: {
-              price: +json.orderAmount,
-              currencyId: 'RUB'
-            }
-          }],
-          getSuccessHTML: function() {
-            return 'Оплата прошла успешно. Вам отправлено письмо'
-          },
-          getOrderInfoHTML: function() {
-            return 'Оплата для заказа'
-          }
         }).then(() => {
             // виджет закрыт
             widget.on('close', function (payment) {
