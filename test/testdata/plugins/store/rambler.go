@@ -415,6 +415,8 @@ func (p *plugin) checkOrder(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 	}
 
+	fmt.Println("checkOrder:", req)
+
 	if req["requestMD5"] != paymentSign(
 		fmt.Sprint(req["requestAction"]),
 		fmt.Sprint(req["operationUid"]),
@@ -446,6 +448,8 @@ func (p *plugin) paymentAviso(ctx echo.Context) error {
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 	}
+
+	fmt.Println("paymentAviso:", req)
 
 	if req["requestMD5"] != paymentSign(
 		fmt.Sprint(req["requestAction"]),
