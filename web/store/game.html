@@ -245,7 +245,7 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
 "use strict";var r=n(require("./qilinStore")),e=n(require("./qilinGame")),i=require("./constants"),o=n(require("./logError"));function n(r){return r&&r.__esModule?r:{default:r}}if(!window){var w=new Error("SDK only work on web browser");throw(0,o.default)(w),w}window.qilinStore=r.default,window.qilinGame=e.default,window.PAYMENT_FORM_CLOSED=i.PAYMENT_FORM_CLOSED,window.FULLSCREEN_MODE_CHANGED=i.FULLSCREEN_MODE_CHANGED;
 },{"./qilinStore":"lwy4","./qilinGame":"blxw","./constants":"eKDL","./logError":"wr21"}]},{},["QCba"], null)
   </script>
-  <script src="https://payment.rambler.ru/widget/sdk.js"></script>
+  <script src="https://payment.rambler.ru/dev2/paygate2/widget/sdk.js"></script>
   <title>Document</title>
 </head>
 <body>
@@ -334,33 +334,61 @@ var t=arguments[3];Object.defineProperty(exports,"__esModule",{value:!0}),export
       .then(json => {
         if (!widget) return;
 
+        json.orderAmount = +json.orderAmount;
+        json.orderParams.positions[0].price = +json.orderParams.positions[0].price;
+
         widget.show();
-        widget.initializeOrder(json);
+        widget.initializeOrder({
+          canSaveCard: false,
+          order: json,
+          products: [{
+            offer: {
+              name: json.productName,
+              // Описание товара
+              description: json.productName,
+              // Ссылка на товар
+              picture: json.productImage,
+            },
+            // количество покупаемого товара
+            count: 1,
+            // итоговая цена
+            total: {
+              price: +json.orderAmount,
+              currencyId: 'RUB'
+            }
+          }],
+          getSuccessHTML: function() {
+            return 'Оплата прошла успешно. Вам отправлено письмо'
+          },
+          getOrderInfoHTML: function() {
+            return 'Оплата для заказа'
+          }
+        }).then(() => {
+            // виджет закрыт
+            widget.on('close', function (payment) {
+              console.log('close', payment);
+            })
+            // виджет задестроен
+            widget.on('destroy', function (payment) {
+              console.log('destroy', payment);
+            })
+            // фейл платежа
+            widget.on('fail', function (payment) {
+              console.log('fail', payment);
+            })
+            // успех платежа
+            widget.on('success', function (payment) {
+              console.log('success', payment);
+            })
+            // начало оплаты
+            widget.on('pay', function (payment) {
+              console.log('pay', payment);
+            });
+        })
       })
       .catch(err => {
         alert('Order not created, see the console.');
         console.log(err);
-      });
-       // виджет закрыт
-      widget.on('close', function () {
-        window.showNotify('close');
-      })
-      // виджет задестроен
-      widget.on('destroy', function () {
-        window.showNotify('destroy');
-      })
-      // фейл платежа
-      widget.on('fail', function () {
-        window.showNotify('fail');
-      })
-      // успех платежа
-      widget.on('success', function () {
-        window.showNotify('success');
-      })
-      // начало оплаты
-      widget.on('pay', function (payment) {
-        console.log('pay', payment);
-        window.showNotify('pay');
       });
     }).catch(err => console.log(err));
   }
