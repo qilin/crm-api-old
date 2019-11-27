@@ -427,7 +427,7 @@ func (p *plugin) checkOrder(ctx echo.Context) error {
 		fmt.Sprint(req["currencyCode"]),
 		p.config.Billing.Secret,
 	)
-	fmt.Println(sign)
+	fmt.Println("sign:", sign)
 
 	if req["requestSign"] != sign {
 		fmt.Println("invalid sign")
@@ -464,7 +464,7 @@ func (p *plugin) paymentAviso(ctx echo.Context) error {
 		fmt.Sprint(req["currencyCode"]),
 		p.config.Billing.Secret,
 	)
-	fmt.Println(sign)
+	fmt.Println("sign:", sign)
 	if req["requestSign"] != sign {
 		fmt.Println("invalid sign")
 		return ctx.JSON(http.StatusBadRequest, "invalid sign")
