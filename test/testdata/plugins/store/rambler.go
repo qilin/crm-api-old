@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
@@ -30,6 +31,8 @@ import (
 
 type plugin struct {
 	config storeConfig
+
+	orders map[string]CreateOrderRequest
 }
 
 type Auth struct {
@@ -92,6 +95,7 @@ var (
 )
 
 func (p *plugin) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) {
+	p.orders = make(map[string]CreateOrderRequest)
 	config := storeConfig{}
 	cfg.UnmarshalKey(PluginName, &config)
 	p.config = config
@@ -333,6 +337,7 @@ func (p *plugin) createOrder(ctx echo.Context) error {
 	}
 
 	orderId := fmt.Sprintf("%d", time.Now().Unix()-1574170567) // TODO
+	p.orders[orderId] = req
 
 	order := map[string]interface{}{
 		"products": []map[string]interface{}{
@@ -392,16 +397,18 @@ func (p *plugin) createOrder(ctx echo.Context) error {
 }
 
 func (p *plugin) signPaymentRequest(orderId, amount string) string {
-	str := fmt.Sprintf("%d;%d;%s;%s;%s",
-		p.config.Billing.ShopID,
-		p.config.Billing.ScID,
+	return paymentSign(
+		strconv.Itoa(p.config.Billing.ShopID),
+		strconv.Itoa(p.config.Billing.ScID),
 		orderId,
 		amount,
 		p.config.Billing.Secret,
 	)
+}
 
+func paymentSign(params ...string) string {
+	str := strings.Join(params, ";")
 	hash := sha256.Sum256([]byte(str))
-
 	return hex.EncodeToString(hash[:])
 }
 
@@ -410,6 +417,21 @@ func (p *plugin) checkOrder(ctx echo.Context) error {
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 	}
+
+	if req["requestMD5"] != paymentSign(
+		fmt.Sprint(req["requestAction"]),
+		fmt.Sprint(req["operationUid"]),
+		fmt.Sprint(req["operationDatetime"]),
+		fmt.Sprint(req["paymentType"]),
+		fmt.Sprint(req["orderNumber"]),
+		fmt.Sprint(req["orderAmount"]),
+		fmt.Sprint(req["currencyCode"]),
+		p.config.Billing.Secret,
+	) {
+		fmt.Println("invalid sign")
+		return ctx.JSON(http.StatusBadRequest, "invalid sign")
+	}
+
 	var v = map[string]interface{}{
 		"checkResponse": map[string]interface{}{
 			"operationUid":      req["operationUid"],
@@ -418,6 +440,7 @@ func (p *plugin) checkOrder(ctx echo.Context) error {
 			"code":              0,
 		},
 	}
+
 	return ctx.JSON(http.StatusOK, v)
 }
 
@@ -426,6 +449,21 @@ func (p *plugin) paymentAviso(ctx echo.Context) error {
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{})
 	}
+
+	if req["requestMD5"] != paymentSign(
+		fmt.Sprint(req["requestAction"]),
+		fmt.Sprint(req["operationUid"]),
+		fmt.Sprint(req["operationDatetime"]),
+		fmt.Sprint(req["paymentType"]),
+		fmt.Sprint(req["orderNumber"]),
+		fmt.Sprint(req["orderAmount"]),
+		fmt.Sprint(req["currencyCode"]),
+		p.config.Billing.Secret,
+	) {
+		fmt.Println("invalid sign")
+		return ctx.JSON(http.StatusBadRequest, "invalid sign")
+	}
+
 	var v = map[string]interface{}{
 		"avisoResponse": map[string]interface{}{
 			"operationUid":      req["operationUid"],
@@ -434,6 +472,20 @@ func (p *plugin) paymentAviso(ctx echo.Context) error {
 			"code":              0,
 		},
 	}
+	data := p.orders[req["orderNumber"].(string)]
+
+	orderReq := common.OrderRequest{
+		GameID: data.GameId,
+		UserID: "123",
+		ItemID: data.ItemId,
+	}
+	if err := p.confirmBuy(p.config.URL.Qilin, orderReq); err != nil {
+		fmt.Println("payment aviso failed:", err.Error())
+		return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
 	return ctx.JSON(http.StatusOK, v)
 }
 
