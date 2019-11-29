@@ -39,13 +39,13 @@ spec:
       initContainers:
       - name: {{ $deployment.name }}-db-migrate
         image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
-        args: ["migrate","up","--dsn","${APP_POSTGRES_DSN}"]
         env:
         - name: APP_POSTGRES_DSN
           valueFrom:
             secretKeyRef:
               name: {{ $deploymentName }}-env
               key: APP_POSTGRES_DSN
+        args: ["migrate","up","--dsn","$(APP_POSTGRES_DSN)"]
       containers:
         - name: {{ $deployment.name }}
           image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
