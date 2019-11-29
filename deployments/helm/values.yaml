@@ -52,7 +52,7 @@ crmsdk:
     service:
       type: ClusterIP
     env:
-    - APP_POSTGRES_DNS
+    - APP_POSTGRES_DSN
 
 crmdev:
     name: crmdev
@@ -72,7 +72,7 @@ crmdev:
     service:
       type: ClusterIP
     env:
-    - APP_POSTGRES_DNS
+    - APP_POSTGRES_DSN
 
 crmparent:
     name: parent
@@ -89,7 +89,7 @@ crmparent:
     service:
       type: ClusterIP
     env:
-    - APP_POSTGRES_DNS
+    - APP_POSTGRES_DSN
     - APP_SDK_PLUGIN_STORE_BILLING_SECRET
     - APP_SDK_PLUGIN_STORE_KEYS_RAMBLERID_RSAPUBLICKEY
     - APP_SDK_PLUGIN_STORE_KEYS_RAMBLERID_RSAPRIVATEKEY
