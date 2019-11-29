@@ -17,8 +17,8 @@ type Config struct {
 }
 
 type PluginsConfig struct {
-	Debug         bool `fallback:"shared.debug"`
-	PluginsConfig map[string]string
+	Debug         bool              `fallback:"shared.debug"`
+	PluginsConfig map[string]string // todo: delete
 	invoker       *invoker.Invoker
 }
 

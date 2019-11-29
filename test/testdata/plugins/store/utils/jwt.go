@@ -12,12 +12,14 @@ const (
 	userIDKey           = "userID"
 )
 
-func IssueJWT(sub, iss, userId, qilinProductUUID string, exp int, pk *ecdsa.PrivateKey) ([]byte, error) {
+func IssueJWT(kid, sub, iss, userId, qilinProductUUID string, exp int, pk *ecdsa.PrivateKey) ([]byte, error) {
 	claims := jwt.Claims{
 		Set: map[string]interface{}{},
 	}
+	claims.KeyID = kid
 	claims.Subject = sub
 	claims.Issuer = iss
+	claims.Expires = jwt.NewNumericTime(time.Now().Add(time.Minute * time.Duration(exp)))
 	claims.Set[userIDKey] = userId
 	claims.Set[qilinProductUUIDKey] = qilinProductUUID
 

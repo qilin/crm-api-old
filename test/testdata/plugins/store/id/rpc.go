@@ -10,7 +10,10 @@ type GetProfileInfoResponse struct {
 	RPC    string `json:"jsonrpc"`
 	Result struct {
 		Info struct {
-			Email string `json:"email"`
+			Email   string `json:"email"`
+			ChainId struct {
+				Default string `json:"default"`
+			} `json:"chain_id"`
 		} `json:"info"`
 		Profile struct {
 			Firstname string `json:"firstname"`

@@ -103,7 +103,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	db, cleanup10, err := postgres.ProviderGORMTest()
+	postgresConfig, cleanup10, err := postgres.ProviderCfg(configurator)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -116,17 +116,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	platformRepo := repo.NewPlatformRepo(db)
-	platformJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
-	productsRepo := repo.NewProductsRepo(db)
-	userMapRepo := repo.NewUserMapRepo(db)
-	repoRepo := &repo2.Repo{
-		Platform:       platformRepo,
-		PlatformJWTKey: platformJWTKeyRepo,
-		Products:       productsRepo,
-		UserMap:        userMapRepo,
-	}
-	sdkConfig, cleanup11, err := sdk.Cfg(configurator)
+	db, cleanup11, err := postgres.ProviderGORM(ctx, zap, postgresConfig)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -140,7 +130,17 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	pluginsConfig, cleanup12, err := sdk.PluginsCfg(configurator)
+	storeRepo := repo.NewPlatformRepo(db)
+	storeJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
+	storeGamesRepo := repo.NewProductsRepo(db)
+	userMapRepo := repo.NewUserMapRepo(db)
+	repoRepo := &repo2.Repo{
+		Store:       storeRepo,
+		StoreJWTKey: storeJWTKeyRepo,
+		StoreGames:  storeGamesRepo,
+		UserMap:     userMapRepo,
+	}
+	sdkConfig, cleanup12, err := sdk.Cfg(configurator)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -155,7 +155,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	sdkSDK, cleanup13, err := sdk.Provider(ctx, awareSet, repoRepo, sdkConfig, pluginsConfig, initial)
+	pluginsConfig, cleanup13, err := sdk.PluginsCfg(configurator)
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -171,7 +171,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	commonHandlers, cleanup14, err := handlers.ProviderSDKHandlers(validate, awareSet, sdkSDK)
+	sdkSDK, cleanup14, err := sdk.Provider(ctx, awareSet, repoRepo, sdkConfig, pluginsConfig, initial)
 	if err != nil {
 		cleanup13()
 		cleanup12()
@@ -188,7 +188,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	config2, cleanup15, err := sdk2.Cfg(configurator)
+	commonHandlers, cleanup15, err := handlers.ProviderSDKHandlers(validate, awareSet, sdkSDK)
 	if err != nil {
 		cleanup14()
 		cleanup13()
@@ -206,7 +206,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcher, cleanup16, err := sdk2.ProviderDispatcher(ctx, awareSet, commonHandlers, config2)
+	config2, cleanup16, err := sdk2.Cfg(configurator)
 	if err != nil {
 		cleanup15()
 		cleanup14()
@@ -225,7 +225,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup17, err := http.Cfg(configurator)
+	dispatcher, cleanup17, err := sdk2.ProviderDispatcher(ctx, awareSet, commonHandlers, config2)
 	if err != nil {
 		cleanup16()
 		cleanup15()
@@ -245,7 +245,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup18, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	httpConfig, cleanup18, err := http.Cfg(configurator)
 	if err != nil {
 		cleanup17()
 		cleanup16()
@@ -266,7 +266,30 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
+	httpHTTP, cleanup19, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	if err != nil {
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return httpHTTP, func() {
+		cleanup19()
 		cleanup18()
 		cleanup17()
 		cleanup16()
@@ -379,15 +402,15 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	platformRepo := repo.NewPlatformRepo(db)
-	platformJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
-	productsRepo := repo.NewProductsRepo(db)
+	storeRepo := repo.NewPlatformRepo(db)
+	storeJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
+	storeGamesRepo := repo.NewProductsRepo(db)
 	userMapRepo := repo.NewUserMapRepo(db)
 	repoRepo := &repo2.Repo{
-		Platform:       platformRepo,
-		PlatformJWTKey: platformJWTKeyRepo,
-		Products:       productsRepo,
-		UserMap:        userMapRepo,
+		Store:       storeRepo,
+		StoreJWTKey: storeJWTKeyRepo,
+		StoreGames:  storeGamesRepo,
+		UserMap:     userMapRepo,
 	}
 	sdkConfig, cleanup11, err := sdk.CfgTest()
 	if err != nil {

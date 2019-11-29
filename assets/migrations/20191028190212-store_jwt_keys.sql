@@ -1,7 +1,8 @@
 -- +migrate Up
 
-CREATE TABLE platform_jwt_keys (
+CREATE TABLE store_jwt_keys (
         id         BIGSERIAL                              NOT NULL,
+        store_id   INT                                    NOT NULL,
         alg        VARCHAR(6)                             NOT NULL,
         iss        TEXT                                   NOT NULL,
         key_type   VARCHAR(3)                             NOT NULL,
@@ -13,4 +14,4 @@ CREATE TABLE platform_jwt_keys (
 
 -- +migrate Down
 
-DROP TABLE platform_jwt_keys;
+DROP TABLE store_jwt_keys;

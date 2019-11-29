@@ -70,9 +70,10 @@ func (id Client) RamblerIdGetProfileInfo(rsid, ip, ua string) (*RamblerProfile, 
 		Method: "Rambler::Id::get_profile_info",
 		Params: []map[string]string{
 			map[string]string{
-				"rsid":       rsid,
-				"__clientIp": ip,
-				"__clientUa": ua,
+				"get_chain_id": "1",
+				"rsid":         rsid,
+				"__clientIp":   ip,
+				"__clientUa":   ua,
 			},
 		},
 	}
@@ -91,8 +92,9 @@ func (id Client) RamblerIdGetProfileInfo(rsid, ip, ua string) (*RamblerProfile, 
 	}
 
 	return &RamblerProfile{
-		Email:     resp.Result.Info.Email,
-		Gender:    resp.Result.Profile.Gender,
-		Birthdate: resp.Result.Profile.Birthdate,
+		Email:          resp.Result.Info.Email,
+		Gender:         resp.Result.Profile.Gender,
+		Birthdate:      resp.Result.Profile.Birthdate,
+		DefaultChainId: resp.Result.Info.ChainId.Default,
 	}, nil
 }

@@ -48,6 +48,10 @@ sdk:
         rsidCookieName: "rsid"
       keys:
         jwt:
+          sub: "123456789"
+          iss: "rambler"
+          kid: "store"
+          exp: 0
           publicKey: |
             -----BEGIN PUBLIC KEY-----
             MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEfQa/uwg5YlO8DTa98hwwt795y4F3ST4A
@@ -65,7 +69,6 @@ sdk:
           kid: "rambler_games"
           rsaPrivateKey: ""
           rsaPublicKey: ""
-  pluginsConfig:
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----

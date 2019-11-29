@@ -9,9 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/google/uuid"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/jinzhu/gorm"
+
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -46,16 +48,16 @@ const (
 )
 
 func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
-	spew.Dump(s.pluginsCfg.PluginsConfig)
+	// todo: remove s.pluginsCfg.PluginsConfig
 	return s.interfaces.authenticator(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, token, log)
 }
 
-func (s *SDK) GetProductByUUID(uuid string) (*domain.ProductItem, error) {
+func (s *SDK) GetProductByUUID(uuid string) (*domain.StoreGamesItem, error) {
 	//return s.repo.Products.Get(s.ctx, uuid)
 	url, ok := s.cfg.Iframes[uuid]
 	if ok {
 		// todo: hardcoded reponse with config
-		return &domain.ProductItem{
+		return &domain.StoreGamesItem{
 			ID:        uuid,
 			URL:       url, // todo: return config value
 			CreatedAt: time.Now(),
@@ -99,17 +101,27 @@ func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
 	return claims.ECDSASign(jwt.ES512, s.keyPair.Private)
 }
 
-func (s *SDK) MapExternalUserToUser(platformId int, externalId string) string {
-	//user, err := s.repo.UserMap.FindByExternalID(s.ctx, platformId, externalId)
-	// if user not found, create new user, otherwise return user.UserId
-	//if err == gorm.ErrRecordNotFound {
-	//	user := &domain.UserMapItem{
-	//		PlatformID: platformId,
-	//		ExternalID: externalId,
-	//	}
-	//	s.repo.UserMap.Create(s.ctx, user)
-	//}
-	return "1c3e43a5-8513-42b3-8774-596c78079bb2"
+func (s *SDK) MapExternalUserToUser(iss string, externalId string) (string, error) {
+	// todo: fixme
+	if iss == "" {
+		return "1c3e43a5-8513-42b3-8774-596c78079bb2", nil
+	}
+
+	sk, err := s.repo.StoreJWTKey.GetByIss(s.ctx, iss)
+	user, err := s.repo.UserMap.FindByExternalID(s.ctx, sk.StoreID, externalId)
+	if err == gorm.ErrRecordNotFound || user.UserID == "" {
+		uuid, _ := uuid.NewUUID()
+		user := &domain.UserMapItem{
+			UserID:     uuid.String(),
+			StoreID:    sk.StoreID,
+			ExternalID: externalId,
+		}
+		err := s.repo.UserMap.Create(s.ctx, user)
+		if err != nil {
+			return "", err
+		}
+	}
+	return user.UserID, nil
 }
 
 func (s *SDK) Mode() common.SDKMode {
@@ -155,7 +167,7 @@ func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Confi
 	}
 
 	// load keys
-	keys, err := repo.PlatformJWTKey.All(ctx)
+	keys, err := repo.StoreJWTKey.All(ctx)
 	if err != nil {
 		set.L().Emergency(err.Error())
 	}

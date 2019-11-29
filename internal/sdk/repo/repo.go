@@ -5,8 +5,8 @@ import (
 )
 
 type Repo struct {
-	Platform       domain.PlatformRepo
-	PlatformJWTKey domain.PlatformJWTKeyRepo
-	Products       domain.ProductsRepo
-	UserMap        domain.UserMapRepo
+	Store       domain.StoreRepo
+	StoreJWTKey domain.StoreJWTKeyRepo
+	StoreGames  domain.StoreGamesRepo
+	UserMap     domain.UserMapRepo
 }

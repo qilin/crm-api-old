@@ -6,7 +6,7 @@ import (
 )
 
 // todo: probably rename
-type ProductItem struct {
+type StoreGamesItem struct {
 	ID        string    `gorm:"column:id" json:"id"`
 	URL       string    `gorm:"column:url" json:"url"`
 	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
@@ -14,14 +14,14 @@ type ProductItem struct {
 }
 
 // TableName
-func (ProductItem) TableName() string {
+func (StoreGamesItem) TableName() string {
 	// todo: rename, conflict with hasura table name
 	return "products"
 }
 
-type ProductsRepo interface {
-	All(ctx context.Context, limit, offset int) ([]ProductItem, error)
-	Create(ctx context.Context, model *ProductItem) error
-	Get(ctx context.Context, id string) (*ProductItem, error)
-	Delete(ctx context.Context, item *ProductItem) error
+type StoreGamesRepo interface {
+	All(ctx context.Context, limit, offset int) ([]StoreGamesItem, error)
+	Create(ctx context.Context, model *StoreGamesItem) error
+	Get(ctx context.Context, id string) (*StoreGamesItem, error)
+	Delete(ctx context.Context, item *StoreGamesItem) error
 }

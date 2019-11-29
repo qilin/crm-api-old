@@ -32,50 +32,40 @@ type plugin struct {
 	config storeConfig
 }
 
-type Auth struct {
-	Fake           bool
-	CookieName     string
-	RsidCookieName string
-}
-
-type JWT struct {
-	PublicKey  string
-	PrivateKey string
-}
-
-type RamblerID struct {
-	Kid           string
-	RsaPublicKey  string
-	RsaPrivateKey string
-}
-
-type Keys struct {
-	JWT       JWT
-	RamblerID RamblerID
-}
-
-type Routes struct {
-	Index  string
-	Iframe string
-}
-
-type URL struct {
-	Iframe string
-	Qilin  string
-}
-
-type Billing struct {
-	ShopID int
-	ScID   int
-	Secret string
-}
-
 type storeConfig struct {
-	Auth    Auth
-	Keys    Keys
-	Routes  Routes
-	URL     URL
-	Billing Billing
+	Auth struct {
+		Fake           bool
+		CookieName     string
+		RsidCookieName string
+	}
+	Keys struct {
+		JWT struct {
+			Sub        string
+			Iss        string
+			Kid        string
+			Exp        int
+			PublicKey  string
+			PrivateKey string
+		}
+		RamblerID struct {
+			Kid           string
+			RsaPublicKey  string
+			RsaPrivateKey string
+		}
+	}
+	Routes struct {
+		Index  string
+		Iframe string
+	}
+	URL struct {
+		Iframe string
+		Qilin  string
+	}
+	Billing struct {
+		ShopID int
+		ScID   int
+		Secret string
+	}
 }
 
 const (
@@ -120,7 +110,7 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		// fake auth
 		if p.config.Auth.Fake {
 			// issue JWT
-			jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, jwtKeyPair.Private)
+			jwt, err := utils.IssueJWT(p.config.Keys.JWT.Kid, p.config.Keys.JWT.Sub, p.config.Keys.JWT.Iss, "123", request.QilinProductUUID, 0, jwtKeyPair.Private)
 			if err != nil {
 				return response, err
 			}
@@ -154,10 +144,9 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 		}
 		log.Debug("Rambler profile found: " + profile.Email)
 
-		// todo: add user to JWT (?)
-
 		// issue JWT
-		jwt, err := utils.IssueJWT("", "", "123", request.QilinProductUUID, 0, jwtKeyPair.Private)
+		jwt, err := utils.IssueJWT(p.config.Keys.JWT.Kid, p.config.Keys.JWT.Sub, p.config.Keys.JWT.Iss,
+			profile.DefaultChainId, request.QilinProductUUID, p.config.Keys.JWT.Exp, jwtKeyPair.Private)
 		if err != nil {
 			return response, err
 		}

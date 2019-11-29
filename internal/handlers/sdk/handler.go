@@ -155,9 +155,12 @@ func (h *SDKGroup) postOrder(ctx echo.Context) error {
 		return err
 	}
 
-	// todo: check mapping (iss+userID) & userID Qilin
-	// todo: tmp fix, hardcoded userID as uuidV4; prod needs logic fix inside MapExternalUserToUser
-	userId := h.sdk.MapExternalUserToUser(0, r.UserID)
+	// todo: tmp fix, hardcoded userID as uuidV4 on empty iss
+	// todo: fixme - pass kid from jwt.header.kid
+	userId, err := h.sdk.MapExternalUserToUser("", r.UserID)
+	if err != nil {
+		return err
+	}
 
 	qilin.OrderURL(product.URL)
 
@@ -288,9 +291,14 @@ func (h *SDKGroup) hubMode(ctx context.Context, r common2.AuthRequest) (common2.
 		return common2.AuthResponse{}, err
 	}
 
-	// todo: check mapping (iss+userID) & userID Qilin
-	// todo: tmp fix, hardcoded userID as uuidV4; prod needs logic fix inside MapExternalUserToUser
-	userId = h.sdk.MapExternalUserToUser(0, userId)
+	// todo: tmp fix, hardcoded userID as uuidV4 on empty iss
+	userId, err = h.sdk.MapExternalUserToUser(claims.Issuer, userId)
+	if err != nil {
+		fmt.Println(err.Error())
+		return common2.AuthResponse{}, err
+	}
+
+	fmt.Println("userID: ", userId)
 
 	// build JWT (qilinProductUUID,userID)
 	jwt, err := h.sdk.IssueJWT(userId, product.ID)
