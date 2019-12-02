@@ -254,6 +254,7 @@ func (p *plugin) runTestGame(ctx echo.Context) error {
 }
 
 func (p *plugin) billingCallback(ctx echo.Context) error {
+	fmt.Println("signature header:", ctx.Request().Header.Get("x-rps-signature"))
 	switch ctx.QueryParam("notification_type") {
 	case "get_item":
 		if !rambler.VerifySignature(ctx.QueryParams(), "6f12ff821d49e386c0918415322d0b74",
