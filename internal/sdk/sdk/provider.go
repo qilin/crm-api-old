@@ -53,6 +53,7 @@ var (
 		repo.NewPlatformJWTKeyRepo,
 		repo.NewProductsRepo,
 		repo.NewUserMapRepo,
+		repo.ActionsLogProvider,
 		trx.NewTrxManager,
 	)
 

@@ -42,12 +42,6 @@ func (p *plugin) Auth(authenticate common.Authenticate) common.Authenticate {
 }
 
 func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
-	cfg, ok := ctx.Value("config").(map[string]string)
-	if !ok {
-		log.Error("plugin: can not cast context config to map[string]string")
-	}
-	_ = cfg
-
 	r.GET("/gamenet/sdk/v1/iframe", func(ctx echo.Context) error {
 		// TODO user from jws token
 		u, err := rambler.SignUrl(

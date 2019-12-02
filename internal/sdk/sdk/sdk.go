@@ -49,7 +49,7 @@ const (
 
 func (s *SDK) Authenticate(ctx context.Context, request common.AuthRequest, token *jwt.Claims, log logger.Logger) (response common.AuthResponse, err error) {
 	// todo: remove s.pluginsCfg.PluginsConfig
-	return s.interfaces.authenticator(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, token, log)
+	return s.interfaces.authenticator(ctx, request, token, log)
 }
 
 func (s *SDK) GetProductByUUID(uuid string) (*domain.StoreGamesItem, error) {
@@ -129,17 +129,21 @@ func (s *SDK) Mode() common.SDKMode {
 }
 
 func (s *SDK) Order(ctx context.Context, request common.OrderRequest, log logger.Logger) (response common.OrderResponse, err error) {
-	return s.interfaces.orderer(context.WithValue(ctx, "config", s.pluginsCfg.PluginsConfig), request, log)
+	return s.interfaces.orderer(ctx, request, log)
 }
 
 func (s *SDK) PluginsRoute(echo *echo.Echo) {
-	s.pluginManager.Http(context.WithValue(context.Background(), "config", s.pluginsCfg.PluginsConfig), echo, s.L())
+	s.pluginManager.Http(context.Background(), echo, s.L())
 }
 
 func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
 	// todo: optimise with ParseWithoutCheck + iss key map
 	//return s.keyRegister.Check(token) // todo: uncomment it back after tests
 	return jwt.ECDSACheck(token, s.keyPair.Public)
+}
+
+func (s *SDK) ActionsLog() domain.ActionsLog {
+	return s.repo.ActionsLog
 }
 
 func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config, pCfg *PluginsConfig, init config.Initial) *SDK {

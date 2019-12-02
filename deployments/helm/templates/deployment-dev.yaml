@@ -36,6 +36,16 @@ spec:
         role: {{ $deployment.role }}
     spec:
       serviceAccountName: {{ .Release.Name }}
+      initContainers:
+      - name: {{ $deployment.name }}-db-migrate
+        image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
+        env:
+        - name: APP_POSTGRES_DSN
+          valueFrom:
+            secretKeyRef:
+              name: {{ $deploymentName }}-env
+              key: APP_POSTGRES_DSN
+        args: ["migrate","up","--dsn","$(APP_POSTGRES_DSN)"]      
       containers:
         - name: {{ $deployment.name }}
           image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
@@ -43,6 +53,14 @@ spec:
           ports:
             {{- range $port := $deployment.ports }}
             - containerPort: {{ $port.port }}
+            {{- end }}
+          env:
+            {{- range $deployment.env }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $deploymentName }}-env
+                  key: {{ . }}
             {{- end }}
           #livenessProbe:
           #  httpGet:

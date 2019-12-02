@@ -15,6 +15,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
 
+	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	common2 "github.com/qilin/crm-api/internal/sdk/common"
 	"github.com/qilin/crm-api/pkg/qilin"
@@ -193,6 +194,17 @@ func (h *SDKGroup) postOrder(ctx echo.Context) error {
 			Code: errInternalServerError,
 			Msg:  StatusText(errInternalServerError),
 		})
+	}
+
+	if err := h.sdk.ActionsLog().Add(context.TODO(), &domain.BuyItemAction{
+		GameID:   r.GameID,
+		ItemID:   r.ItemID,
+		UserID:   userId,
+		StoreID:  "", // TODO
+		Currency: "RUB",
+		Price:    100, // TODO
+	}); err != nil {
+		h.L().Error("failed to store buy item action: " + err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, common2.OrderResponse{

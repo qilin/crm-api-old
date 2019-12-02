@@ -69,12 +69,6 @@ func (p *plugin) getGameUrl() (string, error) {
 }
 
 func (p *plugin) Http(ctx context.Context, r *echo.Echo, log logger.Logger) {
-	cfg, ok := ctx.Value("config").(map[string]string)
-	if !ok {
-		log.Error("plugin: can not cast context config to map[string]string")
-	}
-	_ = cfg
-
 	r.GET("/rgames/sdk/v1/iframe", func(ctx echo.Context) error {
 		data, err := ioutil.ReadFile("web/rgames/index.html")
 		if err != nil {

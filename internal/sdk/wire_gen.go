@@ -134,11 +134,13 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 	storeJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
 	storeGamesRepo := repo.NewProductsRepo(db)
 	userMapRepo := repo.NewUserMapRepo(db)
+	actionsLog := repo.ActionsLogProvider(db)
 	repoRepo := &repo2.Repo{
 		Store:       storeRepo,
 		StoreJWTKey: storeJWTKeyRepo,
 		StoreGames:  storeGamesRepo,
 		UserMap:     userMapRepo,
+		ActionsLog:  actionsLog,
 	}
 	sdkConfig, cleanup12, err := sdk.Cfg(configurator)
 	if err != nil {
@@ -406,11 +408,13 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 	storeJWTKeyRepo := repo.NewPlatformJWTKeyRepo(db)
 	storeGamesRepo := repo.NewProductsRepo(db)
 	userMapRepo := repo.NewUserMapRepo(db)
+	actionsLog := repo.ActionsLogProvider(db)
 	repoRepo := &repo2.Repo{
 		Store:       storeRepo,
 		StoreJWTKey: storeJWTKeyRepo,
 		StoreGames:  storeGamesRepo,
 		UserMap:     userMapRepo,
+		ActionsLog:  actionsLog,
 	}
 	sdkConfig, cleanup11, err := sdk.CfgTest()
 	if err != nil {
