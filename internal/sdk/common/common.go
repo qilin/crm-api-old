@@ -46,4 +46,5 @@ type SDK interface {
 	Order(ctx context.Context, request OrderRequest, log logger.Logger) (response OrderResponse, err error)
 	PluginsRoute(echo *echo.Echo)
 	Verify(token []byte) (*jwt.Claims, error)
+	ActionsLog() domain.ActionsLog
 }

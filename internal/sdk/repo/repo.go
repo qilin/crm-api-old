@@ -9,4 +9,5 @@ type Repo struct {
 	PlatformJWTKey domain.PlatformJWTKeyRepo
 	Products       domain.ProductsRepo
 	UserMap        domain.UserMapRepo
+	ActionsLog     domain.ActionsLog
 }

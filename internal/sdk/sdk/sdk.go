@@ -130,6 +130,10 @@ func (s *SDK) Verify(token []byte) (*jwt.Claims, error) {
 	return jwt.ECDSACheck(token, s.keyPair.Public)
 }
 
+func (s *SDK) ActionsLog() domain.ActionsLog {
+	return s.repo.ActionsLog
+}
+
 func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config, pCfg *PluginsConfig, init config.Initial) *SDK {
 	pm := plugins.NewPluginManager()
 	if cfg.Mode == common.StoreMode || cfg.Mode == common.ProviderMode {
