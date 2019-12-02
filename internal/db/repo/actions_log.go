@@ -23,6 +23,14 @@ type record struct {
 	Data      interface{} `json:"data"`
 }
 
+type GormWrapper struct {
+	Data postgres.Jsonb
+}
+
+func (GormWrapper) TableName() string {
+	return "actions_log"
+}
+
 func (a *ActionsLog) Add(ctx context.Context, act domain.Action) error {
 
 	r := &record{
@@ -37,11 +45,7 @@ func (a *ActionsLog) Add(ctx context.Context, act domain.Action) error {
 		return err
 	}
 
-	type GormWrapper struct {
-		Data postgres.Jsonb
-	}
-
-	action := &GormWrapper{
+	action := GormWrapper{
 		Data: postgres.Jsonb{json.RawMessage(data)},
 	}
 	db := trx.Inject(ctx, a.db)

@@ -193,14 +193,16 @@ func (h *SDKGroup) postOrder(ctx echo.Context) error {
 		})
 	}
 
-	h.sdk.ActionsLog().Add(context.TODO(), &domain.BuyItemAction{
+	if err := h.sdk.ActionsLog().Add(context.TODO(), &domain.BuyItemAction{
 		GameID:   r.GameID,
 		ItemID:   r.ItemID,
 		UserID:   userId,
 		StoreID:  "", // TODO
 		Currency: "RUB",
 		Price:    100, // TODO
-	})
+	}); err != nil {
+		h.L().Error("failed to store buy item action: " + err.Error())
+	}
 
 	return ctx.JSON(http.StatusOK, common2.OrderResponse{
 		//Data: r.Data,
