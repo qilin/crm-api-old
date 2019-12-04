@@ -9,13 +9,14 @@ import (
 )
 
 type AuthMutation struct {
-	Signup *SignupOut `json:"signup"`
+	SignUp         *SignUpResponse         `json:"signUp"`
+	PasswordUpdate *PasswordUpdateResponse `json:"passwordUpdate"`
 }
 
 type AuthQuery struct {
-	Signin  *SigninOut  `json:"signin"`
-	Me      *User       `json:"me"`
-	Signout *SignoutOut `json:"signout"`
+	SignIn  *SignInResponse  `json:"signIn"`
+	SignOut *SignOutResponse `json:"signOut"`
+	Profile *User            `json:"profile"`
 }
 
 type Covers struct {
@@ -61,21 +62,26 @@ type Image struct {
 	URL string `json:"url"`
 }
 
+type PasswordUpdateResponse struct {
+	Status AuthenticatedRequestStatus `json:"status"`
+}
+
 type Publisher struct {
 	Title string `json:"title"`
 }
 
-type SigninOut struct {
-	Status SigninOutStatus `json:"status"`
-	Token  string          `json:"token"`
+type SignInResponse struct {
+	Status RequestStatus `json:"status"`
+	Token  string        `json:"token"`
 }
 
-type SignoutOut struct {
+type SignOutResponse struct {
 	Status AuthenticatedRequestStatus `json:"status"`
 }
 
-type SignupOut struct {
-	Status SignupOutStatus `json:"status"`
+type SignUpResponse struct {
+	Message string               `json:"message"`
+	Status  SignUpResponseStatus `json:"status"`
 }
 
 type StoreQuery struct {
@@ -88,8 +94,13 @@ type Tag struct {
 }
 
 type User struct {
-	ID    int    `json:"id"`
-	Email string `json:"email"`
+	ID        int    `json:"id"`
+	Status    string `json:"status"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Language  string `json:"language"`
 }
 
 type AuthenticatedRequestStatus string
@@ -239,6 +250,53 @@ func (e OrderIn) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type RequestStatus string
+
+const (
+	RequestStatusOk                  RequestStatus = "OK"
+	RequestStatusForbidden           RequestStatus = "FORBIDDEN"
+	RequestStatusNotFound            RequestStatus = "NOT_FOUND"
+	RequestStatusBadRequest          RequestStatus = "BAD_REQUEST"
+	RequestStatusServerInternalError RequestStatus = "SERVER_INTERNAL_ERROR"
+)
+
+var AllRequestStatus = []RequestStatus{
+	RequestStatusOk,
+	RequestStatusForbidden,
+	RequestStatusNotFound,
+	RequestStatusBadRequest,
+	RequestStatusServerInternalError,
+}
+
+func (e RequestStatus) IsValid() bool {
+	switch e {
+	case RequestStatusOk, RequestStatusForbidden, RequestStatusNotFound, RequestStatusBadRequest, RequestStatusServerInternalError:
+		return true
+	}
+	return false
+}
+
+func (e RequestStatus) String() string {
+	return string(e)
+}
+
+func (e *RequestStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RequestStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RequestStatus", str)
+	}
+	return nil
+}
+
+func (e RequestStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type RoleEnum string
 
 const (
@@ -280,91 +338,48 @@ func (e RoleEnum) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type SigninOutStatus string
+type SignUpResponseStatus string
 
 const (
-	SigninOutStatusOk                  SigninOutStatus = "OK"
-	SigninOutStatusBadRequest          SigninOutStatus = "BAD_REQUEST"
-	SigninOutStatusServerInternalError SigninOutStatus = "SERVER_INTERNAL_ERROR"
+	SignUpResponseStatusOk                  SignUpResponseStatus = "OK"
+	SignUpResponseStatusBadRequest          SignUpResponseStatus = "BAD_REQUEST"
+	SignUpResponseStatusServerInternalError SignUpResponseStatus = "SERVER_INTERNAL_ERROR"
+	SignUpResponseStatusUserExists          SignUpResponseStatus = "USER_EXISTS"
 )
 
-var AllSigninOutStatus = []SigninOutStatus{
-	SigninOutStatusOk,
-	SigninOutStatusBadRequest,
-	SigninOutStatusServerInternalError,
+var AllSignUpResponseStatus = []SignUpResponseStatus{
+	SignUpResponseStatusOk,
+	SignUpResponseStatusBadRequest,
+	SignUpResponseStatusServerInternalError,
+	SignUpResponseStatusUserExists,
 }
 
-func (e SigninOutStatus) IsValid() bool {
+func (e SignUpResponseStatus) IsValid() bool {
 	switch e {
-	case SigninOutStatusOk, SigninOutStatusBadRequest, SigninOutStatusServerInternalError:
+	case SignUpResponseStatusOk, SignUpResponseStatusBadRequest, SignUpResponseStatusServerInternalError, SignUpResponseStatusUserExists:
 		return true
 	}
 	return false
 }
 
-func (e SigninOutStatus) String() string {
+func (e SignUpResponseStatus) String() string {
 	return string(e)
 }
 
-func (e *SigninOutStatus) UnmarshalGQL(v interface{}) error {
+func (e *SignUpResponseStatus) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = SigninOutStatus(str)
+	*e = SignUpResponseStatus(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid SigninOutStatus", str)
+		return fmt.Errorf("%s is not a valid SignUpResponseStatus", str)
 	}
 	return nil
 }
 
-func (e SigninOutStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type SignupOutStatus string
-
-const (
-	SignupOutStatusOk                  SignupOutStatus = "OK"
-	SignupOutStatusBadRequest          SignupOutStatus = "BAD_REQUEST"
-	SignupOutStatusServerInternalError SignupOutStatus = "SERVER_INTERNAL_ERROR"
-	SignupOutStatusUserExists          SignupOutStatus = "USER_EXISTS"
-)
-
-var AllSignupOutStatus = []SignupOutStatus{
-	SignupOutStatusOk,
-	SignupOutStatusBadRequest,
-	SignupOutStatusServerInternalError,
-	SignupOutStatusUserExists,
-}
-
-func (e SignupOutStatus) IsValid() bool {
-	switch e {
-	case SignupOutStatusOk, SignupOutStatusBadRequest, SignupOutStatusServerInternalError, SignupOutStatusUserExists:
-		return true
-	}
-	return false
-}
-
-func (e SignupOutStatus) String() string {
-	return string(e)
-}
-
-func (e *SignupOutStatus) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = SignupOutStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid SignupOutStatus", str)
-	}
-	return nil
-}
-
-func (e SignupOutStatus) MarshalGQL(w io.Writer) {
+func (e SignUpResponseStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

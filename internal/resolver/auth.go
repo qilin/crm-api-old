@@ -5,7 +5,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/db/domain"
 
 	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
@@ -21,33 +20,33 @@ func (r *Resolver) AuthQuery() graphql1.AuthQueryResolver {
 	return &authQueryResolver{r}
 }
 
-func (r *authMutationResolver) Signup(ctx context.Context, obj *graphql1.AuthMutation, email string, password string) (*graphql1.SignupOut, error) {
+func (r *authMutationResolver) SignUp(ctx context.Context, obj *graphql1.AuthMutation, email string, password string) (*graphql1.SignUpResponse, error) {
 	// validate input
 	// 1. validate email
 	e := r.validate.Var(email, "email,required")
 	if e != nil {
-		return &graphql1.SignupOut{
-			Status: graphql1.SignupOutStatusBadRequest,
+		return &graphql1.SignUpResponse{
+			Status: graphql1.SignUpResponseStatusBadRequest,
 		}, nil
 	}
 	// 2. validate password length
 	e = r.validate.Var(email, "password,required")
 	if e != nil {
-		return &graphql1.SignupOut{
-			Status: graphql1.SignupOutStatusBadRequest,
+		return &graphql1.SignUpResponse{
+			Status: graphql1.SignUpResponseStatusBadRequest,
 		}, nil
 	}
 
 	// check email already taken
 	isExists, e := r.repo.User.IsExistsEmail(ctx, email)
 	if e != nil {
-		return &graphql1.SignupOut{
-			Status: graphql1.SignupOutStatusServerInternalError,
+		return &graphql1.SignUpResponse{
+			Status: graphql1.SignUpResponseStatusServerInternalError,
 		}, e
 	}
 	if isExists {
-		return &graphql1.SignupOut{
-			Status: graphql1.SignupOutStatusUserExists,
+		return &graphql1.SignUpResponse{
+			Status: graphql1.SignUpResponseStatusUserExists,
 		}, nil
 	}
 
@@ -58,62 +57,56 @@ func (r *authMutationResolver) Signup(ctx context.Context, obj *graphql1.AuthMut
 	}
 	e = r.repo.User.Create(ctx, user)
 	if e != nil {
-		return &graphql1.SignupOut{
-			Status: graphql1.SignupOutStatusServerInternalError,
+		return &graphql1.SignUpResponse{
+			Status: graphql1.SignUpResponseStatusServerInternalError,
 		}, e
 	}
-	return &graphql1.SignupOut{
-		Status: graphql1.SignupOutStatusOk,
+	return &graphql1.SignUpResponse{
+		Status: graphql1.SignUpResponseStatusOk,
 	}, nil
 }
 
-func (r *authQueryResolver) Signin(ctx context.Context, obj *graphql1.AuthQuery, email string, password string) (*graphql1.SigninOut, error) {
+func (r *authMutationResolver) PasswordUpdate(ctx context.Context, obj *graphql1.AuthMutation, old string, new string) (*graphql1.PasswordUpdateResponse, error) {
+	panic("not implemented")
+}
+
+func (r *authQueryResolver) SignIn(ctx context.Context, obj *graphql1.AuthQuery, email string, password string) (*graphql1.SignInResponse, error) {
 	// validate email
 	e := r.validate.Var(email, "email,required")
 	if e != nil {
-		return &graphql1.SigninOut{
-			Status: graphql1.SigninOutStatusBadRequest,
+		return &graphql1.SignInResponse{
+			Status: graphql1.RequestStatusBadRequest,
 		}, e
 	}
 
 	// get user
 	user, e := r.repo.User.FindByEmail(ctx, email)
 	if e != nil {
-		return &graphql1.SigninOut{
-			Status: graphql1.SigninOutStatusServerInternalError,
+		return &graphql1.SignInResponse{
+			Status: graphql1.RequestStatusServerInternalError,
 		}, e
 	}
 	if e := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); e != nil {
-		return &graphql1.SigninOut{
-			Status: graphql1.SigninOutStatusBadRequest,
+		return &graphql1.SignInResponse{
+			Status: graphql1.RequestStatusBadRequest,
 		}, nil
 	}
 
 	jwt := "jwt.token"
 
 	//
-	return &graphql1.SigninOut{
-		Status: graphql1.SigninOutStatusOk,
+	return &graphql1.SignInResponse{
+		Status: graphql1.RequestStatusOk,
 		Token:  jwt,
 	}, nil
 }
 
-func (r *authQueryResolver) Me(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.User, error) {
-	u := auth.ExtractUserContext(ctx)
-	user, e := r.repo.User.Get(ctx, u.Id)
-	if e != nil {
-		return nil, e
-	}
-	return &graphql1.User{
-		ID:    user.ID,
-		Email: user.Email,
-	}, nil
+func (r *authQueryResolver) SignOut(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.SignOutResponse, error) {
+	panic("not implemented")
 }
 
-func (r *authQueryResolver) Signout(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.SignoutOut, error) {
-	return &graphql1.SignoutOut{
-		Status: graphql1.AuthenticatedRequestStatusOk,
-	}, nil
+func (r *authQueryResolver) Profile(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.User, error) {
+	panic("not implemented")
 }
 
 func (r *mutationResolver) Auth(ctx context.Context) (*graphql1.AuthMutation, error) {
