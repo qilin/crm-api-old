@@ -2,11 +2,11 @@ package graphql
 
 import (
 	"context"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
+	"github.com/uber-go/tally"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 
 	gqlgen "github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/handler"
@@ -71,10 +71,27 @@ func (g *GraphQL) Route(groups *common.Groups) {
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
-		options = append(options, handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
-			startTime := time.Now()
-			rc := gqlgen.GetRequestContext(ctx)
-			resp := next(ctx)
+	}
+
+	buckets := tally.DurationBuckets{
+		0 * time.Millisecond,
+		50 * time.Millisecond,
+		100 * time.Millisecond,
+		250 * time.Millisecond,
+		500 * time.Millisecond,
+		1000 * time.Millisecond,
+		2500 * time.Millisecond,
+		10000 * time.Millisecond,
+	}
+
+	histogram := g.M().Histogram("graphql_latency", buckets)
+
+	options = append(options, handler.RequestMiddleware(func(ctx context.Context, next func(ctx context.Context) []byte) []byte {
+		hsw := histogram.Start()
+		startTime := time.Now()
+		rc := gqlgen.GetRequestContext(ctx)
+		resp := next(ctx)
+		if g.cfg.Debug {
 			e := strings.ReplaceAll(rc.Errors.Error(), "\n", " ")
 			g.L().Debug("\nVARS:\n%+v\nQUERY:\n%v\nRESPONSE:\n%v\nERROR:\n%v\n",
 				logger.Args(rc.Variables, strings.TrimRight(rc.RawQuery, "\n"), string(resp), e),
@@ -82,9 +99,10 @@ func (g *GraphQL) Route(groups *common.Groups) {
 					"time": time.Since(startTime).String(),
 				}),
 			)
-			return resp
-		}))
-	}
+		}
+		hsw.Stop()
+		return resp
+	}))
 
 	h := handler.GraphQL(
 		graphql.NewExecutableSchema(*g.resolver),

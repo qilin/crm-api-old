@@ -45,7 +45,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	scope, cleanup5, err := metric.Provider(ctx, zap, metricConfig)
+	scope, cleanup5, err := metric.ProviderPrometheus(ctx, zap, metricConfig)
 	if err != nil {
 		cleanup4()
 		cleanup3()
@@ -209,7 +209,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	scope, cleanup5, err := metric.Provider(ctx, zap, metricConfig)
+	scope, cleanup5, err := metric.ProviderPrometheus(ctx, zap, metricConfig)
 	if err != nil {
 		cleanup4()
 		cleanup3()
