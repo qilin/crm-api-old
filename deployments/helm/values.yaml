@@ -84,9 +84,6 @@ crmparent:
     - port: 8080
       name: crmsdk
       protocol: TCP
-    - port: 8082
-      name: storeapi
-      protocol: TCP
     healthPort: 8081
     replicas: 1
     service:
