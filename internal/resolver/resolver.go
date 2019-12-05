@@ -12,6 +12,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/db/domain"
+	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
@@ -65,7 +66,8 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 
 // Repo
 type Repo struct {
-	User domain.UserRepo
+	User  domain.UserRepo
+	Games *repo.GamesRepo
 }
 
 // New returns instance of config graphql resolvers

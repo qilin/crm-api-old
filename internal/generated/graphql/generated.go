@@ -13,6 +13,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/qilin/crm-api/internal/db/domain/store"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -123,7 +124,8 @@ type ComplexityRoot struct {
 	}
 
 	StoreQuery struct {
-		Games func(childComplexity int, id *string, genre *Genres, top *int, newest *int) int
+		Game  func(childComplexity int, id string) int
+		Games func(childComplexity int, id *string, genre *store.Genre, top *int) int
 	}
 
 	Tag struct {
@@ -153,7 +155,8 @@ type QueryResolver interface {
 	Store(ctx context.Context) (*StoreQuery, error)
 }
 type StoreQueryResolver interface {
-	Games(ctx context.Context, obj *StoreQuery, id *string, genre *Genres, top *int, newest *int) ([]*Game, error)
+	Game(ctx context.Context, obj *StoreQuery, id string) (*store.Game, error)
+	Games(ctx context.Context, obj *StoreQuery, id *string, genre *store.Genre, top *int) ([]*store.Game, error)
 }
 
 type executableSchema struct {
@@ -440,6 +443,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SignupOut.Status(childComplexity), true
 
+	case "StoreQuery.game":
+		if e.complexity.StoreQuery.Game == nil {
+			break
+		}
+
+		args, err := ec.field_StoreQuery_game_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.StoreQuery.Game(childComplexity, args["id"].(string)), true
+
 	case "StoreQuery.games":
 		if e.complexity.StoreQuery.Games == nil {
 			break
@@ -450,7 +465,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.StoreQuery.Games(childComplexity, args["id"].(*string), args["genre"].(*Genres), args["top"].(*int), args["newest"].(*int)), true
+		return e.complexity.StoreQuery.Games(childComplexity, args["id"].(*string), args["genre"].(*store.Genre), args["top"].(*int)), true
 
 	case "Tag.name":
 		if e.complexity.Tag.Name == nil {
@@ -645,7 +660,8 @@ enum RoleEnum {
     USER
 }`},
 	&ast.Source{Name: "api/graphql/store.graphql", Input: `type StoreQuery {
-	games(id:ID, genre:Genres, top:Int, newest: Int): [Game!]! @goField(forceResolver: true)
+	game(id:ID!): Game @goField(forceResolver: true)
+	games(id:ID, genre:Genre, top:Int): [Game!]! @goField(forceResolver: true)
 }
 
 type Game {
@@ -657,7 +673,7 @@ type Game {
 	covers: Covers!
 	screenshots: [Image!]!
 	tags: [Tag!]!
-	genre: Genres!
+	genre: Genre!
 	rating: Int!
 }
 
@@ -665,7 +681,7 @@ type Publisher {
 	title: String!
 }
 
-enum Genres {
+enum Genre {
 	Board
 	Cards
 	Casino
@@ -685,8 +701,8 @@ enum TagType {
 }
 
 type Tag {
-	name: String
-	type: TagType
+	name: String!
+	type: TagType!
 }
 
 type Image {
@@ -783,6 +799,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_StoreQuery_game_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_StoreQuery_games_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -794,9 +824,9 @@ func (ec *executionContext) field_StoreQuery_games_args(ctx context.Context, raw
 		}
 	}
 	args["id"] = arg0
-	var arg1 *Genres
+	var arg1 *store.Genre
 	if tmp, ok := rawArgs["genre"]; ok {
-		arg1, err = ec.unmarshalOGenres2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx, tmp)
+		arg1, err = ec.unmarshalOGenre2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -810,14 +840,6 @@ func (ec *executionContext) field_StoreQuery_games_args(ctx context.Context, raw
 		}
 	}
 	args["top"] = arg2
-	var arg3 *int
-	if tmp, ok := rawArgs["newest"]; ok {
-		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["newest"] = arg3
 	return args, nil
 }
 
@@ -1055,7 +1077,7 @@ func (ec *executionContext) _AuthQuery_signout(ctx context.Context, field graphq
 	return ec.marshalNSignoutOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignoutOut(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_floor_small(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_floor_small(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1083,13 +1105,13 @@ func (ec *executionContext) _Covers_floor_small(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_main_little(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_main_little(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1117,13 +1139,13 @@ func (ec *executionContext) _Covers_main_little(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_main_big(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_main_big(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1151,13 +1173,13 @@ func (ec *executionContext) _Covers_main_big(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_floor_medium(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_floor_medium(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1185,13 +1207,13 @@ func (ec *executionContext) _Covers_floor_medium(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_floor_wide(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_floor_wide(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1219,13 +1241,13 @@ func (ec *executionContext) _Covers_floor_wide(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_floor_large(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_floor_large(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1253,13 +1275,13 @@ func (ec *executionContext) _Covers_floor_large(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_floor_smallest(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_floor_smallest(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1287,13 +1309,13 @@ func (ec *executionContext) _Covers_floor_smallest(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_floor_widest(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_floor_widest(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1321,13 +1343,13 @@ func (ec *executionContext) _Covers_floor_widest(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Covers_background_big(ctx context.Context, field graphql.CollectedField, obj *Covers) (ret graphql.Marshaler) {
+func (ec *executionContext) _Covers_background_big(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1355,10 +1377,10 @@ func (ec *executionContext) _Covers_background_big(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Image)
+	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _CursorOut_count(ctx context.Context, field graphql.CollectedField, obj *CursorOut) (ret graphql.Marshaler) {
@@ -1546,7 +1568,7 @@ func (ec *executionContext) _CursorOut_cursor(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_id(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_id(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1583,7 +1605,7 @@ func (ec *executionContext) _Game_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_title(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_title(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1620,7 +1642,7 @@ func (ec *executionContext) _Game_title(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_summary(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_summary(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1657,7 +1679,7 @@ func (ec *executionContext) _Game_summary(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_description(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_description(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1694,7 +1716,7 @@ func (ec *executionContext) _Game_description(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_publisher(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_publisher(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1725,13 +1747,13 @@ func (ec *executionContext) _Game_publisher(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*Publisher)
+	res := resTmp.(*store.Publisher)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNPublisher2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐPublisher(ctx, field.Selections, res)
+	return ec.marshalNPublisher2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPublisher(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_covers(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_covers(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1762,13 +1784,13 @@ func (ec *executionContext) _Game_covers(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*Covers)
+	res := resTmp.(*store.Covers)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNCovers2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐCovers(ctx, field.Selections, res)
+	return ec.marshalNCovers2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐCovers(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_screenshots(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_screenshots(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1799,13 +1821,13 @@ func (ec *executionContext) _Game_screenshots(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*Image)
+	res := resTmp.([]*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNImage2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, field.Selections, res)
+	return ec.marshalNImage2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_tags(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_tags(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1836,13 +1858,13 @@ func (ec *executionContext) _Game_tags(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*Tag)
+	res := resTmp.([]*store.Tag)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNTag2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTag(ctx, field.Selections, res)
+	return ec.marshalNTag2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTag(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_genre(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_genre(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1873,13 +1895,13 @@ func (ec *executionContext) _Game_genre(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Genres)
+	res := resTmp.(store.Genre)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx, field.Selections, res)
+	return ec.marshalNGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Game_rating(ctx context.Context, field graphql.CollectedField, obj *Game) (ret graphql.Marshaler) {
+func (ec *executionContext) _Game_rating(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1916,7 +1938,7 @@ func (ec *executionContext) _Game_rating(ctx context.Context, field graphql.Coll
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Image_url(ctx context.Context, field graphql.CollectedField, obj *Image) (ret graphql.Marshaler) {
+func (ec *executionContext) _Image_url(ctx context.Context, field graphql.CollectedField, obj *store.Image) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1987,7 +2009,7 @@ func (ec *executionContext) _Mutation_auth(ctx context.Context, field graphql.Co
 	return ec.marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthMutation(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Publisher_title(ctx context.Context, field graphql.CollectedField, obj *Publisher) (ret graphql.Marshaler) {
+func (ec *executionContext) _Publisher_title(ctx context.Context, field graphql.CollectedField, obj *store.Publisher) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2315,6 +2337,47 @@ func (ec *executionContext) _SignupOut_status(ctx context.Context, field graphql
 	return ec.marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _StoreQuery_game(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "StoreQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_StoreQuery_game_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StoreQuery().Game(rctx, obj, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*store.Game)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2341,7 +2404,7 @@ func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.StoreQuery().Games(rctx, obj, args["id"].(*string), args["genre"].(*Genres), args["top"].(*int), args["newest"].(*int))
+		return ec.resolvers.StoreQuery().Games(rctx, obj, args["id"].(*string), args["genre"].(*store.Genre), args["top"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2353,13 +2416,13 @@ func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*Game)
+	res := resTmp.([]*store.Game)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGame(ctx, field.Selections, res)
+	return ec.marshalNGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Tag_name(ctx context.Context, field graphql.CollectedField, obj *Tag) (ret graphql.Marshaler) {
+func (ec *executionContext) _Tag_name(ctx context.Context, field graphql.CollectedField, obj *store.Tag) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2385,15 +2448,18 @@ func (ec *executionContext) _Tag_name(ctx context.Context, field graphql.Collect
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Tag_type(ctx context.Context, field graphql.CollectedField, obj *Tag) (ret graphql.Marshaler) {
+func (ec *executionContext) _Tag_type(ctx context.Context, field graphql.CollectedField, obj *store.Tag) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2419,12 +2485,15 @@ func (ec *executionContext) _Tag_type(ctx context.Context, field graphql.Collect
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*TagType)
+	res := resTmp.(store.TagType)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOTagType2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTagType(ctx, field.Selections, res)
+	return ec.marshalNTagType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTagType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -3792,7 +3861,7 @@ func (ec *executionContext) _AuthQuery(ctx context.Context, sel ast.SelectionSet
 
 var coversImplementors = []string{"Covers"}
 
-func (ec *executionContext) _Covers(ctx context.Context, sel ast.SelectionSet, obj *Covers) graphql.Marshaler {
+func (ec *executionContext) _Covers(ctx context.Context, sel ast.SelectionSet, obj *store.Covers) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, coversImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3879,7 +3948,7 @@ func (ec *executionContext) _CursorOut(ctx context.Context, sel ast.SelectionSet
 
 var gameImplementors = []string{"Game"}
 
-func (ec *executionContext) _Game(ctx context.Context, sel ast.SelectionSet, obj *Game) graphql.Marshaler {
+func (ec *executionContext) _Game(ctx context.Context, sel ast.SelectionSet, obj *store.Game) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, gameImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3951,7 +4020,7 @@ func (ec *executionContext) _Game(ctx context.Context, sel ast.SelectionSet, obj
 
 var imageImplementors = []string{"Image"}
 
-func (ec *executionContext) _Image(ctx context.Context, sel ast.SelectionSet, obj *Image) graphql.Marshaler {
+func (ec *executionContext) _Image(ctx context.Context, sel ast.SelectionSet, obj *store.Image) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, imageImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -4006,7 +4075,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 var publisherImplementors = []string{"Publisher"}
 
-func (ec *executionContext) _Publisher(ctx context.Context, sel ast.SelectionSet, obj *Publisher) graphql.Marshaler {
+func (ec *executionContext) _Publisher(ctx context.Context, sel ast.SelectionSet, obj *store.Publisher) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, publisherImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -4180,6 +4249,17 @@ func (ec *executionContext) _StoreQuery(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("StoreQuery")
+		case "game":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StoreQuery_game(ctx, field, obj)
+				return res
+			})
 		case "games":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4207,7 +4287,7 @@ func (ec *executionContext) _StoreQuery(ctx context.Context, sel ast.SelectionSe
 
 var tagImplementors = []string{"Tag"}
 
-func (ec *executionContext) _Tag(ctx context.Context, sel ast.SelectionSet, obj *Tag) graphql.Marshaler {
+func (ec *executionContext) _Tag(ctx context.Context, sel ast.SelectionSet, obj *store.Tag) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, tagImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -4218,8 +4298,14 @@ func (ec *executionContext) _Tag(ctx context.Context, sel ast.SelectionSet, obj 
 			out.Values[i] = graphql.MarshalString("Tag")
 		case "name":
 			out.Values[i] = ec._Tag_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "type":
 			out.Values[i] = ec._Tag_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4531,11 +4617,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNCovers2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐCovers(ctx context.Context, sel ast.SelectionSet, v Covers) graphql.Marshaler {
+func (ec *executionContext) marshalNCovers2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐCovers(ctx context.Context, sel ast.SelectionSet, v store.Covers) graphql.Marshaler {
 	return ec._Covers(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCovers2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐCovers(ctx context.Context, sel ast.SelectionSet, v *Covers) graphql.Marshaler {
+func (ec *executionContext) marshalNCovers2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐCovers(ctx context.Context, sel ast.SelectionSet, v *store.Covers) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4545,11 +4631,11 @@ func (ec *executionContext) marshalNCovers2ᚖgithubᚗcomᚋqilinᚋcrmᚑapi�
 	return ec._Covers(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGame(ctx context.Context, sel ast.SelectionSet, v Game) graphql.Marshaler {
+func (ec *executionContext) marshalNGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v store.Game) graphql.Marshaler {
 	return ec._Game(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGame(ctx context.Context, sel ast.SelectionSet, v []*Game) graphql.Marshaler {
+func (ec *executionContext) marshalNGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v []*store.Game) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4573,7 +4659,7 @@ func (ec *executionContext) marshalNGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapi�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGame(ctx, sel, v[i])
+			ret[i] = ec.marshalNGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4586,7 +4672,7 @@ func (ec *executionContext) marshalNGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapi�
 	return ret
 }
 
-func (ec *executionContext) marshalNGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGame(ctx context.Context, sel ast.SelectionSet, v *Game) graphql.Marshaler {
+func (ec *executionContext) marshalNGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v *store.Game) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4596,13 +4682,19 @@ func (ec *executionContext) marshalNGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋi
 	return ec._Game(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, v interface{}) (Genres, error) {
-	var res Genres
-	return res, res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalNGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx context.Context, v interface{}) (store.Genre, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return store.Genre(tmp), err
 }
 
-func (ec *executionContext) marshalNGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, sel ast.SelectionSet, v Genres) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalNGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx context.Context, sel ast.SelectionSet, v store.Genre) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
@@ -4619,11 +4711,11 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNImage2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx context.Context, sel ast.SelectionSet, v Image) graphql.Marshaler {
+func (ec *executionContext) marshalNImage2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx context.Context, sel ast.SelectionSet, v store.Image) graphql.Marshaler {
 	return ec._Image(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNImage2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx context.Context, sel ast.SelectionSet, v []*Image) graphql.Marshaler {
+func (ec *executionContext) marshalNImage2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx context.Context, sel ast.SelectionSet, v []*store.Image) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4647,7 +4739,7 @@ func (ec *executionContext) marshalNImage2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapi
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx, sel, v[i])
+			ret[i] = ec.marshalNImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4660,7 +4752,7 @@ func (ec *executionContext) marshalNImage2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapi
 	return ret
 }
 
-func (ec *executionContext) marshalNImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx context.Context, sel ast.SelectionSet, v *Image) graphql.Marshaler {
+func (ec *executionContext) marshalNImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx context.Context, sel ast.SelectionSet, v *store.Image) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4684,11 +4776,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPublisher2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐPublisher(ctx context.Context, sel ast.SelectionSet, v Publisher) graphql.Marshaler {
+func (ec *executionContext) marshalNPublisher2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPublisher(ctx context.Context, sel ast.SelectionSet, v store.Publisher) graphql.Marshaler {
 	return ec._Publisher(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPublisher2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐPublisher(ctx context.Context, sel ast.SelectionSet, v *Publisher) graphql.Marshaler {
+func (ec *executionContext) marshalNPublisher2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPublisher(ctx context.Context, sel ast.SelectionSet, v *store.Publisher) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4772,11 +4864,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTag2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTag(ctx context.Context, sel ast.SelectionSet, v Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTag(ctx context.Context, sel ast.SelectionSet, v store.Tag) graphql.Marshaler {
 	return ec._Tag(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTag(ctx context.Context, sel ast.SelectionSet, v []*Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTag(ctx context.Context, sel ast.SelectionSet, v []*store.Tag) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4800,7 +4892,7 @@ func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapi�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNTag2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTag(ctx, sel, v[i])
+			ret[i] = ec.marshalNTag2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTag(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4813,7 +4905,7 @@ func (ec *executionContext) marshalNTag2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapi�
 	return ret
 }
 
-func (ec *executionContext) marshalNTag2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTag(ctx context.Context, sel ast.SelectionSet, v *Tag) graphql.Marshaler {
+func (ec *executionContext) marshalNTag2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTag(ctx context.Context, sel ast.SelectionSet, v *store.Tag) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -4821,6 +4913,21 @@ func (ec *executionContext) marshalNTag2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋin
 		return graphql.Null
 	}
 	return ec._Tag(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNTagType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTagType(ctx context.Context, v interface{}) (store.TagType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return store.TagType(tmp), err
+}
+
+func (ec *executionContext) marshalNTagType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTagType(ctx context.Context, sel ast.SelectionSet, v store.TagType) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
@@ -5108,28 +5215,39 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, v interface{}) (Genres, error) {
-	var res Genres
-	return res, res.UnmarshalGQL(v)
+func (ec *executionContext) marshalOGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v store.Game) graphql.Marshaler {
+	return ec._Game(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, sel ast.SelectionSet, v Genres) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) unmarshalOGenres2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, v interface{}) (*Genres, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOGenres2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOGenres2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐGenres(ctx context.Context, sel ast.SelectionSet, v *Genres) graphql.Marshaler {
+func (ec *executionContext) marshalOGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v *store.Game) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return v
+	return ec._Game(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx context.Context, v interface{}) (store.Genre, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return store.Genre(tmp), err
+}
+
+func (ec *executionContext) marshalOGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx context.Context, sel ast.SelectionSet, v store.Genre) graphql.Marshaler {
+	return graphql.MarshalString(string(v))
+}
+
+func (ec *executionContext) unmarshalOGenre2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx context.Context, v interface{}) (*store.Genre, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOGenre2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx context.Context, sel ast.SelectionSet, v *store.Genre) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx, sel, *v)
 }
 
 func (ec *executionContext) unmarshalOID2string(ctx context.Context, v interface{}) (string, error) {
@@ -5155,11 +5273,11 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	return ec.marshalOID2string(ctx, sel, *v)
 }
 
-func (ec *executionContext) marshalOImage2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx context.Context, sel ast.SelectionSet, v Image) graphql.Marshaler {
+func (ec *executionContext) marshalOImage2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx context.Context, sel ast.SelectionSet, v store.Image) graphql.Marshaler {
 	return ec._Image(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐImage(ctx context.Context, sel ast.SelectionSet, v *Image) graphql.Marshaler {
+func (ec *executionContext) marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx context.Context, sel ast.SelectionSet, v *store.Image) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5337,30 +5455,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
-}
-
-func (ec *executionContext) unmarshalOTagType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTagType(ctx context.Context, v interface{}) (TagType, error) {
-	var res TagType
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalOTagType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTagType(ctx context.Context, sel ast.SelectionSet, v TagType) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) unmarshalOTagType2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTagType(ctx context.Context, v interface{}) (*TagType, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOTagType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTagType(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOTagType2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐTagType(ctx context.Context, sel ast.SelectionSet, v *TagType) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

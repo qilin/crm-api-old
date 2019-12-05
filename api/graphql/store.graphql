@@ -1,5 +1,6 @@
 type StoreQuery {
-	games(id:ID, genre:Genres, top:Int, newest: Int): [Game!]! @goField(forceResolver: true)
+	game(id:ID!): Game @goField(forceResolver: true)
+	games(id:ID, genre:Genre, top:Int): [Game!]! @goField(forceResolver: true)
 }
 
 type Game {
@@ -11,7 +12,7 @@ type Game {
 	covers: Covers!
 	screenshots: [Image!]!
 	tags: [Tag!]!
-	genre: Genres!
+	genre: Genre!
 	rating: Int!
 }
 
@@ -19,7 +20,7 @@ type Publisher {
 	title: String!
 }
 
-enum Genres {
+enum Genre {
 	Board
 	Cards
 	Casino
@@ -39,8 +40,8 @@ enum TagType {
 }
 
 type Tag {
-	name: String
-	type: TagType
+	name: String!
+	type: TagType!
 }
 
 type Image {

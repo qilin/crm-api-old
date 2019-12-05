@@ -10,3 +10,6 @@ model:
 resolver:
   filename: internal/resolver/resolver_gen.go
   type: Resolver
+
+autobind:
+ - github.com/qilin/crm-api/internal/db/domain/store

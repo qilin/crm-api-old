@@ -40,6 +40,7 @@ func Provider(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Co
 var (
 	ProviderRepo = wire.NewSet(
 		repo.NewUserRepo,
+		repo.NewGamesRepo,
 		trx.NewTrxManager,
 	)
 	ProviderRepoProduction = wire.NewSet(
