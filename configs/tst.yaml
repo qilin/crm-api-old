@@ -1,5 +1,5 @@
 graphql:
-  introspection: false
+  introspection: true
   dataloader:
     wait: 250us
   playground:
