@@ -29,6 +29,7 @@ type Config struct {
 	}
 
 	// cookies rules
+
 	SessionCookieName string `default:"ssid"`
 	Domain            string
 	Secure            bool
