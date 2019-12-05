@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -16,12 +15,14 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/coreos/go-oidc"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"golang.org/x/oauth2"
 )
 
 type Config struct {
-	OAuth2 struct {
+	Enabled bool
+	OAuth2  struct {
 		Provider     string `required:"true"`
 		ClientId     string `required:"true"`
 		ClientSecret string `required:"true"`
@@ -63,10 +64,16 @@ type AppSet struct {
 func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) (*Auth, error) {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	keys := oidc.NewRemoteKeySet(context.Background(), cfg.OAuth2.Provider+".well-known/jwks.json")
-	jwtKeys, err := NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
-	if err != nil {
-		return nil, err
+
+	var jwtKeys KeyPair
+	if cfg.Enabled {
+		k, err := NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
+		if err != nil {
+			return nil, errors.Wrap(err, "can't parse auth.jwt keys")
+		}
+		jwtKeys = k
 	}
+
 	return &Auth{
 		ctx: ctx,
 		cfg: *cfg,
