@@ -51,11 +51,12 @@ spec:
           image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
           args: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080"]
           ports:
-            {{- range $port := $deployment.ports }}
-            {{- if (eq $port.name "crmsdk") }}
-            - containerPort: {{ $port.port }}:8080
-            {{- end }}            
-            {{- end }}
+            - containerPort: 8080
+            # {{- range $port := $deployment.ports }}
+            # {{- if (eq $port.name "crmsdk") }}
+            # - containerPort: {{ $port.port }}:8080
+            # {{- end }}            
+            # {{- end }}
           env:
             {{- range $deployment.env }}
             - name: {{ . }}
@@ -68,11 +69,12 @@ spec:
           image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
           args: ["daemon","-c","configs/tst.yaml","-b",":8082"]
           ports:
-            {{- range $port := $deployment.ports }}
-            {{- if (eq $port.name "storeapi") }}
-            - containerPort: {{ $port.port }}:8082
-            {{- end }}            
-            {{- end }}
+            - containerPort: 8082
+            # {{- range $port := $deployment.ports }}
+            # {{- if (eq $port.name "storeapi") }}
+            # - containerPort: {{ $port.port }}:8082
+            # {{- end }}            
+            # {{- end }}
           env:
             {{- range $deployment.env }}
             - name: {{ . }}
