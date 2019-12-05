@@ -6,6 +6,8 @@ import (
 	"os"
 	"plugin"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+
 	"github.com/spf13/viper"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -14,14 +16,16 @@ import (
 )
 
 type PluginManager struct {
+	log   logger.Logger
 	init  []Initable
 	auth  []Authenticator
 	order []Orderer
 	http  []Httper
 }
 
-func NewPluginManager() *PluginManager {
+func NewPluginManager(log logger.Logger) *PluginManager {
 	return &PluginManager{
+		log:   log,
 		init:  []Initable{},
 		auth:  []Authenticator{},
 		order: []Orderer{},
@@ -69,7 +73,7 @@ func (m *PluginManager) Load(path string) error {
 
 func (m *PluginManager) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) {
 	for _, p := range m.init {
-		p.Init(ctx, cfg, log)
+		p.Init(ctx, cfg.Sub(p.Name()), log)
 	}
 }
 
@@ -91,4 +95,19 @@ func (m *PluginManager) Order(order common.Order) common.Order {
 		order = plg.Order(order)
 	}
 	return order
+}
+
+type Config struct {
+	Plugins []string
+	invoker *invoker.Invoker
+}
+
+// OnReload
+func (c *Config) OnReload(callback func(ctx context.Context)) {
+	c.invoker.OnReload(callback)
+}
+
+// Reload
+func (c *Config) Reload(ctx context.Context) {
+	c.invoker.Reload(ctx)
 }

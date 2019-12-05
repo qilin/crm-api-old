@@ -79,15 +79,13 @@ var (
 )
 
 func (p *plugin) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) {
-	config := storeConfig{}
-	cfg.UnmarshalKey(PluginName, &config)
-	p.config = config
+	cfg.Unmarshal(&p.config)
 
 	p.payment = rambler.NewPaymentHandler(&rambler.PaymentConfig{
-		Secret:     config.Billing.Secret,
-		ShopID:     config.Billing.ShopID,
-		ShowcaseID: config.Billing.ScID,
-		Qilin:      config.URL.Qilin,
+		Secret:     p.config.Billing.Secret,
+		ShopID:     p.config.Billing.ShopID,
+		ShowcaseID: p.config.Billing.ScID,
+		Qilin:      p.config.URL.Qilin,
 	})
 	var err error
 	jwtKeyPair, err = utils.DecodePemECDSA(p.config.Keys.JWT.PrivateKey, p.config.Keys.JWT.PublicKey)

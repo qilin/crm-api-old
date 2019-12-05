@@ -16,6 +16,7 @@ type Httper interface {
 }
 
 type Authenticator interface {
+	Provider() string
 	Name() string
 	Auth(authenticate common.Authenticate) common.Authenticate
 }

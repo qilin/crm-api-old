@@ -3,6 +3,8 @@ package sdk
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/plugins"
+
 	dispatcher "github.com/qilin/crm-api/internal/dispatcher/sdk"
 
 	"github.com/qilin/crm-api/pkg/http"
@@ -30,20 +32,9 @@ func CfgTest() (*Config, func(), error) {
 	return &Config{}, func() {}, nil
 }
 
-func PluginsCfg(cfg config.Configurator) (*PluginsConfig, func(), error) {
-	c := &PluginsConfig{}
-	e := cfg.UnmarshalKeyOnReload(common.UnmarshalKey, c)
-	return c, func() {}, e
-}
-
-func PluginsCfgTest(cfg config.Configurator) (*PluginsConfig, func(), error) {
-	c := &PluginsConfig{}
-	return c, func() {}, nil
-}
-
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, repo *sdkRepo.Repo, cfg *Config, pCfg *PluginsConfig, init config.Initial) (*SDK, func(), error) {
-	g := New(ctx, set, repo, cfg, pCfg, init)
+func Provider(ctx context.Context, pm *plugins.PluginManager, set provider.AwareSet, repo *sdkRepo.Repo, cfg *Config) (*SDK, func(), error) {
+	g := New(ctx, pm, set, repo, cfg)
 	return g, func() {}, nil
 }
 
@@ -71,22 +62,22 @@ var (
 
 	WireSet = wire.NewSet(
 		Cfg,
-		PluginsCfg,
 		Provider,
 		ProviderSDKRepo,
 		resolver.ValidatorsProduction,
 		dispatcher.WireSet,
+		plugins.WireSet,
 		http.Provider,
 		http.Cfg,
 	)
 
 	WireTestSet = wire.NewSet(
 		CfgTest,
-		PluginsCfgTest,
 		Provider,
 		ProviderSDKTestRepo,
 		resolver.ValidatorsTest,
 		dispatcher.WireTestSet,
+		plugins.WireTestSet,
 		http.Provider,
 		http.CfgTest,
 	)

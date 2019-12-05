@@ -16,12 +16,6 @@ type Config struct {
 	invoker *invoker.Invoker
 }
 
-type PluginsConfig struct {
-	Debug         bool              `fallback:"shared.debug"`
-	PluginsConfig map[string]string // todo: delete
-	invoker       *invoker.Invoker
-}
-
 type JWT struct {
 	Subject    string
 	Iss        string
@@ -37,15 +31,5 @@ func (c *Config) OnReload(callback func(ctx context.Context)) {
 
 // Reload
 func (c *Config) Reload(ctx context.Context) {
-	c.invoker.Reload(ctx)
-}
-
-// OnReload
-func (c *PluginsConfig) OnReload(callback func(ctx context.Context)) {
-	c.invoker.OnReload(callback)
-}
-
-// Reload
-func (c *PluginsConfig) Reload(ctx context.Context) {
 	c.invoker.Reload(ctx)
 }
