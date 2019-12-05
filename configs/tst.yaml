@@ -6,7 +6,7 @@ graphql:
     enabled: true
     route: /client
     name: local
-    endpoint: /v1/graphql
+    endpoint: /api/v1/graphql
 postgres:
   dsn: "GET FROM ENV"
   maxOpenConns: 5
