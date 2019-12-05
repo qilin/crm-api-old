@@ -16,6 +16,7 @@ type Handlers struct {
 	GraphQL  *graphql.GraphQL
 	WebHooks *webhooks.WebHooks
 	Auth     *auth.Auth
+	Games    *GamesGroup
 }
 
 // ProviderHandlers
@@ -24,6 +25,7 @@ func ProviderHandlers(initial config.Initial, validator *validator.Validate, set
 		handlers.GraphQL,
 		handlers.WebHooks,
 		handlers.Auth,
+		handlers.Games,
 	}
 	return listHandlers, func() {}, nil
 }

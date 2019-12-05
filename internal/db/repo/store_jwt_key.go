@@ -2,11 +2,13 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/qilin/crm-api/internal/db/trx"
 
 	"github.com/jinzhu/gorm"
 	"github.com/qilin/crm-api/internal/db/domain"
+	"github.com/qilin/crm-api/internal/db/domain/store"
 )
 
 type StoreJWTKeyRepo struct {
@@ -14,6 +16,21 @@ type StoreJWTKeyRepo struct {
 }
 
 func (a *StoreJWTKeyRepo) All(ctx context.Context) ([]domain.StoreJWTKeyItem, error) {
+	fmt.Println("touch games")
+	r := NewGamesRepo(a.db)
+	err := r.Insert(ctx, &store.Game{
+		ID: "fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb6",
+	})
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	err = r.Delete(ctx,
+		"fa14b399-ae9b-4111-9c7f-0f1fe2cc1eb6",
+	)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
 	db := trx.Inject(ctx, a.db)
 	var (
 		keys = []domain.StoreJWTKeyItem{}

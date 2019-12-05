@@ -4,6 +4,7 @@ package daemon
 
 import (
 	"context"
+
 	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/handlers"
 
@@ -30,6 +31,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		webhooks.WireSet,
 		wire.Struct(new(handlers.Handlers), "*"),
 		handlers.ProviderHandlers,
+		handlers.NewGamesGroup,
 		auth.WireSet,
 		dispatcher.WireSet,
 	))
@@ -47,6 +49,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		webhooks.WireTestSet,
 		wire.Struct(new(handlers.Handlers), "*"),
 		handlers.ProviderHandlers,
+		handlers.NewGamesGroup,
 		auth.WireSet,
 		dispatcher.WireSet,
 	))

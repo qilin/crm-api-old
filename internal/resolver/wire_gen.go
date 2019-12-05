@@ -101,8 +101,10 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		return graphql.Config{}, nil, err
 	}
 	userRepo := repo.NewUserRepo(db)
+	gamesRepo := repo.NewGamesRepo(db)
 	resolverRepo := Repo{
-		User: userRepo,
+		User:  userRepo,
+		Games: gamesRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
@@ -251,8 +253,10 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return graphql.Config{}, nil, err
 	}
 	userRepo := repo.NewUserRepo(db)
+	gamesRepo := repo.NewGamesRepo(db)
 	resolverRepo := Repo{
-		User: userRepo,
+		User:  userRepo,
+		Games: gamesRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
