@@ -1,5 +1,6 @@
 type StoreQuery {
-	games(id:ID, genre:Genre, top:Int, newest: Int): [Game!]! @goField(forceResolver: true)
+	game(id:ID!): Game @goField(forceResolver: true)
+	games(id:ID, genre:Genre, top:Int): [Game!]! @goField(forceResolver: true)
 }
 
 type Game @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Game") {

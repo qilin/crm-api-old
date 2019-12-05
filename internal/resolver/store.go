@@ -2,10 +2,7 @@ package resolver
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
 	"sort"
-	"strconv"
 
 	"github.com/qilin/crm-api/internal/db/domain/store"
 	"github.com/qilin/crm-api/internal/generated/graphql"
@@ -21,13 +18,20 @@ func (r *Resolver) StoreQuery() graphql.StoreQueryResolver {
 	return &storeQueryResolver{r}
 }
 
+func (r *storeQueryResolver) Game(
+	ctx context.Context,
+	obj *graphql.StoreQuery,
+	id string,
+) (*store.Game, error) {
+	return r.repo.Games.Get(ctx, id)
+}
+
 func (r *storeQueryResolver) Games(
 	ctx context.Context,
 	obj *graphql.StoreQuery,
 	id *string,
 	genre *store.Genre,
 	top *int,
-	newest *int,
 ) ([]*store.Game, error) {
 	games, err := r.repo.Games.All(ctx)
 	if err != nil {
@@ -55,30 +59,6 @@ func (r *storeQueryResolver) Games(
 		}
 	}
 
-	if newest != nil {
-		sort.Slice(games, func(i, j int) bool {
-			iid, _ := strconv.Atoi(games[i].ID)
-			jid, _ := strconv.Atoi(games[j].ID)
-			return iid > jid
-		})
-		if len(games) > *newest {
-			games = games[:*newest]
-		}
-	}
-
-	return games, nil
-}
-
-func loadGames() ([]*store.Game, error) {
-	data, err := ioutil.ReadFile("./configs/games.json")
-	if err != nil {
-		return nil, err
-	}
-
-	var games []*store.Game
-	if err := json.Unmarshal(data, &games); err != nil {
-		return nil, err
-	}
 	return games, nil
 }
 

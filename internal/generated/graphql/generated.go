@@ -124,7 +124,8 @@ type ComplexityRoot struct {
 	}
 
 	StoreQuery struct {
-		Games func(childComplexity int, id *string, genre *store.Genre, top *int, newest *int) int
+		Game  func(childComplexity int, id string) int
+		Games func(childComplexity int, id *string, genre *store.Genre, top *int) int
 	}
 
 	Tag struct {
@@ -154,7 +155,8 @@ type QueryResolver interface {
 	Store(ctx context.Context) (*StoreQuery, error)
 }
 type StoreQueryResolver interface {
-	Games(ctx context.Context, obj *StoreQuery, id *string, genre *store.Genre, top *int, newest *int) ([]*store.Game, error)
+	Game(ctx context.Context, obj *StoreQuery, id string) (*store.Game, error)
+	Games(ctx context.Context, obj *StoreQuery, id *string, genre *store.Genre, top *int) ([]*store.Game, error)
 }
 
 type executableSchema struct {
@@ -441,6 +443,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SignupOut.Status(childComplexity), true
 
+	case "StoreQuery.game":
+		if e.complexity.StoreQuery.Game == nil {
+			break
+		}
+
+		args, err := ec.field_StoreQuery_game_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.StoreQuery.Game(childComplexity, args["id"].(string)), true
+
 	case "StoreQuery.games":
 		if e.complexity.StoreQuery.Games == nil {
 			break
@@ -451,7 +465,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.StoreQuery.Games(childComplexity, args["id"].(*string), args["genre"].(*store.Genre), args["top"].(*int), args["newest"].(*int)), true
+		return e.complexity.StoreQuery.Games(childComplexity, args["id"].(*string), args["genre"].(*store.Genre), args["top"].(*int)), true
 
 	case "Tag.name":
 		if e.complexity.Tag.Name == nil {
@@ -646,7 +660,8 @@ enum RoleEnum {
     USER
 }`},
 	&ast.Source{Name: "api/graphql/store.graphql", Input: `type StoreQuery {
-	games(id:ID, genre:Genre, top:Int, newest: Int): [Game!]! @goField(forceResolver: true)
+	game(id:ID!): Game @goField(forceResolver: true)
+	games(id:ID, genre:Genre, top:Int): [Game!]! @goField(forceResolver: true)
 }
 
 type Game @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Game") {
@@ -784,6 +799,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_StoreQuery_game_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_StoreQuery_games_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -811,14 +840,6 @@ func (ec *executionContext) field_StoreQuery_games_args(ctx context.Context, raw
 		}
 	}
 	args["top"] = arg2
-	var arg3 *int
-	if tmp, ok := rawArgs["newest"]; ok {
-		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["newest"] = arg3
 	return args, nil
 }
 
@@ -2316,6 +2337,47 @@ func (ec *executionContext) _SignupOut_status(ctx context.Context, field graphql
 	return ec.marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _StoreQuery_game(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "StoreQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_StoreQuery_game_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StoreQuery().Game(rctx, obj, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*store.Game)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2342,7 +2404,7 @@ func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.StoreQuery().Games(rctx, obj, args["id"].(*string), args["genre"].(*store.Genre), args["top"].(*int), args["newest"].(*int))
+		return ec.resolvers.StoreQuery().Games(rctx, obj, args["id"].(*string), args["genre"].(*store.Genre), args["top"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4187,6 +4249,17 @@ func (ec *executionContext) _StoreQuery(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("StoreQuery")
+		case "game":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StoreQuery_game(ctx, field, obj)
+				return res
+			})
 		case "games":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5140,6 +5213,17 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v store.Game) graphql.Marshaler {
+	return ec._Game(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v *store.Game) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Game(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx context.Context, v interface{}) (store.Genre, error) {

@@ -48,6 +48,7 @@ type SignupOut struct {
 }
 
 type StoreQuery struct {
+	Game  *store.Game   `json:"game"`
 	Games []*store.Game `json:"games"`
 }
 

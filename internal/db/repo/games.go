@@ -97,7 +97,17 @@ func (r *GamesRepo) Delete(ctx context.Context, id string) error {
 }
 
 func (r *GamesRepo) Get(ctx context.Context, id string) (*store.Game, error) {
-	return nil, nil
+	var item gameItem
+	if err := r.db.Where("id = ?", id).First(&item).Error; err != nil {
+		return nil, err
+	}
+
+	var g store.Game
+	if err := json.Unmarshal(item.Data.RawMessage, &g); err != nil {
+		return nil, err
+	}
+
+	return &g, nil
 }
 
 func (r *GamesRepo) All(ctx context.Context) ([]*store.Game, error) {
