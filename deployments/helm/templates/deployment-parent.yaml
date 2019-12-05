@@ -47,12 +47,31 @@ spec:
               key: APP_POSTGRES_DSN
         args: ["migrate","up","--dsn","$(APP_POSTGRES_DSN)"]      
       containers:
-        - name: {{ $deployment.name }}
+        - name: {{ $deployment.name }}-sdk
           image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
           args: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080"]
           ports:
             {{- range $port := $deployment.ports }}
+            {{- if eq $port.name "crmsdk" }}
             - containerPort: {{ $port.port }}
+            {{- end }}
+            {{- end }}
+          env:
+            {{- range $deployment.env }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $deploymentName }}-env
+                  key: {{ . }}
+            {{- end }}            
+        - name: {{ $deployment.name }}-storeapi
+          image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
+          args: ["daemon","-c","configs/tst.yaml","-b",":8082"]
+          ports:
+            {{- range $port := $deployment.ports }}
+            {{- if eq $port.name "storeapi" }}
+            - containerPort: {{ $port.port }}
+            {{- end }}
             {{- end }}
           env:
             {{- range $deployment.env }}
