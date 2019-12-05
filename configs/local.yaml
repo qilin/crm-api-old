@@ -24,6 +24,7 @@ dispatcher:
     headers:
       - "*"
 auth:
+  enabled: true
   oauth2:
     provider: "https://auth1.tst.protocol.one/"
     clientId: "5da4ec412b13220001efe179"
@@ -114,6 +115,7 @@ stan:
     stanOptions:
       natsURL: nats://natss:4222
 eventbus:
+  enabled: true
   subjects:
     invitesOut: "invites"
     invitesIn: "invites"

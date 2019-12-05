@@ -2,23 +2,23 @@ package auth
 
 import (
 	"context"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
+	"github.com/pkg/errors"
 )
 
 // Cfg
 func Cfg(cfg config.Configurator) (*Config, func(), error) {
-	c := &Config{
-	}
-	e := cfg.UnmarshalKey(UnmarshalKey, c)
-	return c, func() {}, e
+	c := &Config{}
+	err := cfg.UnmarshalKey(UnmarshalKey, c)
+	return c, func() {}, errors.Wrap(err, "failed to parse auth configuration")
 }
 
 // CfgTest
 func CfgTest() (*Config, func(), error) {
-	c := &Config{
-	}
+	c := &Config{}
 	return c, func() {}, nil
 }
 
@@ -29,6 +29,6 @@ func Provider(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Co
 }
 
 var (
-	WireSet     = wire.NewSet(Provider, Cfg, wire.Struct(new(AppSet), "*"), )
-	WireTestSet = wire.NewSet(Provider, CfgTest, wire.Struct(new(AppSet), "*"), )
+	WireSet     = wire.NewSet(Provider, Cfg, wire.Struct(new(AppSet), "*"))
+	WireTestSet = wire.NewSet(Provider, CfgTest, wire.Struct(new(AppSet), "*"))
 )

@@ -25,6 +25,7 @@ dispatcher:
     headers:
       - "*"
 auth:
+  enabled: false
   oauth2:
     provider: "GET FROM ENV"
     clientId: "GET FROM ENV"
@@ -44,6 +45,7 @@ stan:
     stanOptions:
       natsURL: "GET FROM ENV"
 eventbus:
+  enabled: false
   subjects:
     invitesOut: "invites"
     invitesIn: "invites"
