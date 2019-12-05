@@ -512,12 +512,12 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	gamesGroup := handlers.NewGamesGroup(gamesRepo)
+	internal := handlers.NewInternal(gamesRepo)
 	handlersHandlers := handlers.Handlers{
 		GraphQL:  graphQL,
 		WebHooks: webHooks,
 		Auth:     authAuth,
-		Games:    gamesGroup,
+		Internal: internal,
 	}
 	commonHandlers, cleanup28, err := handlers.ProviderHandlers(initial, validate, awareSet, handlersHandlers)
 	if err != nil {
@@ -1174,12 +1174,12 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	gamesGroup := handlers.NewGamesGroup(gamesRepo)
+	internal := handlers.NewInternal(gamesRepo)
 	handlersHandlers := handlers.Handlers{
 		GraphQL:  graphQL,
 		WebHooks: webHooks,
 		Auth:     authAuth,
-		Games:    gamesGroup,
+		Internal: internal,
 	}
 	commonHandlers, cleanup27, err := handlers.ProviderHandlers(initial, validate, awareSet, handlersHandlers)
 	if err != nil {

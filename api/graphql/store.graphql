@@ -3,7 +3,7 @@ type StoreQuery {
 	games(id:ID, genre:Genre, top:Int): [Game!]! @goField(forceResolver: true)
 }
 
-type Game @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Game") {
+type Game {
 	id: ID!
 	title: String!
 	summary: String!
@@ -16,11 +16,11 @@ type Game @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Game
 	rating: Int!
 }
 
-type Publisher @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Publisher") {
+type Publisher {
 	title: String!
 }
 
-enum Genre @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Genre") {
+enum Genre {
 	Board
 	Cards
 	Casino
@@ -34,21 +34,21 @@ enum Genre @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Gen
 	Strategy	
 }
 
-enum TagType @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.TagType") {
+enum TagType {
 	genre
 	common
 }
 
-type Tag @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Tag") {
+type Tag {
 	name: String!
 	type: TagType!
 }
 
-type Image @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Image") {
+type Image {
 	url: String!
 }
 
-type Covers @goModel(model:"github.com/qilin/crm-api/internal/db/domain/store.Covers") {
+type Covers {
 	floor_small: Image
 	main_little: Image
 	main_big: Image

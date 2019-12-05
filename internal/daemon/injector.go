@@ -31,7 +31,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		webhooks.WireSet,
 		wire.Struct(new(handlers.Handlers), "*"),
 		handlers.ProviderHandlers,
-		handlers.NewGamesGroup,
+		handlers.NewInternal,
 		auth.WireSet,
 		dispatcher.WireSet,
 	))
@@ -49,7 +49,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		webhooks.WireTestSet,
 		wire.Struct(new(handlers.Handlers), "*"),
 		handlers.ProviderHandlers,
-		handlers.NewGamesGroup,
+		handlers.NewInternal,
 		auth.WireSet,
 		dispatcher.WireSet,
 	))
