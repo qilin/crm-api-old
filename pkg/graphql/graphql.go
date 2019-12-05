@@ -64,8 +64,10 @@ func (g *GraphQL) Route(groups *common.Groups) {
 		}),
 	}
 
-	if g.cfg.Debug {
+	if g.cfg.Playground.Enabled {
 		groups.GraphQL.Any(g.cfg.Playground.Route, echo.WrapHandler(handler.Playground(g.cfg.Playground.Name, g.cfg.Playground.Endpoint)))
+	}
+	if g.cfg.Debug {
 		upgrader.CheckOrigin = func(r *http.Request) bool {
 			return true
 		}
@@ -93,6 +95,7 @@ func (g *GraphQL) Route(groups *common.Groups) {
 }
 
 type PlaygroundCfg struct {
+	Enabled  bool
 	Route    string
 	Name     string
 	Endpoint string

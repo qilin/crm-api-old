@@ -3,6 +3,7 @@ graphql:
   dataloader:
     wait: 250us
   playground:
+    enabled: true
     route: /client
     name: local
     endpoint: /v1/graphql
