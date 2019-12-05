@@ -47,7 +47,7 @@ spec:
               key: APP_POSTGRES_DSN
         args: ["migrate","up","--dsn","$(APP_POSTGRES_DSN)"]      
       containers:
-        - name: {{ $deployment.name }}-sdk
+        - name: {{ $deployment.name }}
           image: {{ .Values.backend.image }}:{{ .Values.backend.imageTag }}
           args: ["sdk","-c","configs/sdk-parent.yaml","-b",":8080"]
           ports:
