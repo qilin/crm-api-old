@@ -60,6 +60,15 @@ type ComplexityRoot struct {
 		Signout func(childComplexity int) int
 	}
 
+	Breaker struct {
+		Backgound   func(childComplexity int) int
+		Description func(childComplexity int) int
+		Image       func(childComplexity int) int
+		Link        func(childComplexity int) int
+		Title       func(childComplexity int) int
+		Type        func(childComplexity int) int
+	}
+
 	Covers struct {
 		BackgroundBig func(childComplexity int) int
 		FloorLarge    func(childComplexity int) int
@@ -78,6 +87,17 @@ type ComplexityRoot struct {
 		IsEnd  func(childComplexity int) int
 		Limit  func(childComplexity int) int
 		Offset func(childComplexity int) int
+	}
+
+	FreeGameOffer struct {
+		Game  func(childComplexity int) int
+		Image func(childComplexity int) int
+	}
+
+	FreeGamesGroup struct {
+		Games func(childComplexity int) int
+		Title func(childComplexity int) int
+		Type  func(childComplexity int) int
 	}
 
 	Game struct {
@@ -123,9 +143,15 @@ type ComplexityRoot struct {
 		Status func(childComplexity int) int
 	}
 
+	StoreFront struct {
+		Modules func(childComplexity int) int
+	}
+
 	StoreQuery struct {
-		Game  func(childComplexity int, id string) int
-		Games func(childComplexity int, id *string, genre *store.Genre, top *int) int
+		Game       func(childComplexity int, id string) int
+		Games      func(childComplexity int, genre *store.Genre, top *int) int
+		Module     func(childComplexity int, id string, locale *string) int
+		StoreFront func(childComplexity int, locale *string) int
 	}
 
 	Tag struct {
@@ -156,7 +182,9 @@ type QueryResolver interface {
 }
 type StoreQueryResolver interface {
 	Game(ctx context.Context, obj *StoreQuery, id string) (*store.Game, error)
-	Games(ctx context.Context, obj *StoreQuery, id *string, genre *store.Genre, top *int) ([]*store.Game, error)
+	Games(ctx context.Context, obj *StoreQuery, genre *store.Genre, top *int) ([]*store.Game, error)
+	Module(ctx context.Context, obj *StoreQuery, id string, locale *string) (store.Module, error)
+	StoreFront(ctx context.Context, obj *StoreQuery, locale *string) (*store.StoreFront, error)
 }
 
 type executableSchema struct {
@@ -211,6 +239,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AuthQuery.Signout(childComplexity), true
+
+	case "Breaker.backgound":
+		if e.complexity.Breaker.Backgound == nil {
+			break
+		}
+
+		return e.complexity.Breaker.Backgound(childComplexity), true
+
+	case "Breaker.description":
+		if e.complexity.Breaker.Description == nil {
+			break
+		}
+
+		return e.complexity.Breaker.Description(childComplexity), true
+
+	case "Breaker.image":
+		if e.complexity.Breaker.Image == nil {
+			break
+		}
+
+		return e.complexity.Breaker.Image(childComplexity), true
+
+	case "Breaker.link":
+		if e.complexity.Breaker.Link == nil {
+			break
+		}
+
+		return e.complexity.Breaker.Link(childComplexity), true
+
+	case "Breaker.title":
+		if e.complexity.Breaker.Title == nil {
+			break
+		}
+
+		return e.complexity.Breaker.Title(childComplexity), true
+
+	case "Breaker.type":
+		if e.complexity.Breaker.Type == nil {
+			break
+		}
+
+		return e.complexity.Breaker.Type(childComplexity), true
 
 	case "Covers.background_big":
 		if e.complexity.Covers.BackgroundBig == nil {
@@ -309,6 +379,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CursorOut.Offset(childComplexity), true
+
+	case "FreeGameOffer.game":
+		if e.complexity.FreeGameOffer.Game == nil {
+			break
+		}
+
+		return e.complexity.FreeGameOffer.Game(childComplexity), true
+
+	case "FreeGameOffer.image":
+		if e.complexity.FreeGameOffer.Image == nil {
+			break
+		}
+
+		return e.complexity.FreeGameOffer.Image(childComplexity), true
+
+	case "FreeGamesGroup.games":
+		if e.complexity.FreeGamesGroup.Games == nil {
+			break
+		}
+
+		return e.complexity.FreeGamesGroup.Games(childComplexity), true
+
+	case "FreeGamesGroup.title":
+		if e.complexity.FreeGamesGroup.Title == nil {
+			break
+		}
+
+		return e.complexity.FreeGamesGroup.Title(childComplexity), true
+
+	case "FreeGamesGroup.type":
+		if e.complexity.FreeGamesGroup.Type == nil {
+			break
+		}
+
+		return e.complexity.FreeGamesGroup.Type(childComplexity), true
 
 	case "Game.covers":
 		if e.complexity.Game.Covers == nil {
@@ -443,6 +548,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SignupOut.Status(childComplexity), true
 
+	case "StoreFront.modules":
+		if e.complexity.StoreFront.Modules == nil {
+			break
+		}
+
+		return e.complexity.StoreFront.Modules(childComplexity), true
+
 	case "StoreQuery.game":
 		if e.complexity.StoreQuery.Game == nil {
 			break
@@ -465,7 +577,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.StoreQuery.Games(childComplexity, args["id"].(*string), args["genre"].(*store.Genre), args["top"].(*int)), true
+		return e.complexity.StoreQuery.Games(childComplexity, args["genre"].(*store.Genre), args["top"].(*int)), true
+
+	case "StoreQuery.module":
+		if e.complexity.StoreQuery.Module == nil {
+			break
+		}
+
+		args, err := ec.field_StoreQuery_module_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.StoreQuery.Module(childComplexity, args["id"].(string), args["locale"].(*string)), true
+
+	case "StoreQuery.storeFront":
+		if e.complexity.StoreQuery.StoreFront == nil {
+			break
+		}
+
+		args, err := ec.field_StoreQuery_storeFront_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.StoreQuery.StoreFront(childComplexity, args["locale"].(*string)), true
 
 	case "Tag.name":
 		if e.complexity.Tag.Name == nil {
@@ -660,10 +796,49 @@ enum RoleEnum {
     USER
 }`},
 	&ast.Source{Name: "api/graphql/store.graphql", Input: `type StoreQuery {
-	game(id:ID!): Game @goField(forceResolver: true)
-	games(id:ID, genre:Genre, top:Int): [Game!]! @goField(forceResolver: true)
+	game(id:ID!): Game                                  @goField(forceResolver: true)
+	games(genre:Genre, top:Int): [Game!]!               @goField(forceResolver: true)
+
+	module(id:ID!, locale:String): Module               @goField(forceResolver: true)
+	storeFront(locale:String): StoreFront               @goField(forceResolver: true)
 }
 
+# Storefront & modules
+type StoreFront {
+	modules: [Module!]!
+}
+
+interface Module {
+	type: ModuleType!
+	title: String!
+}
+
+enum ModuleType {
+	Breaker
+	FreeGamesGroup
+}
+
+type Breaker implements Module {
+	type: ModuleType!
+	title: String!
+	description: String
+	link: String!
+	image: Image
+	backgound: String
+}
+
+type FreeGamesGroup implements Module {
+	type: ModuleType!
+	title: String!
+	games: [FreeGameOffer!]!
+}
+
+type FreeGameOffer {
+	game: Game!
+	image: Image! 
+}
+
+# Products
 type Game {
 	id: ID!
 	title: String!
@@ -816,30 +991,58 @@ func (ec *executionContext) field_StoreQuery_game_args(ctx context.Context, rawA
 func (ec *executionContext) field_StoreQuery_games_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 *store.Genre
+	if tmp, ok := rawArgs["genre"]; ok {
+		arg0, err = ec.unmarshalOGenre2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["genre"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["top"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["top"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_StoreQuery_module_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["id"] = arg0
-	var arg1 *store.Genre
-	if tmp, ok := rawArgs["genre"]; ok {
-		arg1, err = ec.unmarshalOGenre2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx, tmp)
+	var arg1 *string
+	if tmp, ok := rawArgs["locale"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["genre"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["top"]; ok {
-		arg2, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	args["locale"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_StoreQuery_storeFront_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["locale"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["top"] = arg2
+	args["locale"] = arg0
 	return args, nil
 }
 
@@ -1075,6 +1278,219 @@ func (ec *executionContext) _AuthQuery_signout(ctx context.Context, field graphq
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNSignoutOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignoutOut(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Breaker_type(ctx context.Context, field graphql.CollectedField, obj *store.Breaker) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Breaker",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(store.ModuleType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNModuleType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModuleType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Breaker_title(ctx context.Context, field graphql.CollectedField, obj *store.Breaker) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Breaker",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Breaker_description(ctx context.Context, field graphql.CollectedField, obj *store.Breaker) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Breaker",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Breaker_link(ctx context.Context, field graphql.CollectedField, obj *store.Breaker) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Breaker",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Link, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Breaker_image(ctx context.Context, field graphql.CollectedField, obj *store.Breaker) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Breaker",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Image, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*store.Image)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Breaker_backgound(ctx context.Context, field graphql.CollectedField, obj *store.Breaker) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Breaker",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Backgound, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Covers_floor_small(ctx context.Context, field graphql.CollectedField, obj *store.Covers) (ret graphql.Marshaler) {
@@ -1566,6 +1982,191 @@ func (ec *executionContext) _CursorOut_cursor(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FreeGameOffer_game(ctx context.Context, field graphql.CollectedField, obj *store.FreeGameOffer) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "FreeGameOffer",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Game, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*store.Game)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FreeGameOffer_image(ctx context.Context, field graphql.CollectedField, obj *store.FreeGameOffer) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "FreeGameOffer",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Image, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*store.Image)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FreeGamesGroup_type(ctx context.Context, field graphql.CollectedField, obj *store.FreeGamesGroup) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "FreeGamesGroup",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(store.ModuleType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNModuleType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModuleType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FreeGamesGroup_title(ctx context.Context, field graphql.CollectedField, obj *store.FreeGamesGroup) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "FreeGamesGroup",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FreeGamesGroup_games(ctx context.Context, field graphql.CollectedField, obj *store.FreeGamesGroup) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "FreeGamesGroup",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Games, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*store.FreeGameOffer)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNFreeGameOffer2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐFreeGameOffer(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Game_id(ctx context.Context, field graphql.CollectedField, obj *store.Game) (ret graphql.Marshaler) {
@@ -2337,6 +2938,43 @@ func (ec *executionContext) _SignupOut_status(ctx context.Context, field graphql
 	return ec.marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _StoreFront_modules(ctx context.Context, field graphql.CollectedField, obj *store.StoreFront) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "StoreFront",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Modules, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]store.Module)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNModule2ᚕgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModule(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _StoreQuery_game(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2404,7 +3042,7 @@ func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.StoreQuery().Games(rctx, obj, args["id"].(*string), args["genre"].(*store.Genre), args["top"].(*int))
+		return ec.resolvers.StoreQuery().Games(rctx, obj, args["genre"].(*store.Genre), args["top"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2420,6 +3058,88 @@ func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StoreQuery_module(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "StoreQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_StoreQuery_module_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StoreQuery().Module(rctx, obj, args["id"].(string), args["locale"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(store.Module)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOModule2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModule(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StoreQuery_storeFront(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "StoreQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_StoreQuery_storeFront_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StoreQuery().StoreFront(rctx, obj, args["locale"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*store.StoreFront)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOStoreFront2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐStoreFront(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Tag_name(ctx context.Context, field graphql.CollectedField, obj *store.Tag) (ret graphql.Marshaler) {
@@ -3755,6 +4475,23 @@ func (ec *executionContext) unmarshalInputCursorIn(ctx context.Context, obj inte
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Module(ctx context.Context, sel ast.SelectionSet, obj *store.Module) graphql.Marshaler {
+	switch obj := (*obj).(type) {
+	case nil:
+		return graphql.Null
+	case store.Breaker:
+		return ec._Breaker(ctx, sel, &obj)
+	case *store.Breaker:
+		return ec._Breaker(ctx, sel, obj)
+	case store.FreeGamesGroup:
+		return ec._FreeGamesGroup(ctx, sel, &obj)
+	case *store.FreeGamesGroup:
+		return ec._FreeGamesGroup(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
@@ -3859,6 +4596,49 @@ func (ec *executionContext) _AuthQuery(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var breakerImplementors = []string{"Breaker", "Module"}
+
+func (ec *executionContext) _Breaker(ctx context.Context, sel ast.SelectionSet, obj *store.Breaker) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, breakerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Breaker")
+		case "type":
+			out.Values[i] = ec._Breaker_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._Breaker_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._Breaker_description(ctx, field, obj)
+		case "link":
+			out.Values[i] = ec._Breaker_link(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "image":
+			out.Values[i] = ec._Breaker_image(ctx, field, obj)
+		case "backgound":
+			out.Values[i] = ec._Breaker_backgound(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var coversImplementors = []string{"Covers"}
 
 func (ec *executionContext) _Covers(ctx context.Context, sel ast.SelectionSet, obj *store.Covers) graphql.Marshaler {
@@ -3932,6 +4712,75 @@ func (ec *executionContext) _CursorOut(ctx context.Context, sel ast.SelectionSet
 			}
 		case "cursor":
 			out.Values[i] = ec._CursorOut_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var freeGameOfferImplementors = []string{"FreeGameOffer"}
+
+func (ec *executionContext) _FreeGameOffer(ctx context.Context, sel ast.SelectionSet, obj *store.FreeGameOffer) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, freeGameOfferImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FreeGameOffer")
+		case "game":
+			out.Values[i] = ec._FreeGameOffer_game(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "image":
+			out.Values[i] = ec._FreeGameOffer_image(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var freeGamesGroupImplementors = []string{"FreeGamesGroup", "Module"}
+
+func (ec *executionContext) _FreeGamesGroup(ctx context.Context, sel ast.SelectionSet, obj *store.FreeGamesGroup) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, freeGamesGroupImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FreeGamesGroup")
+		case "type":
+			out.Values[i] = ec._FreeGamesGroup_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._FreeGamesGroup_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "games":
+			out.Values[i] = ec._FreeGamesGroup_games(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -4238,6 +5087,33 @@ func (ec *executionContext) _SignupOut(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var storeFrontImplementors = []string{"StoreFront"}
+
+func (ec *executionContext) _StoreFront(ctx context.Context, sel ast.SelectionSet, obj *store.StoreFront) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, storeFrontImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StoreFront")
+		case "modules":
+			out.Values[i] = ec._StoreFront_modules(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var storeQueryImplementors = []string{"StoreQuery"}
 
 func (ec *executionContext) _StoreQuery(ctx context.Context, sel ast.SelectionSet, obj *StoreQuery) graphql.Marshaler {
@@ -4272,6 +5148,28 @@ func (ec *executionContext) _StoreQuery(ctx context.Context, sel ast.SelectionSe
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			})
+		case "module":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StoreQuery_module(ctx, field, obj)
+				return res
+			})
+		case "storeFront":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StoreQuery_storeFront(ctx, field, obj)
 				return res
 			})
 		default:
@@ -4631,6 +5529,57 @@ func (ec *executionContext) marshalNCovers2ᚖgithubᚗcomᚋqilinᚋcrmᚑapi�
 	return ec._Covers(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNFreeGameOffer2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐFreeGameOffer(ctx context.Context, sel ast.SelectionSet, v store.FreeGameOffer) graphql.Marshaler {
+	return ec._FreeGameOffer(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFreeGameOffer2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐFreeGameOffer(ctx context.Context, sel ast.SelectionSet, v []*store.FreeGameOffer) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFreeGameOffer2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐFreeGameOffer(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNFreeGameOffer2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐFreeGameOffer(ctx context.Context, sel ast.SelectionSet, v *store.FreeGameOffer) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._FreeGameOffer(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v store.Game) graphql.Marshaler {
 	return ec._Game(ctx, sel, &v)
 }
@@ -4768,6 +5717,62 @@ func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}
 
 func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
 	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNModule2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModule(ctx context.Context, sel ast.SelectionSet, v store.Module) graphql.Marshaler {
+	return ec._Module(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNModule2ᚕgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModule(ctx context.Context, sel ast.SelectionSet, v []store.Module) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNModule2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModule(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) unmarshalNModuleType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModuleType(ctx context.Context, v interface{}) (store.ModuleType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return store.ModuleType(tmp), err
+}
+
+func (ec *executionContext) marshalNModuleType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModuleType(ctx context.Context, sel ast.SelectionSet, v store.ModuleType) graphql.Marshaler {
+	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -5250,29 +6255,6 @@ func (ec *executionContext) marshalOGenre2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋ
 	return ec.marshalOGenre2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGenre(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOID2string(ctx context.Context, v interface{}) (string, error) {
-	return graphql.UnmarshalID(v)
-}
-
-func (ec *executionContext) marshalOID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	return graphql.MarshalID(v)
-}
-
-func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOID2string(ctx, v)
-	return &res, err
-}
-
-func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec.marshalOID2string(ctx, sel, *v)
-}
-
 func (ec *executionContext) marshalOImage2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx context.Context, sel ast.SelectionSet, v store.Image) graphql.Marshaler {
 	return ec._Image(ctx, sel, &v)
 }
@@ -5305,6 +6287,10 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return ec.marshalOInt2int(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOModule2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐModule(ctx context.Context, sel ast.SelectionSet, v store.Module) graphql.Marshaler {
+	return ec._Module(ctx, sel, &v)
 }
 
 func (ec *executionContext) unmarshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) (RoleEnum, error) {
@@ -5389,6 +6375,17 @@ func (ec *executionContext) marshalORoleEnum2ᚖgithubᚗcomᚋqilinᚋcrmᚑapi
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOStoreFront2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐStoreFront(ctx context.Context, sel ast.SelectionSet, v store.StoreFront) graphql.Marshaler {
+	return ec._StoreFront(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOStoreFront2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐStoreFront(ctx context.Context, sel ast.SelectionSet, v *store.StoreFront) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._StoreFront(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOStoreQuery2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐStoreQuery(ctx context.Context, sel ast.SelectionSet, v StoreQuery) graphql.Marshaler {

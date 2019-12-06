@@ -1,8 +1,47 @@
 type StoreQuery {
-	game(id:ID!): Game @goField(forceResolver: true)
-	games(id:ID, genre:Genre, top:Int): [Game!]! @goField(forceResolver: true)
+	game(id:ID!): Game                                  @goField(forceResolver: true)
+	games(genre:Genre, top:Int): [Game!]!               @goField(forceResolver: true)
+
+	module(id:ID!, locale:String): Module               @goField(forceResolver: true)
+	storeFront(locale:String): StoreFront               @goField(forceResolver: true)
 }
 
+# Storefront & modules
+type StoreFront {
+	modules: [Module!]!
+}
+
+interface Module {
+	type: ModuleType!
+	title: String!
+}
+
+enum ModuleType {
+	Breaker
+	FreeGamesGroup
+}
+
+type Breaker implements Module {
+	type: ModuleType!
+	title: String!
+	description: String
+	link: String!
+	image: Image
+	backgound: String
+}
+
+type FreeGamesGroup implements Module {
+	type: ModuleType!
+	title: String!
+	games: [FreeGameOffer!]!
+}
+
+type FreeGameOffer {
+	game: Game!
+	image: Image! 
+}
+
+# Products
 type Game {
 	id: ID!
 	title: String!

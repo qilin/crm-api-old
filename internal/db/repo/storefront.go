@@ -17,36 +17,35 @@ type history struct {
 	Deleted bool
 }
 
-func (*history) TableName() string { return "store.games_history" }
+func (*history) TableName() string { return "store.modules_history" }
 
-type gameItem struct {
+type module struct {
 	ID      string
 	Version int
 	Data    postgres.Jsonb
 }
 
-func (*gameItem) TableName() string { return "store.games" }
+func (*module) TableName() string { return "store.modules" }
 
-type GamesRepo struct {
+type StorefrontRepo struct {
 	db *gorm.DB
 }
 
-func NewGamesRepo(db *gorm.DB) *GamesRepo {
-	return &GamesRepo{db}
+func NewStorefrontRepo(db *gorm.DB) *StorefrontRepo {
+	return &StorefrontRepo{db}
 }
 
-func (r *GamesRepo) Insert(ctx context.Context, game *store.Game) (err error) {
+func (r *StorefrontRepo) InsertModule(ctx context.Context, module interface{}) (err error) {
 
-	raw, err := json.Marshal(game)
+	raw, err := json.Marshal(module)
 	if err != nil {
 		return err
 	}
-	// Note the use of tx as the database handle once you are within a transaction
 
 	tx := r.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("failed to store game: %s", r)
+			err = fmt.Errorf("failed to store module: %s", r)
 			tx.Rollback()
 		}
 	}()
@@ -69,7 +68,7 @@ func (r *GamesRepo) Insert(ctx context.Context, game *store.Game) (err error) {
 	return tx.Commit().Error
 }
 
-func (r *GamesRepo) Delete(ctx context.Context, id string) error {
+func (r *StorefrontRepo) Delete(ctx context.Context, id string) error {
 	tx := r.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -96,7 +95,7 @@ func (r *GamesRepo) Delete(ctx context.Context, id string) error {
 	return tx.Commit().Error
 }
 
-func (r *GamesRepo) Get(ctx context.Context, id string) (*store.Game, error) {
+func (r *StorefrontRepo) Get(ctx context.Context, id string) (*store.Game, error) {
 	var item gameItem
 	if err := r.db.Where("id = ?", id).First(&item).Error; err != nil {
 		return nil, err
@@ -110,7 +109,7 @@ func (r *GamesRepo) Get(ctx context.Context, id string) (*store.Game, error) {
 	return &g, nil
 }
 
-func (r *GamesRepo) All(ctx context.Context) ([]*store.Game, error) {
+func (r *StorefrontRepo) All(ctx context.Context) ([]*store.Game, error) {
 	var items []gameItem
 	if err := r.db.Find(&items).Error; err != nil {
 		return nil, err

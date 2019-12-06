@@ -18,30 +18,19 @@ func (r *Resolver) StoreQuery() graphql.StoreQueryResolver {
 	return &storeQueryResolver{r}
 }
 
-func (r *storeQueryResolver) Game(
-	ctx context.Context,
-	obj *graphql.StoreQuery,
-	id string,
-) (*store.Game, error) {
+func (r *storeQueryResolver) Game(ctx context.Context, obj *graphql.StoreQuery, id string) (*store.Game, error) {
 	return r.repo.Games.Get(ctx, id)
 }
 
 func (r *storeQueryResolver) Games(
 	ctx context.Context,
 	obj *graphql.StoreQuery,
-	id *string,
 	genre *store.Genre,
 	top *int,
 ) ([]*store.Game, error) {
 	games, err := r.repo.Games.All(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	if id != nil {
-		games = filter(games, func(g *store.Game) bool {
-			return g.ID == *id
-		})
 	}
 
 	if genre != nil {
@@ -60,6 +49,16 @@ func (r *storeQueryResolver) Games(
 	}
 
 	return games, nil
+}
+
+func (r *storeQueryResolver) Module(ctx context.Context, obj *graphql.StoreQuery, id string, locale *string) (store.Module, error) {
+	return &store.FreeGamesGroup{
+		Type: store.ModuleTypeFreeGamesGroup,
+	}, nil
+}
+
+func (r *storeQueryResolver) StoreFront(ctx context.Context, obj *graphql.StoreQuery, locale *string) (*store.StoreFront, error) {
+	return &store.StoreFront{}, nil
 }
 
 func filter(games []*store.Game, matcher func(*store.Game) bool) []*store.Game {
