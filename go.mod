@@ -5,7 +5,7 @@ go 1.13
 require (
 	cloud.google.com/go v0.46.3 // indirect
 	github.com/99designs/gqlgen v0.9.3
-	github.com/ProtocolONE/go-core/v2 v2.2.1
+	github.com/ProtocolONE/go-core/v2 v2.2.2
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
 	github.com/cactus/go-statsd-client/statsd v0.0.0-20190922113730-52b467de415c // indirect
 	github.com/carlescere/goback v0.0.0-20150314180917-ebe10501f4c4

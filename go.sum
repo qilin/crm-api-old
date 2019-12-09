@@ -25,6 +25,7 @@ github.com/ProtocolONE/go-core/v2 v2.2.0 h1:CfyWVgJa43NgdZM8AiLvZA6koNliAEeTgaXl
 github.com/ProtocolONE/go-core/v2 v2.2.0/go.mod h1:D8fY3Bp38ZWmEAD4AUgY+pVn8XaVxYXSZNtdDxecBfs=
 github.com/ProtocolONE/go-core/v2 v2.2.1 h1:Qx1hrEWagUkfMTlbKlWtbWMxb2IHUrDsq1wZmrD9J8w=
 github.com/ProtocolONE/go-core/v2 v2.2.1/go.mod h1:c/CQpcPM9mvrLWy6U+ZX6KCh1TIfJ5t/gRKtu3UQ/ro=
+github.com/ProtocolONE/go-core/v2 v2.2.2/go.mod h1:c/CQpcPM9mvrLWy6U+ZX6KCh1TIfJ5t/gRKtu3UQ/ro=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
 github.com/agnivade/levenshtein v1.0.1 h1:3oJU7J3FGFmyhn8KHjmVaZCN5hxTr7GxgRue+sxIXdQ=
