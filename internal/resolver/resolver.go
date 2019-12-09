@@ -3,6 +3,7 @@ package resolver
 import (
 	"context"
 	"fmt"
+	"github.com/eko/gocache/store"
 
 	"gopkg.in/go-playground/validator.v9"
 
@@ -43,6 +44,7 @@ type Resolver struct {
 	cfg      *Config
 	repo     Repo
 	validate *validator.Validate
+	cache    store.StoreInterface
 	trx      *trx.Manager
 	provider.LMT
 }
@@ -75,6 +77,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
 	c := graphql1.Config{
 		Resolvers: &Resolver{
+			cache:    appSet.Cache,
 			ctx:      ctx,
 			cfg:      cfg,
 			repo:     appSet.Repo,

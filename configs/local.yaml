@@ -111,12 +111,17 @@ auth:
 webhooks:
   secret: insecure
 stan:
-    stanClusterId: "test-cluster"
-    stanClientId: "qilin-crm-daemon"
-    stanOptions:
-      natsURL: nats://natss:4222
+  stanClusterId: "test-cluster"
+  stanClientId: "qilin-crm-daemon"
+  stanOptions:
+    natsURL: nats://natss:4222
 eventbus:
   enabled: true
   subjects:
     invitesOut: "invites"
     invitesIn: "invites"
+cache:
+  ristretto:
+    numCounters: 1000
+    maxCost: 100
+    bufferItems: 64

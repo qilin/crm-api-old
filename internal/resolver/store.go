@@ -2,6 +2,10 @@ package resolver
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	cacheStore "github.com/eko/gocache/store"
+	"github.com/gurukami/typ/v2"
 	"sort"
 
 	"github.com/qilin/crm-api/internal/db/domain/store"
@@ -23,7 +27,34 @@ func (r *storeQueryResolver) Game(
 	obj *graphql.StoreQuery,
 	id string,
 ) (*store.Game, error) {
-	return r.repo.Games.Get(ctx, id)
+
+	d, e := r.cache.Get("game:" + id)
+
+	if d != nil && e == nil {
+		game := &store.Game{}
+		e := json.Unmarshal(d.([]byte), game)
+		if e != nil {
+			return nil, e
+		}
+		return game, nil
+	}
+
+	game, e := r.repo.Games.Get(ctx, id)
+	if e != nil {
+		return nil, e
+	}
+
+	b, e := json.Marshal(game)
+	if e != nil {
+		return nil, e
+	}
+
+	e = r.cache.Set("game:"+id, b, &cacheStore.Options{Cost: 2})
+	if e != nil {
+		return nil, e
+	}
+
+	return game, nil
 }
 
 func (r *storeQueryResolver) Games(
@@ -33,6 +64,20 @@ func (r *storeQueryResolver) Games(
 	genre *store.Genre,
 	top *int,
 ) ([]*store.Game, error) {
+
+	key := fmt.Sprintf("games:%v:%v:%v", typ.Of(id).String().V(), typ.Of(genre).String().V(), typ.Of(top).String().V())
+
+	d, e := r.cache.Get(key)
+
+	if d != nil && e == nil {
+		var games []*store.Game
+		e := json.Unmarshal(d.([]byte), &games)
+		if e != nil {
+			return nil, e
+		}
+		return games, nil
+	}
+
 	games, err := r.repo.Games.All(ctx)
 	if err != nil {
 		return nil, err
@@ -57,6 +102,16 @@ func (r *storeQueryResolver) Games(
 		if len(games) > *top {
 			games = games[:*top]
 		}
+	}
+
+	b, e := json.Marshal(games)
+	if e != nil {
+		return nil, e
+	}
+
+	e = r.cache.Set(key, b, &cacheStore.Options{Cost: 2})
+	if e != nil {
+		return nil, e
 	}
 
 	return games, nil

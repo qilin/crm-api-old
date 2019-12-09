@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"context"
+	"github.com/eko/gocache/cache"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -10,6 +11,7 @@ import (
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/generated/graphql"
 	"github.com/qilin/crm-api/internal/validators"
+	diCache "github.com/qilin/crm-api/pkg/cache"
 	"github.com/qilin/crm-api/pkg/postgres"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -27,8 +29,9 @@ func CfgTest() (*Config, func(), error) {
 }
 
 type AppSet struct {
-	Repo Repo
-	Trx  *trx.Manager
+	Cache cache.CacheInterface
+	Repo  Repo
+	Trx   *trx.Manager
 }
 
 // Provider
@@ -68,6 +71,7 @@ var (
 		Cfg,
 		ProviderRepoProduction,
 		ValidatorsProduction,
+		diCache.WireSet,
 		wire.Struct(new(AppSet), "*"),
 	)
 	WireTestSet = wire.NewSet(
@@ -75,6 +79,7 @@ var (
 		CfgTest,
 		ProviderTestRepo,
 		ValidatorsTest,
+		diCache.WireSet,
 		wire.Struct(new(AppSet), "*"),
 	)
 )

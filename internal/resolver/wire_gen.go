@@ -17,6 +17,7 @@ import (
 	"github.com/qilin/crm-api/internal/db/trx"
 	"github.com/qilin/crm-api/internal/generated/graphql"
 	"github.com/qilin/crm-api/internal/validators"
+	"github.com/qilin/crm-api/pkg/cache"
 	"github.com/qilin/crm-api/pkg/postgres"
 )
 
@@ -77,7 +78,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		Metric: scope,
 		Tracer: tracer,
 	}
-	postgresConfig, cleanup8, err := postgres.ProviderCfg(configurator)
+	cacheConfig, cleanup8, err := cache.ProviderCfg(configurator)
 	if err != nil {
 		cleanup7()
 		cleanup6()
@@ -88,8 +89,35 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	db, cleanup9, err := postgres.ProviderGORM(ctx, zap, postgresConfig)
+	cacheCache, cleanup9, err := cache.Provider(ctx, awareSet, cacheConfig)
 	if err != nil {
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
+	postgresConfig, cleanup10, err := postgres.ProviderCfg(configurator)
+	if err != nil {
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
+	db, cleanup11, err := postgres.ProviderGORM(ctx, zap, postgresConfig)
+	if err != nil {
+		cleanup10()
+		cleanup9()
 		cleanup8()
 		cleanup7()
 		cleanup6()
@@ -108,37 +136,11 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
-		Repo: resolverRepo,
-		Trx:  manager,
+		Cache: cacheCache,
+		Repo:  resolverRepo,
+		Trx:   manager,
 	}
-	resolverConfig, cleanup10, err := Cfg(configurator)
-	if err != nil {
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return graphql.Config{}, nil, err
-	}
-	validatorSet, cleanup11, err := validators.Provider()
-	if err != nil {
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return graphql.Config{}, nil, err
-	}
-	validate, cleanup12, err := validators.ProviderValidators(validatorSet)
+	resolverConfig, cleanup12, err := Cfg(configurator)
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -153,7 +155,7 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	graphqlConfig, cleanup13, err := Provider(ctx, awareSet, appSet, resolverConfig, validate)
+	validatorSet, cleanup13, err := validators.Provider()
 	if err != nil {
 		cleanup12()
 		cleanup11()
@@ -169,7 +171,44 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
+	validate, cleanup14, err := validators.ProviderValidators(validatorSet)
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
+	graphqlConfig, cleanup15, err := Provider(ctx, awareSet, appSet, resolverConfig, validate)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
 	return graphqlConfig, func() {
+		cleanup15()
+		cleanup14()
 		cleanup13()
 		cleanup12()
 		cleanup11()
@@ -241,8 +280,33 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		Metric: scope,
 		Tracer: tracer,
 	}
-	db, cleanup8, err := postgres.ProviderGORMTest()
+	cacheConfig, cleanup8, err := cache.ProviderCfg(configurator)
 	if err != nil {
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
+	cacheCache, cleanup9, err := cache.Provider(ctx, awareSet, cacheConfig)
+	if err != nil {
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
+	db, cleanup10, err := postgres.ProviderGORMTest()
+	if err != nil {
+		cleanup9()
+		cleanup8()
 		cleanup7()
 		cleanup6()
 		cleanup5()
@@ -260,35 +324,11 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
-		Repo: resolverRepo,
-		Trx:  manager,
+		Cache: cacheCache,
+		Repo:  resolverRepo,
+		Trx:   manager,
 	}
-	resolverConfig, cleanup9, err := CfgTest()
-	if err != nil {
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return graphql.Config{}, nil, err
-	}
-	validatorSet, cleanup10, err := validators.Provider()
-	if err != nil {
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return graphql.Config{}, nil, err
-	}
-	validate, cleanup11, err := validators.ProviderValidators(validatorSet)
+	resolverConfig, cleanup11, err := CfgTest()
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -302,7 +342,7 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
-	graphqlConfig, cleanup12, err := Provider(ctx, awareSet, appSet, resolverConfig, validate)
+	validatorSet, cleanup12, err := validators.Provider()
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -317,7 +357,42 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return graphql.Config{}, nil, err
 	}
+	validate, cleanup13, err := validators.ProviderValidators(validatorSet)
+	if err != nil {
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
+	graphqlConfig, cleanup14, err := Provider(ctx, awareSet, appSet, resolverConfig, validate)
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return graphql.Config{}, nil, err
+	}
 	return graphqlConfig, func() {
+		cleanup14()
+		cleanup13()
 		cleanup12()
 		cleanup11()
 		cleanup10()
