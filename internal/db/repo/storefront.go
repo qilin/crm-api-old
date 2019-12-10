@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 
@@ -61,7 +60,7 @@ func (r *StorefrontRepo) InsertModule(ctx context.Context, mod store.Module) (er
 
 	t, err := r.getType(tx, mod.GetID())
 	switch {
-	case err == sql.ErrNoRows:
+	case gorm.IsRecordNotFoundError(err):
 		// fine
 	case err != nil:
 		return err
@@ -97,8 +96,8 @@ func (r *StorefrontRepo) InsertModule(ctx context.Context, mod store.Module) (er
 
 func (r *StorefrontRepo) getType(tx *gorm.DB, id string) (store.ModuleType, error) {
 	var m module
-	tx.Select("type").Where("id = ?", id).First(&m)
-	return m.Type, tx.Error
+	res := tx.Select("type").Where("id = ?", id).First(&m)
+	return m.Type, res.Error
 }
 
 func (r *StorefrontRepo) Delete(ctx context.Context, id string, category store.UserCategory) (err error) {

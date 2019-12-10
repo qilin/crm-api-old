@@ -38,7 +38,7 @@ type FreeGamesGroup implements Module {
 
 type FreeGameOffer {
 	game: Game!
-	image: Image! 
+	image: Image
 }
 
 # Products

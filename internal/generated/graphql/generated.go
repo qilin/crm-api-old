@@ -835,7 +835,7 @@ type FreeGamesGroup implements Module {
 
 type FreeGameOffer {
 	game: Game!
-	image: Image! 
+	image: Image
 }
 
 # Products
@@ -2047,15 +2047,12 @@ func (ec *executionContext) _FreeGameOffer_image(ctx context.Context, field grap
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*store.Image)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐImage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _FreeGamesGroup_type(ctx context.Context, field graphql.CollectedField, obj *store.FreeGamesGroup) (ret graphql.Marshaler) {
@@ -4740,9 +4737,6 @@ func (ec *executionContext) _FreeGameOffer(ctx context.Context, sel ast.Selectio
 			}
 		case "image":
 			out.Values[i] = ec._FreeGameOffer_image(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

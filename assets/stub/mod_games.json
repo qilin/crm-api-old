@@ -1,0 +1,17 @@
+{
+	"id": "test_games",
+	"type": "FreeGamesGroup",
+	"user_category": "",
+	"title": "Super Games Offer Carousel",
+	"games":[
+		{
+			"game_id": "6c6b771e-d222-4e18-881c-0877578e0e4a"
+		},
+		{
+			"game_id": "367b15ad-8f4b-48e0-a480-b6d45595bf63"
+		},
+		{
+			"game_id": "ec215564-58a4-4375-bcc6-d88178d17424"
+		}
+	]
+}

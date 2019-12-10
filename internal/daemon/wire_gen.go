@@ -143,9 +143,11 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	gamesRepo := repo.NewGamesRepo(db)
+	storefrontRepo := repo.NewStorefrontRepo(db)
 	resolverRepo := resolver.Repo{
-		User:  userRepo,
-		Games: gamesRepo,
+		User:        userRepo,
+		Games:       gamesRepo,
+		Storefronts: storefrontRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	resolverAppSet := resolver.AppSet{
@@ -512,7 +514,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	internal := handlers.NewInternal(gamesRepo)
+	internal := handlers.NewInternal(gamesRepo, storefrontRepo)
 	handlersHandlers := handlers.Handlers{
 		GraphQL:  graphQL,
 		WebHooks: webHooks,
@@ -821,9 +823,11 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		return nil, nil, err
 	}
 	gamesRepo := repo.NewGamesRepo(db)
+	storefrontRepo := repo.NewStorefrontRepo(db)
 	resolverRepo := resolver.Repo{
-		User:  userRepo,
-		Games: gamesRepo,
+		User:        userRepo,
+		Games:       gamesRepo,
+		Storefronts: storefrontRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	resolverAppSet := resolver.AppSet{
@@ -1174,7 +1178,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	internal := handlers.NewInternal(gamesRepo)
+	internal := handlers.NewInternal(gamesRepo, storefrontRepo)
 	handlersHandlers := handlers.Handlers{
 		GraphQL:  graphQL,
 		WebHooks: webHooks,

@@ -53,8 +53,9 @@ func (m *FreeGamesGroup) GetType() ModuleType       { return m.Type }
 func (m *FreeGamesGroup) GetCategory() UserCategory { return m.UserCategory }
 
 type FreeGameOffer struct {
-	Game  *Game  `json:"game"`
-	Image *Image `json:"image"`
+	GameID string `json:"game_id"`
+	Game   *Game  `json:"game"`
+	Image  *Image `json:"image"`
 }
 
 type StoreFront struct {

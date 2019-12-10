@@ -1,7 +1,5 @@
 -- +migrate Up
 
-CREATE SCHEMA store;
-
 CREATE TABLE store.modules (
 	id             TEXT      NOT NULL,
 	user_category  TEXT      NOT NULL,
@@ -24,5 +22,3 @@ CREATE TABLE store.modules_history (
 
 -- +migrate Down
 
-DROP TABLE store.modules_history;
-DROP TABLE store.modules;

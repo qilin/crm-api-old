@@ -62,7 +62,23 @@ func filter(games []*store.Game, matcher func(*store.Game) bool) []*store.Game {
 }
 
 func (r *storeQueryResolver) Module(ctx context.Context, obj *graphql.StoreQuery, id string, locale *string) (store.Module, error) {
-	return r.repo.Storefronts.GetModule(ctx, id, store.UserCategoryUnknown)
+	m, err := r.repo.Storefronts.GetModule(ctx, id, store.UserCategoryUnknown)
+	if err != nil {
+		return nil, err
+	}
+	switch v := m.(type) {
+	case *store.FreeGamesGroup:
+		// enhance with game data
+		for i := range v.Games {
+			game, err := r.repo.Games.Get(ctx, v.Games[i].GameID)
+			if err != nil {
+				return nil, err
+			}
+			v.Games[i].Game = game
+		}
+	}
+
+	return m, nil
 }
 
 func (r *storeQueryResolver) StoreFront(ctx context.Context, obj *graphql.StoreQuery, locale *string) (*store.StoreFront, error) {
