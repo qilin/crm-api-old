@@ -30,11 +30,8 @@ require (
 	github.com/labstack/echo/v4 v4.1.10
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/lib/pq v1.2.0
-	github.com/m3db/prometheus_client_golang v0.8.1 // indirect
-	github.com/m3db/prometheus_client_model v0.1.0 // indirect
-	github.com/m3db/prometheus_common v0.1.0 // indirect
-	github.com/m3db/prometheus_procfs v0.8.1 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/mitchellh/mapstructure v1.1.2
 	github.com/nats-io/nats-server/v2 v2.1.0 // indirect
 	github.com/nats-io/nats-streaming-server v0.16.2 // indirect
 	github.com/nats-io/stan.go v0.5.0
@@ -66,5 +63,3 @@ require (
 	gopkg.in/gorp.v1 v1.7.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
 )
-
-replace github.com/ProtocolONE/go-core/v2 => github.com/Irioth/go-core/v2 v2.2.4

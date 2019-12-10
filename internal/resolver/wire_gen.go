@@ -130,9 +130,11 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 	}
 	userRepo := repo.NewUserRepo(db)
 	gamesRepo := repo.NewGamesRepo(db)
+	storefrontRepo := repo.NewStorefrontRepo(db)
 	resolverRepo := Repo{
-		User:  userRepo,
-		Games: gamesRepo,
+		User:        userRepo,
+		Games:       gamesRepo,
+		Storefronts: storefrontRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{
@@ -318,9 +320,11 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 	}
 	userRepo := repo.NewUserRepo(db)
 	gamesRepo := repo.NewGamesRepo(db)
+	storefrontRepo := repo.NewStorefrontRepo(db)
 	resolverRepo := Repo{
-		User:  userRepo,
-		Games: gamesRepo,
+		User:        userRepo,
+		Games:       gamesRepo,
+		Storefronts: storefrontRepo,
 	}
 	manager := trx.NewTrxManager(db)
 	appSet := AppSet{

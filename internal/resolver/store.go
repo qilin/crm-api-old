@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
+
 	cacheStore "github.com/eko/gocache/store"
 	"github.com/gurukami/typ/v2"
-	"sort"
 
 	"github.com/qilin/crm-api/internal/db/domain/store"
 	"github.com/qilin/crm-api/internal/generated/graphql"
@@ -60,12 +61,11 @@ func (r *storeQueryResolver) Game(
 func (r *storeQueryResolver) Games(
 	ctx context.Context,
 	obj *graphql.StoreQuery,
-	id *string,
 	genre *store.Genre,
 	top *int,
 ) ([]*store.Game, error) {
 
-	key := fmt.Sprintf("games:%v:%v:%v", typ.Of(id).String().V(), typ.Of(genre).String().V(), typ.Of(top).String().V())
+	key := fmt.Sprintf("games:%v:%v", typ.Of(genre).String().V(), typ.Of(top).String().V())
 
 	d, e := r.cache.Get(key)
 
@@ -81,12 +81,6 @@ func (r *storeQueryResolver) Games(
 	games, err := r.repo.Games.All(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	if id != nil {
-		games = filter(games, func(g *store.Game) bool {
-			return g.ID == *id
-		})
 	}
 
 	if genre != nil {
@@ -125,4 +119,28 @@ func filter(games []*store.Game, matcher func(*store.Game) bool) []*store.Game {
 		}
 	}
 	return res
+}
+
+func (r *storeQueryResolver) Module(ctx context.Context, obj *graphql.StoreQuery, id string, locale *string) (store.Module, error) {
+	m, err := r.repo.Storefronts.GetModule(ctx, id, store.UserCategoryUnknown)
+	if err != nil {
+		return nil, err
+	}
+	switch v := m.(type) {
+	case *store.FreeGamesGroup:
+		// enhance with game data
+		for i := range v.Games {
+			game, err := r.repo.Games.Get(ctx, v.Games[i].GameID)
+			if err != nil {
+				return nil, err
+			}
+			v.Games[i].Game = game
+		}
+	}
+
+	return m, nil
+}
+
+func (r *storeQueryResolver) StoreFront(ctx context.Context, obj *graphql.StoreQuery, locale *string) (*store.StoreFront, error) {
+	return &store.StoreFront{}, nil
 }

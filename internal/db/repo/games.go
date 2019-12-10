@@ -35,7 +35,7 @@ func NewGamesRepo(db *gorm.DB) *GamesRepo {
 	return &GamesRepo{db}
 }
 
-func (r *GamesRepo) Insert(ctx context.Context, game *store.Game) error {
+func (r *GamesRepo) Insert(ctx context.Context, game *store.Game) (err error) {
 
 	raw, err := json.Marshal(game)
 	if err != nil {
@@ -46,7 +46,7 @@ func (r *GamesRepo) Insert(ctx context.Context, game *store.Game) error {
 	tx := r.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println(r)
+			err = fmt.Errorf("failed to store game: %s", r)
 			tx.Rollback()
 		}
 	}()
