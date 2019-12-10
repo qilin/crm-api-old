@@ -50,3 +50,8 @@ eventbus:
   subjects:
     invitesOut: "invites"
     invitesIn: "invites"
+cache:
+  ristretto:
+    numCounters: 1000
+    maxCost: 100
+    bufferItems: 64
