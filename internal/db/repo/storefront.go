@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 
@@ -10,19 +11,23 @@ import (
 	"github.com/qilin/crm-api/internal/db/domain/store"
 )
 
-type history struct {
-	ID      string
-	Version int `gorm:"AUTO_INCREMENT"`
-	Data    postgres.Jsonb
-	Deleted bool
+type moduleHistory struct {
+	ID           string
+	UserCategory store.UserCategory
+	Type         store.ModuleType
+	Version      int `gorm:"AUTO_INCREMENT"`
+	Data         postgres.Jsonb
+	Deleted      bool
 }
 
-func (*history) TableName() string { return "store.modules_history" }
+func (*moduleHistory) TableName() string { return "store.modules_history" }
 
 type module struct {
-	ID      string
-	Version int
-	Data    postgres.Jsonb
+	ID           string
+	UserCategory store.UserCategory
+	Type         store.ModuleType
+	Version      int
+	Data         postgres.Jsonb
 }
 
 func (*module) TableName() string { return "store.modules" }
@@ -35,9 +40,9 @@ func NewStorefrontRepo(db *gorm.DB) *StorefrontRepo {
 	return &StorefrontRepo{db}
 }
 
-func (r *StorefrontRepo) InsertModule(ctx context.Context, module interface{}) (err error) {
+func (r *StorefrontRepo) InsertModule(ctx context.Context, mod store.Module) (err error) {
 
-	raw, err := json.Marshal(module)
+	raw, err := json.Marshal(mod)
 	if err != nil {
 		return err
 	}
@@ -54,13 +59,35 @@ func (r *StorefrontRepo) InsertModule(ctx context.Context, module interface{}) (
 		return err
 	}
 
-	h := &history{ID: game.ID, Data: postgres.Jsonb{raw}}
+	t, err := r.getType(tx, mod.GetID())
+	switch {
+	case err == sql.ErrNoRows:
+		// fine
+	case err != nil:
+		return err
+	case t != mod.GetType():
+		return fmt.Errorf("Invalid module type '%s', expected '%s'", mod.GetType(), t)
+	}
+
+	h := &moduleHistory{
+		ID:           mod.GetID(),
+		UserCategory: mod.GetCategory(),
+		Type:         mod.GetType(),
+		Data:         postgres.Jsonb{raw},
+	}
 	if err := tx.Create(h).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := tx.Save(&gameItem{ID: game.ID, Version: h.Version, Data: postgres.Jsonb{raw}}).Error; err != nil {
+	m := &module{
+		ID:           mod.GetID(),
+		UserCategory: mod.GetCategory(),
+		Type:         mod.GetType(),
+		Version:      h.Version,
+		Data:         postgres.Jsonb{raw},
+	}
+	if err := tx.Save(m).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -68,11 +95,17 @@ func (r *StorefrontRepo) InsertModule(ctx context.Context, module interface{}) (
 	return tx.Commit().Error
 }
 
-func (r *StorefrontRepo) Delete(ctx context.Context, id string) error {
+func (r *StorefrontRepo) getType(tx *gorm.DB, id string) (store.ModuleType, error) {
+	var m module
+	tx.Select("type").Where("id = ?", id).First(&m)
+	return m.Type, tx.Error
+}
+
+func (r *StorefrontRepo) Delete(ctx context.Context, id string, category store.UserCategory) (err error) {
 	tx := r.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println(r)
+			err = fmt.Errorf("failed to delete module: %s", r)
 			tx.Rollback()
 		}
 	}()
@@ -81,13 +114,17 @@ func (r *StorefrontRepo) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	h := &history{ID: id, Deleted: true}
+	h := &moduleHistory{
+		ID:           id,
+		UserCategory: category,
+		Deleted:      true,
+	}
 	if err := tx.Create(h).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := tx.Delete(&gameItem{ID: id}).Error; err != nil {
+	if err := tx.Delete(&module{ID: id, UserCategory: category}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -95,33 +132,11 @@ func (r *StorefrontRepo) Delete(ctx context.Context, id string) error {
 	return tx.Commit().Error
 }
 
-func (r *StorefrontRepo) Get(ctx context.Context, id string) (*store.Game, error) {
-	var item gameItem
-	if err := r.db.Where("id = ?", id).First(&item).Error; err != nil {
+func (r *StorefrontRepo) GetModule(ctx context.Context, id string, category store.UserCategory) (store.Module, error) {
+	var m module
+	if err := r.db.Where("id = ? and user_category = ?", id, category).First(&m).Error; err != nil {
 		return nil, err
 	}
 
-	var g store.Game
-	if err := json.Unmarshal(item.Data.RawMessage, &g); err != nil {
-		return nil, err
-	}
-
-	return &g, nil
-}
-
-func (r *StorefrontRepo) All(ctx context.Context) ([]*store.Game, error) {
-	var items []gameItem
-	if err := r.db.Find(&items).Error; err != nil {
-		return nil, err
-	}
-
-	var games = make([]*store.Game, 0, len(items))
-	for i := range items {
-		var g store.Game
-		if err := json.Unmarshal(items[i].Data.RawMessage, &g); err != nil {
-			return nil, err
-		}
-		games = append(games, &g)
-	}
-	return games, nil
+	return store.UnmarshalModule(m.Type, m.Data.RawMessage)
 }

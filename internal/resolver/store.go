@@ -51,16 +51,6 @@ func (r *storeQueryResolver) Games(
 	return games, nil
 }
 
-func (r *storeQueryResolver) Module(ctx context.Context, obj *graphql.StoreQuery, id string, locale *string) (store.Module, error) {
-	return &store.FreeGamesGroup{
-		Type: store.ModuleTypeFreeGamesGroup,
-	}, nil
-}
-
-func (r *storeQueryResolver) StoreFront(ctx context.Context, obj *graphql.StoreQuery, locale *string) (*store.StoreFront, error) {
-	return &store.StoreFront{}, nil
-}
-
 func filter(games []*store.Game, matcher func(*store.Game) bool) []*store.Game {
 	var res = make([]*store.Game, 0, len(games))
 	for _, g := range games {
@@ -69,4 +59,12 @@ func filter(games []*store.Game, matcher func(*store.Game) bool) []*store.Game {
 		}
 	}
 	return res
+}
+
+func (r *storeQueryResolver) Module(ctx context.Context, obj *graphql.StoreQuery, id string, locale *string) (store.Module, error) {
+	return r.repo.Storefronts.GetModule(ctx, id, store.UserCategoryUnknown)
+}
+
+func (r *storeQueryResolver) StoreFront(ctx context.Context, obj *graphql.StoreQuery, locale *string) (*store.StoreFront, error) {
+	return &store.StoreFront{}, nil
 }

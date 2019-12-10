@@ -66,8 +66,9 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 
 // Repo
 type Repo struct {
-	User  domain.UserRepo
-	Games *repo.GamesRepo
+	User        domain.UserRepo
+	Games       *repo.GamesRepo
+	Storefronts *repo.StorefrontRepo
 }
 
 // New returns instance of config graphql resolvers

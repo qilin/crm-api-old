@@ -4479,12 +4479,8 @@ func (ec *executionContext) _Module(ctx context.Context, sel ast.SelectionSet, o
 	switch obj := (*obj).(type) {
 	case nil:
 		return graphql.Null
-	case store.Breaker:
-		return ec._Breaker(ctx, sel, &obj)
 	case *store.Breaker:
 		return ec._Breaker(ctx, sel, obj)
-	case store.FreeGamesGroup:
-		return ec._FreeGamesGroup(ctx, sel, &obj)
 	case *store.FreeGamesGroup:
 		return ec._FreeGamesGroup(ctx, sel, obj)
 	default:
