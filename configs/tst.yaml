@@ -14,8 +14,7 @@ postgres:
   connMaxLifetime: 15m
 dispatcher:
   cors:
-    allowed:
-      - "GET FROM ENV"
+    allowed: "http://localhost:3000"
     methods:
       - "HEAD"
       - "GET"
