@@ -2,7 +2,11 @@ package resolver
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 
+	cacheStore "github.com/eko/gocache/store"
+	"github.com/gurukami/typ/v2"
 	"github.com/qilin/crm-api/internal/db/domain/store"
 	"github.com/qilin/crm-api/internal/generated/graphql"
 )
@@ -36,6 +40,17 @@ func (r *storeQueryResolver) Games(
 	genre *store.Genre,
 ) ([]store.Game, error) {
 
+	key := fmt.Sprintf("games:%v", typ.Of(genre).String().V())
+	d, e := r.cache.Get(key)
+	if d != nil && e == nil {
+		var games store.GameSlice
+		e := json.Unmarshal(d.([]byte), &games)
+		if e != nil {
+			return nil, e
+		}
+		return games, nil
+	}
+
 	games, err := r.repo.Games.All(ctx)
 	if err != nil {
 		return nil, err
@@ -50,6 +65,16 @@ func (r *storeQueryResolver) Games(
 			}
 			return false
 		})
+	}
+
+	b, e := json.Marshal(games)
+	if e != nil {
+		return nil, e
+	}
+
+	e = r.cache.Set(key, b, &cacheStore.Options{Cost: 2})
+	if e != nil {
+		return nil, e
 	}
 
 	return games, nil
