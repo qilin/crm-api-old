@@ -30,7 +30,7 @@ func (h *Internal) Route(groups *common.Groups) {
 }
 
 func (h *Internal) publishGames(ctx echo.Context) error {
-	var games []store.Game
+	var games store.GameSlice
 	if err := ctx.Bind(&games); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
@@ -38,7 +38,7 @@ func (h *Internal) publishGames(ctx echo.Context) error {
 	}
 
 	for i := range games {
-		if err := h.games.Insert(context.TODO(), &games[i]); err != nil {
+		if err := h.games.Insert(context.TODO(), games[i]); err != nil {
 			return ctx.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": err.Error(),
 			})

@@ -35,7 +35,7 @@ func NewGamesRepo(db *gorm.DB) *GamesRepo {
 	return &GamesRepo{db}
 }
 
-func (r *GamesRepo) Insert(ctx context.Context, game *store.Game) (err error) {
+func (r *GamesRepo) Insert(ctx context.Context, game store.Game) (err error) {
 
 	raw, err := json.Marshal(game)
 	if err != nil {
@@ -55,13 +55,13 @@ func (r *GamesRepo) Insert(ctx context.Context, game *store.Game) (err error) {
 		return err
 	}
 
-	h := &history{ID: game.ID, Data: postgres.Jsonb{raw}}
+	h := &history{ID: game.Common().ID, Data: postgres.Jsonb{raw}}
 	if err := tx.Create(h).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := tx.Save(&gameItem{ID: game.ID, Version: h.Version, Data: postgres.Jsonb{raw}}).Error; err != nil {
+	if err := tx.Save(&gameItem{ID: game.Common().ID, Version: h.Version, Data: postgres.Jsonb{raw}}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -96,33 +96,33 @@ func (r *GamesRepo) Delete(ctx context.Context, id string) error {
 	return tx.Commit().Error
 }
 
-func (r *GamesRepo) Get(ctx context.Context, id string) (*store.Game, error) {
+func (r *GamesRepo) Get(ctx context.Context, id string) (store.Game, error) {
 	var item gameItem
 	if err := r.db.Where("id = ?", id).First(&item).Error; err != nil {
 		return nil, err
 	}
 
-	var g store.Game
-	if err := json.Unmarshal(item.Data.RawMessage, &g); err != nil {
+	g, err := store.UnmarshalGame(item.Data.RawMessage)
+	if err != nil {
 		return nil, err
 	}
 
-	return &g, nil
+	return g, nil
 }
 
-func (r *GamesRepo) All(ctx context.Context) ([]*store.Game, error) {
+func (r *GamesRepo) All(ctx context.Context) ([]store.Game, error) {
 	var items []gameItem
 	if err := r.db.Find(&items).Error; err != nil {
 		return nil, err
 	}
 
-	var games = make([]*store.Game, 0, len(items))
+	var games = make([]store.Game, 0, len(items))
 	for i := range items {
-		var g store.Game
-		if err := json.Unmarshal(items[i].Data.RawMessage, &g); err != nil {
+		g, err := store.UnmarshalGame(items[i].Data.RawMessage)
+		if err != nil {
 			return nil, err
 		}
-		games = append(games, &g)
+		games = append(games, g)
 	}
 	return games, nil
 }

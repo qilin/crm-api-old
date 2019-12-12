@@ -54,7 +54,6 @@ func (m *FreeGamesGroup) GetCategory() UserCategory { return m.UserCategory }
 
 type FreeGameOffer struct {
 	GameID string `json:"game_id"`
-	Game   *Game  `json:"game"`
 	Image  *Image `json:"image"`
 }
 
