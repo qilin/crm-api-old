@@ -46,6 +46,7 @@ require (
 	github.com/selvatico/go-mocket v1.0.7
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
+	github.com/tidwall/gjson v1.3.5
 	github.com/uber-go/tally v3.3.12+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect
 	github.com/vektah/gqlparser v1.1.2
