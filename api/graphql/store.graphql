@@ -146,15 +146,3 @@ type Image {
 type Video {
 	url: String!
 }
-
-type Covers {
-	floor_small: Image
-	main_little: Image
-	main_big: Image
-	floor_medium: Image
-	floor_wide: Image
-	floor_large: Image
-	floor_smallest: Image
-	floor_widest: Image
-	background_big: Image
-}
