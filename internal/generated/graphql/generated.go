@@ -104,6 +104,11 @@ type ComplexityRoot struct {
 		Type  func(childComplexity int) int
 	}
 
+	FriendGame struct {
+		Friends func(childComplexity int) int
+		Game    func(childComplexity int) int
+	}
+
 	Image struct {
 		URL func(childComplexity int) int
 	}
@@ -123,8 +128,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Auth  func(childComplexity int) int
-		Store func(childComplexity int) int
+		Auth   func(childComplexity int) int
+		Store  func(childComplexity int) int
+		Viewer func(childComplexity int) int
 	}
 
 	RequirementsSet struct {
@@ -179,6 +185,11 @@ type ComplexityRoot struct {
 		URL func(childComplexity int) int
 	}
 
+	ViewerQuery struct {
+		FriendsGames func(childComplexity int) int
+		Games        func(childComplexity int) int
+	}
+
 	WebGame struct {
 		Description  func(childComplexity int) int
 		Developer    func(childComplexity int) int
@@ -212,6 +223,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Auth(ctx context.Context) (*AuthQuery, error)
 	Store(ctx context.Context) (*StoreQuery, error)
+	Viewer(ctx context.Context) (*ViewerQuery, error)
 }
 type StoreQueryResolver interface {
 	Game(ctx context.Context, obj *StoreQuery, id string) (store.Game, error)
@@ -469,6 +481,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.FreeGamesGroup.Type(childComplexity), true
 
+	case "FriendGame.friends":
+		if e.complexity.FriendGame.Friends == nil {
+			break
+		}
+
+		return e.complexity.FriendGame.Friends(childComplexity), true
+
+	case "FriendGame.game":
+		if e.complexity.FriendGame.Game == nil {
+			break
+		}
+
+		return e.complexity.FriendGame.Game(childComplexity), true
+
 	case "Image.url":
 		if e.complexity.Image.URL == nil {
 			break
@@ -524,6 +550,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Store(childComplexity), true
+
+	case "Query.viewer":
+		if e.complexity.Query.Viewer == nil {
+			break
+		}
+
+		return e.complexity.Query.Viewer(childComplexity), true
 
 	case "RequirementsSet.cpu":
 		if e.complexity.RequirementsSet.CPU == nil {
@@ -698,6 +731,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Video.URL(childComplexity), true
+
+	case "ViewerQuery.friendsGames":
+		if e.complexity.ViewerQuery.FriendsGames == nil {
+			break
+		}
+
+		return e.complexity.ViewerQuery.FriendsGames(childComplexity), true
+
+	case "ViewerQuery.games":
+		if e.complexity.ViewerQuery.Games == nil {
+			break
+		}
+
+		return e.complexity.ViewerQuery.Games(childComplexity), true
 
 	case "WebGame.description":
 		if e.complexity.WebGame.Description == nil {
@@ -909,10 +956,21 @@ directive @hasRole(role: [RoleEnum]) on INPUT_FIELD_DEFINITION
 	&ast.Source{Name: "api/graphql/endpoints.graphql", Input: `type Query {
     auth: AuthQuery
     store: StoreQuery
+    viewer: ViewerQuery
 }
 
 type Mutation {
     auth: AuthMutation
+}
+
+type ViewerQuery {
+	games: [Game!]!
+	friendsGames: [FriendGame!]!
+}
+
+type FriendGame {
+	game: Game!
+	friends: [User!]!
 }`},
 	&ast.Source{Name: "api/graphql/root.graphql", Input: `scalar ISO8601DateTime
 
@@ -2490,6 +2548,80 @@ func (ec *executionContext) _FreeGamesGroup_games(ctx context.Context, field gra
 	return ec.marshalNFreeGameOffer2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐFreeGameOffer(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _FriendGame_game(ctx context.Context, field graphql.CollectedField, obj *FriendGame) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "FriendGame",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Game, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(store.Game)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FriendGame_friends(ctx context.Context, field graphql.CollectedField, obj *FriendGame) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "FriendGame",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Friends, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*User)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Image_url(ctx context.Context, field graphql.CollectedField, obj *store.Image) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2775,6 +2907,40 @@ func (ec *executionContext) _Query_store(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOStoreQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐStoreQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_viewer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Viewer(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ViewerQuery)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOViewerQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐViewerQuery(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3662,6 +3828,80 @@ func (ec *executionContext) _Video_url(ctx context.Context, field graphql.Collec
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ViewerQuery_games(ctx context.Context, field graphql.CollectedField, obj *ViewerQuery) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ViewerQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Games, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]store.Game)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNGame2ᚕgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ViewerQuery_friendsGames(ctx context.Context, field graphql.CollectedField, obj *ViewerQuery) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "ViewerQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FriendsGames, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*FriendGame)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNFriendGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐFriendGame(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _WebGame_id(ctx context.Context, field graphql.CollectedField, obj *store.WebGame) (ret graphql.Marshaler) {
@@ -5658,6 +5898,38 @@ func (ec *executionContext) _FreeGamesGroup(ctx context.Context, sel ast.Selecti
 	return out
 }
 
+var friendGameImplementors = []string{"FriendGame"}
+
+func (ec *executionContext) _FriendGame(ctx context.Context, sel ast.SelectionSet, obj *FriendGame) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, friendGameImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FriendGame")
+		case "game":
+			out.Values[i] = ec._FriendGame_game(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "friends":
+			out.Values[i] = ec._FriendGame_friends(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var imageImplementors = []string{"Image"}
 
 func (ec *executionContext) _Image(ctx context.Context, sel ast.SelectionSet, obj *store.Image) graphql.Marshaler {
@@ -5812,6 +6084,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_store(ctx, field)
+				return res
+			})
+		case "viewer":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_viewer(ctx, field)
 				return res
 			})
 		case "__type":
@@ -6151,6 +6434,38 @@ func (ec *executionContext) _Video(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = graphql.MarshalString("Video")
 		case "url":
 			out.Values[i] = ec._Video_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var viewerQueryImplementors = []string{"ViewerQuery"}
+
+func (ec *executionContext) _ViewerQuery(ctx context.Context, sel ast.SelectionSet, obj *ViewerQuery) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, viewerQueryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ViewerQuery")
+		case "games":
+			out.Values[i] = ec._ViewerQuery_games(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "friendsGames":
+			out.Values[i] = ec._ViewerQuery_friendsGames(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -6558,6 +6873,57 @@ func (ec *executionContext) marshalNFreeGameOffer2ᚖgithubᚗcomᚋqilinᚋcrm�
 		return graphql.Null
 	}
 	return ec._FreeGameOffer(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNFriendGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐFriendGame(ctx context.Context, sel ast.SelectionSet, v FriendGame) graphql.Marshaler {
+	return ec._FriendGame(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFriendGame2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐFriendGame(ctx context.Context, sel ast.SelectionSet, v []*FriendGame) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFriendGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐFriendGame(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNFriendGame2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐFriendGame(ctx context.Context, sel ast.SelectionSet, v *FriendGame) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._FriendGame(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx context.Context, sel ast.SelectionSet, v store.Game) graphql.Marshaler {
@@ -7044,6 +7410,43 @@ func (ec *executionContext) marshalNTagType2githubᚗcomᚋqilinᚋcrmᚑapiᚋi
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
@@ -7602,6 +8005,17 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOViewerQuery2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐViewerQuery(ctx context.Context, sel ast.SelectionSet, v ViewerQuery) graphql.Marshaler {
+	return ec._ViewerQuery(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOViewerQuery2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐViewerQuery(ctx context.Context, sel ast.SelectionSet, v *ViewerQuery) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ViewerQuery(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

@@ -11,7 +11,6 @@ require (
 	github.com/carlescere/goback v0.0.0-20150314180917-ebe10501f4c4
 	github.com/casbin/casbin v1.8.3
 	github.com/coreos/go-oidc v2.1.0+incompatible
-	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/ristretto v0.0.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eko/gocache v1.0.0
@@ -19,7 +18,6 @@ require (
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/gobuffalo/packr v1.30.1 // indirect
-	github.com/gofrs/uuid v3.2.0+incompatible // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
@@ -42,7 +40,6 @@ require (
 	github.com/qiangmzsx/string-adapter v0.0.0-20180323073508-38f25303bb0c
 	github.com/rogpeppe/go-internal v1.4.0 // indirect
 	github.com/rubenv/sql-migrate v0.0.0-20190902133344-8926f37f0bc1
-	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/selvatico/go-mocket v1.0.7
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0

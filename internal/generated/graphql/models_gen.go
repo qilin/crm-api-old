@@ -34,6 +34,11 @@ type CursorOut struct {
 	Cursor string `json:"cursor"`
 }
 
+type FriendGame struct {
+	Game    store.Game `json:"game"`
+	Friends []*User    `json:"friends"`
+}
+
 type SigninOut struct {
 	Status SigninOutStatus `json:"status"`
 	Token  string          `json:"token"`
@@ -57,6 +62,11 @@ type StoreQuery struct {
 type User struct {
 	ID    int    `json:"id"`
 	Email string `json:"email"`
+}
+
+type ViewerQuery struct {
+	Games        []store.Game  `json:"games"`
+	FriendsGames []*FriendGame `json:"friendsGames"`
 }
 
 type AuthenticatedRequestStatus string
