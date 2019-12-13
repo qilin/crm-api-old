@@ -92,17 +92,27 @@ func (r *authQueryResolver) SignIn(ctx context.Context, obj *graphql1.AuthQuery,
 		}, nil
 	}
 
-	jwt := "jwt.token"
+	token, err := r.auth.SignIn(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	//
+	// todo: need set cookie
 	return &graphql1.SignInResponse{
 		Status: graphql1.RequestStatusOk,
-		Token:  jwt,
+		Token:  token,
 	}, nil
 }
 
 func (r *authQueryResolver) SignOut(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.SignOutResponse, error) {
-	panic("not implemented")
+	err := r.auth.SignOut(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// todo: need remove cookie
+	return &graphql1.SignOutResponse{
+		Status: graphql1.AuthenticatedRequestStatusOk,
+	}, nil
 }
 
 func (r *authQueryResolver) Profile(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.User, error) {

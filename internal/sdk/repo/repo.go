@@ -5,9 +5,9 @@ import (
 )
 
 type Repo struct {
-    Store       domain.StoreRepo
-    StoreJWTKey domain.StoreJWTKeyRepo
-    StoreGames  domain.StoreGamesRepo
-	UserMap        domain.UserMapRepo
-	ActionsLog     domain.ActionsLog
+	Store       domain.StoreRepo
+	StoreJWTKey domain.StoreJWTKeyRepo
+	StoreGames  domain.StoreGamesRepo
+	UserMap     domain.UserMapRepo
+	ActionsLog  domain.ActionsLog
 }

@@ -68,6 +68,6 @@ func (u *Users) IsExistsPhone(ctx context.Context, phone string) (bool, error) {
 	return count > 0, nil
 }
 
-func NewUsers(db *gorm.DB) domain.UsersRepo {
+func NewUsersRepo(db *gorm.DB) domain.UsersRepo {
 	return &Users{db: db}
 }

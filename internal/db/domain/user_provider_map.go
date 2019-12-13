@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type AuthProviderItem struct {
+type UserProviderMapItem struct {
 	// user_id
 	UserID int `gorm:"column:user_id" json:"id"`
 	// provider
@@ -19,13 +19,13 @@ type AuthProviderItem struct {
 }
 
 // TableName
-func (AuthProviderItem) TableName() string {
+func (UserProviderMapItem) TableName() string {
 	return "users.authentication_providers"
 }
 
-type AuthProviderRepo interface {
-	Create(ctx context.Context, model *AuthProviderItem) error
-	Delete(ctx context.Context, model *AuthProviderItem) error
-	Get(ctx context.Context, user_id int, provider, provider_id string) (*AuthProviderItem, error)
-	GetByUserId(ctx context.Context, user_id int) ([]AuthProviderItem, error)
+type UserProviderMapRepo interface {
+	Create(ctx context.Context, model *UserProviderMapItem) error
+	Delete(ctx context.Context, model *UserProviderMapItem) error
+	Get(ctx context.Context, user_id int, provider, provider_id string) (*UserProviderMapItem, error)
+	GetByUserId(ctx context.Context, user_id int) ([]UserProviderMapItem, error)
 }

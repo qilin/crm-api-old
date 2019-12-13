@@ -23,6 +23,7 @@ type UsersItem struct {
 	Country  string `gorm:"column:country" json:"country"`
 	Zip      string `gorm:"column:zip" json:"zip"`
 
+	PhotoURL  string `gorm:"column:photo_url" json:"photo_url"`
 	FirstName string `gorm:"column:first_name" json:"first_name"`
 	LastName  string `gorm:"column:last_name" json:"last_name"`
 	BirthDate int    `gorm:"column:birth_date" json:"birth_date"`

@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const (
+	ActionSignIn  = "sign_in"
+	ActionSignOut = "sign_out"
+)
+
 type AuthLogItem struct {
 	ID int `gorm:"column:user_id" json:"id"`
 	// user_id

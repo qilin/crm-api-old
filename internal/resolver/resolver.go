@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/qilin/crm-api/internal/authentication"
+
 	"gopkg.in/go-playground/validator.v9"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -38,6 +40,7 @@ func (c *Config) Reload(ctx context.Context) {
 
 // Resolver config graphql resolvers
 type Resolver struct {
+	auth     authentication.AuthenticationService
 	ctx      context.Context
 	cfg      *Config
 	repo     Repo
@@ -95,7 +98,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 		return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 	}
 	c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-		user := auth.ExtractUserContext(ctx)
+		user := authentication.ExtractUserContext(ctx)
 		if user.IsEmpty() {
 			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 		}

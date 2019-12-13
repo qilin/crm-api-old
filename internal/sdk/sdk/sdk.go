@@ -97,6 +97,7 @@ func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
 	return claims.ECDSASign(jwt.ES512, s.keyPair.Private)
 }
 
+// todo: map users.user_providers_map
 func (s *SDK) MapExternalUserToUser(iss string, externalId string) (string, error) {
 	// todo: fixme
 	if iss == "" {

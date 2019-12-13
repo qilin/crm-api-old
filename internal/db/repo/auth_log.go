@@ -28,6 +28,10 @@ func (a *AuthLog) All(ctx context.Context, user_id int, offset, limit int) ([]do
 	return out, e
 }
 
-func NewAuthLog(db *gorm.DB) domain.AuthLogRepo {
+func NewAuthLogRepo(db *gorm.DB) domain.AuthLogRepo {
 	return &AuthLog{db: db}
+}
+
+func AuthLogRepoProvider(db *gorm.DB) domain.AuthLogRepo {
+	return NewAuthLogRepo(db)
 }
