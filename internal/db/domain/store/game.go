@@ -58,6 +58,7 @@ const (
 	PlatformLinux   Platform = "Linux"
 	PlatformMacOs   Platform = "MacOS"
 	PlatformWindows Platform = "Windows"
+	PlatformWeb     Platform = "Web"
 )
 
 type Covers struct {

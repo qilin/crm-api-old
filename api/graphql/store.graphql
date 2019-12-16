@@ -58,6 +58,7 @@ interface Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
+	platforms: [Platform]!
 	rating: Int!
 
 	price: Float
@@ -74,6 +75,7 @@ enum Platform {
 	Linux
 	MacOS
 	Windows
+	Web
 }
 
 type Languages {
@@ -116,6 +118,7 @@ type WebGame implements Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
+	platforms: [Platform]!
 	rating: Int!
 
 	price: Float
@@ -141,13 +144,13 @@ type DesktopGame implements Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
+	platforms: [Platform]!
 	rating: Int!
 
 	price: Float
 	currency: String
 	discount: Int
 	# DesktopGame specific fields
-	platforms: [Platform]!
 	# TODO
 }
 
