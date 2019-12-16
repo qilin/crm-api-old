@@ -14,13 +14,15 @@ type Game interface {
 type GameType string
 
 const (
-	GameTypeWeb     GameType = "web"
-	GameTypeDesktop GameType = "desktop"
+	GameTypeWeb     GameType = "Web"
+	GameTypeDesktop GameType = "Desktop"
 )
 
 type GameCommon struct {
-	ID           string                `json:"id"`
-	Type         GameType              `json:"type"`
+	ID   string   `json:"id"`
+	Type GameType `json:"type"`
+	Slug string   `json:"slug"`
+
 	Title        string                `json:"title"`
 	Summary      string                `json:"summary"`
 	Description  string                `json:"description"`
@@ -32,6 +34,12 @@ type GameCommon struct {
 	Tags         []*Tag                `json:"tags"`
 	Requirements []*SystemRequirements `json:"requirements"`
 	Languages    *Languages            `json:"languages"`
+	Platforms    []Platform            `json:"platforms"`
+	Rating       int                   `json:"rating"`
+
+	Price    float64 `json:"price"`
+	Currency string  `json:"currency"`
+	Discount int     `json:"discount"`
 }
 
 func (g *GameCommon) Common() *GameCommon { return g }
@@ -43,6 +51,14 @@ type WebGame struct {
 type DesktopGame struct {
 	GameCommon
 }
+
+type Platform string
+
+const (
+	PlatformLinux   Platform = "Linux"
+	PlatformMacOs   Platform = "MacOS"
+	PlatformWindows Platform = "Windows"
+)
 
 type Covers struct {
 	FloorSmall    *Image `json:"floor_small"`

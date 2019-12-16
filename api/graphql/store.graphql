@@ -44,6 +44,9 @@ type FreeGameOffer {
 # Products
 interface Game {
 	id: ID!
+	type: GameType!
+	slug: String!
+
 	title: String!
 	summary: String!
 	description: String!
@@ -55,6 +58,23 @@ interface Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
+	platforms: [Platform]!
+	rating: Int!
+
+	price: Float
+	currency: String
+	discount: Int
+}
+
+enum GameType {
+	Web
+	Desktop
+}
+
+enum Platform {
+	Linux
+	MacOS
+	Windows
 }
 
 type Languages {
@@ -83,6 +103,9 @@ type Media {
 
 type WebGame implements Game {
 	id: ID!
+	type: GameType!
+	slug: String!
+
 	title: String!
 	summary: String!
 	description: String!
@@ -94,12 +117,21 @@ type WebGame implements Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
+	platforms: [Platform]!
+	rating: Int!
+
+	price: Float
+	currency: String
+	discount: Int
 	# WebGame specific fields
 	# TODO
 }
 
 type DesktopGame implements Game {
 	id: ID!
+	type: GameType!
+	slug: String!
+
 	title: String!
 	summary: String!
 	description: String!
@@ -111,6 +143,12 @@ type DesktopGame implements Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
+	platforms: [Platform]!
+	rating: Int!
+
+	price: Float
+	currency: String
+	discount: Int
 	# DesktopGame specific fields
 	# TODO
 }
