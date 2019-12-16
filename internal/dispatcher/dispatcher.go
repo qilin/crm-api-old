@@ -13,6 +13,8 @@ import (
 	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"github.com/qilin/crm-api/pkg/graphql"
+	"github.com/uber-go/tally"
+	"time"
 )
 
 // Dispatcher
@@ -26,6 +28,29 @@ type Dispatcher struct {
 // dispatch
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
+	buckets := tally.DurationBuckets{
+		0 * time.Millisecond,
+		50 * time.Millisecond,
+		100 * time.Millisecond,
+		250 * time.Millisecond,
+		500 * time.Millisecond,
+		1000 * time.Millisecond,
+		2500 * time.Millisecond,
+		10000 * time.Millisecond,
+	}
+
+	histogram := d.M().Histogram("http_latency", buckets)
+
+	echoHttp.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) (err error) {
+			hsw := histogram.Start()
+			if err = next(c); err != nil {
+				c.Error(err)
+			}
+			hsw.Stop()
+			return
+		}
+	})
 	echoHttp.Use(middleware.Logger())
 	echoHttp.Use(middleware.Recover())
 

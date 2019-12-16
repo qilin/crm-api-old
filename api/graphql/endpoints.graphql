@@ -1,8 +1,19 @@
 type Query {
     auth: AuthQuery
     store: StoreQuery
+    viewer: ViewerQuery
 }
 
 type Mutation {
     auth: AuthMutation
+}
+
+type ViewerQuery {
+	games: [Game!]!
+	friendsGames: [FriendGame!]!
+}
+
+type FriendGame {
+	game: Game!
+	friends: [User!]!
 }

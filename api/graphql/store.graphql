@@ -1,25 +1,121 @@
 type StoreQuery {
-	games(id:ID, genre:Genres, top:Int, newest: Int): [Game!]! @goField(forceResolver: true)
+	game(id:ID!): Game                                  @goField(forceResolver: true)
+	games(genre:Genre): [Game!]!                        @goField(forceResolver: true)
+
+	module(id:ID!, locale:String): Module               @goField(forceResolver: true)
+	storeFront(locale:String): StoreFront               @goField(forceResolver: true)
 }
 
-type Game {
+# Storefront & modules
+type StoreFront {
+	modules: [Module!]!
+}
+
+interface Module {
+	type: ModuleType!
+	title: String!
+}
+
+enum ModuleType {
+	Breaker
+	FreeGamesGroup
+}
+
+type Breaker implements Module {
+	type: ModuleType!
+	title: String!
+	description: String
+	link: String!
+	image: Image
+	backgound: String
+}
+
+type FreeGamesGroup implements Module {
+	type: ModuleType!
+	title: String!
+	games: [FreeGameOffer!]!
+}
+
+type FreeGameOffer {
+	game: Game!                               @goField(forceResolver: true)
+	image: Image
+}
+
+# Products
+interface Game {
 	id: ID!
 	title: String!
 	summary: String!
 	description: String!
-	publisher: Publisher!
-	covers: Covers!
-	screenshots: [Image!]!
+	developer: String!
+	publisher: String!
+	genres: [Genre!]!
+	releaseDate: String
+	media: Media!
 	tags: [Tag!]!
-	genre: Genres!
-	rating: Int!
+	requirements: [SystemRequirements!]!
+	languages: Languages
 }
 
-type Publisher {
+type Languages {
+	audio: [String!]!
+	text: [String!]!
+}
+
+type SystemRequirements {
+	platform: String!
+	minimal: RequirementsSet
+	recommended: RequirementsSet
+}
+
+type RequirementsSet {
+	cpu: String
+	diskSpace: String
+	gpu: String
+	os: String
+	ram: String
+}
+
+type Media {
+	screenshots: [Image!]!
+	trailers: [Video!]!
+}
+
+type WebGame implements Game {
+	id: ID!
 	title: String!
+	summary: String!
+	description: String!
+	developer: String!
+	publisher: String!
+	genres: [Genre!]!
+	releaseDate: String
+	media: Media!
+	tags: [Tag!]!
+	requirements: [SystemRequirements!]!
+	languages: Languages
+	# WebGame specific fields
+	# TODO
 }
 
-enum Genres {
+type DesktopGame implements Game {
+	id: ID!
+	title: String!
+	summary: String!
+	description: String!
+	developer: String!
+	publisher: String!
+	genres: [Genre!]!
+	releaseDate: String
+	media: Media!
+	tags: [Tag!]!
+	requirements: [SystemRequirements!]!
+	languages: Languages
+	# DesktopGame specific fields
+	# TODO
+}
+
+enum Genre {
 	Board
 	Cards
 	Casino
@@ -39,22 +135,14 @@ enum TagType {
 }
 
 type Tag {
-	name: String
-	type: TagType
+	name: String!
+	type: TagType!
 }
 
 type Image {
 	url: String!
 }
 
-type Covers {
-	floor_small: Image
-	main_little: Image
-	main_big: Image
-	floor_medium: Image
-	floor_wide: Image
-	floor_large: Image
-	floor_smallest: Image
-	floor_widest: Image
-	background_big: Image
+type Video {
+	url: String!
 }

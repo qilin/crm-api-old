@@ -4,6 +4,7 @@ stan:
   stanOptions:
     natsURL: nats://natss:4222
 eventbus:
+  enabled: true
   subjects:
     invitesOut: "invites"
     invitesIn: "invites"

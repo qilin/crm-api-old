@@ -3,6 +3,7 @@ package resolver
 import (
 	"context"
 	"fmt"
+	"github.com/eko/gocache/store"
 
 	"github.com/qilin/crm-api/internal/authentication"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/db/domain"
+	"github.com/qilin/crm-api/internal/db/repo"
 	"github.com/qilin/crm-api/internal/db/trx"
 	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
 	gqErrs "github.com/qilin/crm-api/pkg/graphql/errors"
@@ -45,6 +47,7 @@ type Resolver struct {
 	cfg      *Config
 	repo     Repo
 	validate *validator.Validate
+	cache    store.StoreInterface
 	trx      *trx.Manager
 	provider.LMT
 }
@@ -68,7 +71,9 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 
 // Repo
 type Repo struct {
-	User domain.UserRepo
+	User        domain.UserRepo
+	Games       *repo.GamesRepo
+	Storefronts *repo.StorefrontRepo
 }
 
 // New returns instance of config graphql resolvers
@@ -76,6 +81,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
 	c := graphql1.Config{
 		Resolvers: &Resolver{
+			cache:    appSet.Cache,
 			ctx:      ctx,
 			cfg:      cfg,
 			repo:     appSet.Repo,

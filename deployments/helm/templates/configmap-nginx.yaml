@@ -64,7 +64,13 @@ data:
         server_name {{ .Values.ingressStore.hostname }};
         listen 8080;
         
-        location / {
-            proxy_pass http://{{ $crmParentSvcName }}:8080/payment/;
+        location /v1/rambler {
+            proxy_pass http://{{ $crmParentSvcName }}:8080/payment/v1/rambler;
         }
+
+        location /api {
+            rewrite ^/api/(.*)$ /$1 break;
+            proxy_pass http://{{ $crmParentSvcName }}:8082;
+        }
+
       }

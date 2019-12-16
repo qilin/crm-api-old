@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,14 +13,16 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/coreos/go-oidc"
 	"github.com/labstack/echo/v4"
-	qilinCrypto "github.com/qilin/crm-api/internal/crypto"
+    qilinCrypto "github.com/qilin/crm-api/internal/crypto"
+	"github.com/pkg/errors"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"golang.org/x/oauth2"
 )
 
 type Config struct {
-	OAuth2 struct {
+	Enabled bool
+	OAuth2  struct {
 		Provider     string `required:"true"`
 		ClientId     string `required:"true"`
 		ClientSecret string `required:"true"`
@@ -68,6 +69,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config)
 	if err != nil {
 		return nil, err
 	}
+
 	return &Auth{
 		ctx: ctx,
 		cfg: *cfg,

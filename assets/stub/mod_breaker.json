@@ -1,0 +1,12 @@
+{
+	"id": "test_breaker",
+	"type": "Breaker",
+	"user_category": "",
+	"title": "Some event",
+	"description": "Just some event",
+	"link": "example.com/ok",
+	"image": {
+		"url": "example.com/picture.jpg"
+	},
+	"backgound": "#00FFCC"
+}

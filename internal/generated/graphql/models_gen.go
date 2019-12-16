@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/qilin/crm-api/internal/db/domain/store"
 )
 
 type AuthMutation struct {
@@ -17,18 +19,6 @@ type AuthQuery struct {
 	SignIn  *SignInResponse  `json:"signIn"`
 	SignOut *SignOutResponse `json:"signOut"`
 	Profile *User            `json:"profile"`
-}
-
-type Covers struct {
-	FloorSmall    *Image `json:"floor_small"`
-	MainLittle    *Image `json:"main_little"`
-	MainBig       *Image `json:"main_big"`
-	FloorMedium   *Image `json:"floor_medium"`
-	FloorWide     *Image `json:"floor_wide"`
-	FloorLarge    *Image `json:"floor_large"`
-	FloorSmallest *Image `json:"floor_smallest"`
-	FloorWidest   *Image `json:"floor_widest"`
-	BackgroundBig *Image `json:"background_big"`
 }
 
 type CursorIn struct {
@@ -45,29 +35,9 @@ type CursorOut struct {
 	Cursor string `json:"cursor"`
 }
 
-type Game struct {
-	ID          string     `json:"id"`
-	Title       string     `json:"title"`
-	Summary     string     `json:"summary"`
-	Description string     `json:"description"`
-	Publisher   *Publisher `json:"publisher"`
-	Covers      *Covers    `json:"covers"`
-	Screenshots []*Image   `json:"screenshots"`
-	Tags        []*Tag     `json:"tags"`
-	Genre       Genres     `json:"genre"`
-	Rating      int        `json:"rating"`
-}
-
-type Image struct {
-	URL string `json:"url"`
-}
-
-type PasswordUpdateResponse struct {
-	Status AuthenticatedRequestStatus `json:"status"`
-}
-
-type Publisher struct {
-	Title string `json:"title"`
+type FriendGame struct {
+	Game    store.Game `json:"game"`
+	Friends []*User    `json:"friends"`
 }
 
 type SignInResponse struct {
@@ -85,12 +55,10 @@ type SignUpResponse struct {
 }
 
 type StoreQuery struct {
-	Games []*Game `json:"games"`
-}
-
-type Tag struct {
-	Name *string  `json:"name"`
-	Type *TagType `json:"type"`
+	Game       store.Game        `json:"game"`
+	Games      []store.Game      `json:"games"`
+	Module     store.Module      `json:"module"`
+	StoreFront *store.StoreFront `json:"storeFront"`
 }
 
 type User struct {
@@ -101,6 +69,11 @@ type User struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	Language  string `json:"language"`
+}
+
+type ViewerQuery struct {
+	Games        []store.Game  `json:"games"`
+	FriendsGames []*FriendGame `json:"friendsGames"`
 }
 
 type AuthenticatedRequestStatus string
@@ -147,65 +120,6 @@ func (e *AuthenticatedRequestStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AuthenticatedRequestStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type Genres string
-
-const (
-	GenresBoard     Genres = "Board"
-	GenresCards     Genres = "Cards"
-	GenresCasino    Genres = "Casino"
-	GenresFarm      Genres = "Farm"
-	GenresRacing    Genres = "Racing"
-	GenresShooter   Genres = "Shooter"
-	GenresFindItems Genres = "FindItems"
-	GenresPuzzle    Genres = "Puzzle"
-	GenresRpg       Genres = "RPG"
-	GenresSimulator Genres = "Simulator"
-	GenresStrategy  Genres = "Strategy"
-)
-
-var AllGenres = []Genres{
-	GenresBoard,
-	GenresCards,
-	GenresCasino,
-	GenresFarm,
-	GenresRacing,
-	GenresShooter,
-	GenresFindItems,
-	GenresPuzzle,
-	GenresRpg,
-	GenresSimulator,
-	GenresStrategy,
-}
-
-func (e Genres) IsValid() bool {
-	switch e {
-	case GenresBoard, GenresCards, GenresCasino, GenresFarm, GenresRacing, GenresShooter, GenresFindItems, GenresPuzzle, GenresRpg, GenresSimulator, GenresStrategy:
-		return true
-	}
-	return false
-}
-
-func (e Genres) String() string {
-	return string(e)
-}
-
-func (e *Genres) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = Genres(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Genres", str)
-	}
-	return nil
-}
-
-func (e Genres) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -380,46 +294,5 @@ func (e *SignUpResponseStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SignUpResponseStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type TagType string
-
-const (
-	TagTypeGenre  TagType = "genre"
-	TagTypeCommon TagType = "common"
-)
-
-var AllTagType = []TagType{
-	TagTypeGenre,
-	TagTypeCommon,
-}
-
-func (e TagType) IsValid() bool {
-	switch e {
-	case TagTypeGenre, TagTypeCommon:
-		return true
-	}
-	return false
-}
-
-func (e TagType) String() string {
-	return string(e)
-}
-
-func (e *TagType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TagType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TagType", str)
-	}
-	return nil
-}
-
-func (e TagType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

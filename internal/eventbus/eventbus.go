@@ -82,6 +82,7 @@ func (a *EventBus) Stop() error {
 
 // Config
 type Config struct {
+	Enabled     bool
 	Debug       bool `fallback:"shared.debug"`
 	Subjects    common.Subjects
 	Subscribers []string

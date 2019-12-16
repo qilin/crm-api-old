@@ -37,6 +37,9 @@ func CfgTest() (*Config, func(), error) {
 // Provider
 func Provider(ctx context.Context, set provider.AwareSet, pubs common.Publishers, subs common.Subscribers, stan *stan.Stan, cfg *Config, stanCfg *stan.Config) (*EventBus, func(), error) {
 	g := New(ctx, set, stan, pubs, subs, cfg, stanCfg)
+	if !cfg.Enabled {
+		return g, nil, nil
+	}
 	err := g.Run()
 	cleanup := func() {
 		g.Stop()
