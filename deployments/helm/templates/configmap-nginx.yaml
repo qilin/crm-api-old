@@ -74,6 +74,6 @@ data:
         }
 
         location / {
-            proxy_pass http://qilin-crm-dashboard:80;
+            proxy_pass http://qilin-store-ui:80;
         }
       }
