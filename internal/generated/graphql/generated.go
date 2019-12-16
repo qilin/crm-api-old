@@ -128,6 +128,10 @@ type ComplexityRoot struct {
 		Auth func(childComplexity int) int
 	}
 
+	PasswordUpdateResponse struct {
+		Status func(childComplexity int) int
+	}
+
 	Query struct {
 		Auth   func(childComplexity int) int
 		Store  func(childComplexity int) int
@@ -557,6 +561,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Auth(childComplexity), true
 
+	case "PasswordUpdateResponse.status":
+		if e.complexity.PasswordUpdateResponse.Status == nil {
+			break
+		}
+
+		return e.complexity.PasswordUpdateResponse.Status(childComplexity), true
+
 	case "Query.auth":
 		if e.complexity.Query.Auth == nil {
 			break
@@ -613,33 +624,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RequirementsSet.RAM(childComplexity), true
 
-	case "SigninOut.status":
-		if e.complexity.SigninOut.Status == nil {
+	case "SignInResponse.status":
+		if e.complexity.SignInResponse.Status == nil {
 			break
 		}
 
-		return e.complexity.SigninOut.Status(childComplexity), true
+		return e.complexity.SignInResponse.Status(childComplexity), true
 
-	case "SigninOut.token":
-		if e.complexity.SigninOut.Token == nil {
+	case "SignInResponse.token":
+		if e.complexity.SignInResponse.Token == nil {
 			break
 		}
 
-		return e.complexity.SigninOut.Token(childComplexity), true
+		return e.complexity.SignInResponse.Token(childComplexity), true
 
-	case "SignoutOut.status":
-		if e.complexity.SignoutOut.Status == nil {
+	case "SignOutResponse.status":
+		if e.complexity.SignOutResponse.Status == nil {
 			break
 		}
 
-		return e.complexity.SignoutOut.Status(childComplexity), true
+		return e.complexity.SignOutResponse.Status(childComplexity), true
 
-	case "SignupOut.status":
-		if e.complexity.SignupOut.Status == nil {
+	case "SignUpResponse.message":
+		if e.complexity.SignUpResponse.Message == nil {
 			break
 		}
 
-		return e.complexity.SignupOut.Status(childComplexity), true
+		return e.complexity.SignUpResponse.Message(childComplexity), true
+
+	case "SignUpResponse.status":
+		if e.complexity.SignUpResponse.Status == nil {
+			break
+		}
+
+		return e.complexity.SignUpResponse.Status(childComplexity), true
 
 	case "StoreFront.modules":
 		if e.complexity.StoreFront.Modules == nil {
@@ -751,6 +769,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.ID(childComplexity), true
+
+	case "User.language":
+		if e.complexity.User.Language == nil {
+			break
+		}
+
+		return e.complexity.User.Language(childComplexity), true
+
+	case "User.lastName":
+		if e.complexity.User.LastName == nil {
+			break
+		}
+
+		return e.complexity.User.LastName(childComplexity), true
+
+	case "User.phone":
+		if e.complexity.User.Phone == nil {
+			break
+		}
+
+		return e.complexity.User.Phone(childComplexity), true
+
+	case "User.status":
+		if e.complexity.User.Status == nil {
+			break
+		}
+
+		return e.complexity.User.Status(childComplexity), true
 
 	case "Video.url":
 		if e.complexity.Video.URL == nil {
@@ -2961,6 +3007,43 @@ func (ec *executionContext) _Mutation_auth(ctx context.Context, field graphql.Co
 	return ec.marshalOAuthMutation2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthMutation(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PasswordUpdateResponse_status(ctx context.Context, field graphql.CollectedField, obj *PasswordUpdateResponse) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "PasswordUpdateResponse",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(AuthenticatedRequestStatus)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_auth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -3308,7 +3391,7 @@ func (ec *executionContext) _RequirementsSet_ram(ctx context.Context, field grap
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SigninOut_status(ctx context.Context, field graphql.CollectedField, obj *SigninOut) (ret graphql.Marshaler) {
+func (ec *executionContext) _SignInResponse_status(ctx context.Context, field graphql.CollectedField, obj *SignInResponse) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -3970,6 +4053,154 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Email, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_phone(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Phone, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_firstName(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FirstName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_language(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Language, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6254,6 +6485,33 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
+var passwordUpdateResponseImplementors = []string{"PasswordUpdateResponse"}
+
+func (ec *executionContext) _PasswordUpdateResponse(ctx context.Context, sel ast.SelectionSet, obj *PasswordUpdateResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, passwordUpdateResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PasswordUpdateResponse")
+		case "status":
+			out.Values[i] = ec._PasswordUpdateResponse_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -6349,7 +6607,7 @@ func (ec *executionContext) _RequirementsSet(ctx context.Context, sel ast.Select
 	return out
 }
 
-var signinOutImplementors = []string{"SigninOut"}
+var signInResponseImplementors = []string{"SignInResponse"}
 
 func (ec *executionContext) _SignInResponse(ctx context.Context, sel ast.SelectionSet, obj *SignInResponse) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, signInResponseImplementors)
@@ -8070,17 +8328,6 @@ func (ec *executionContext) marshalOModule2githubᚗcomᚋqilinᚋcrmᚑapiᚋin
 	return ec._Module(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalORequirementsSet2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐRequirementsSet(ctx context.Context, sel ast.SelectionSet, v store.RequirementsSet) graphql.Marshaler {
-	return ec._RequirementsSet(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalORequirementsSet2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐRequirementsSet(ctx context.Context, sel ast.SelectionSet, v *store.RequirementsSet) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._RequirementsSet(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOPasswordUpdateResponse2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐPasswordUpdateResponse(ctx context.Context, sel ast.SelectionSet, v PasswordUpdateResponse) graphql.Marshaler {
 	return ec._PasswordUpdateResponse(ctx, sel, &v)
 }
@@ -8090,6 +8337,17 @@ func (ec *executionContext) marshalOPasswordUpdateResponse2ᚖgithubᚗcomᚋqil
 		return graphql.Null
 	}
 	return ec._PasswordUpdateResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalORequirementsSet2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐRequirementsSet(ctx context.Context, sel ast.SelectionSet, v store.RequirementsSet) graphql.Marshaler {
+	return ec._RequirementsSet(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalORequirementsSet2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐRequirementsSet(ctx context.Context, sel ast.SelectionSet, v *store.RequirementsSet) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RequirementsSet(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalORoleEnum2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRoleEnum(ctx context.Context, v interface{}) (RoleEnum, error) {

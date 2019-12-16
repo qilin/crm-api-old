@@ -40,6 +40,10 @@ type FriendGame struct {
 	Friends []*User    `json:"friends"`
 }
 
+type PasswordUpdateResponse struct {
+	Status AuthenticatedRequestStatus `json:"status"`
+}
+
 type SignInResponse struct {
 	Status RequestStatus `json:"status"`
 	Token  string        `json:"token"`
