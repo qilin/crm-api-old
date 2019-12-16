@@ -73,4 +73,7 @@ data:
             proxy_pass http://{{ $crmParentSvcName }}:8082;
         }
 
+        location / {
+            proxy_pass http://qilin-crm-dashboard:80;
+        }
       }
