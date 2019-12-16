@@ -206,7 +206,6 @@ type ComplexityRoot struct {
 		ID           func(childComplexity int) int
 		Languages    func(childComplexity int) int
 		Media        func(childComplexity int) int
-		Platforms    func(childComplexity int) int
 		Price        func(childComplexity int) int
 		Publisher    func(childComplexity int) int
 		Rating       func(childComplexity int) int
@@ -865,13 +864,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.WebGame.Media(childComplexity), true
 
-	case "WebGame.platforms":
-		if e.complexity.WebGame.Platforms == nil {
-			break
-		}
-
-		return e.complexity.WebGame.Platforms(childComplexity), true
-
 	case "WebGame.price":
 		if e.complexity.WebGame.Price == nil {
 			break
@@ -1177,7 +1169,6 @@ interface Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
-	platforms: [Platform]!
 	rating: Int!
 
 	price: Float
@@ -1236,7 +1227,6 @@ type WebGame implements Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
-	platforms: [Platform]!
 	rating: Int!
 
 	price: Float
@@ -1262,13 +1252,13 @@ type DesktopGame implements Game {
 	tags: [Tag!]!
 	requirements: [SystemRequirements!]!
 	languages: Languages
-	platforms: [Platform]!
 	rating: Int!
 
 	price: Float
 	currency: String
 	discount: Int
 	# DesktopGame specific fields
+	platforms: [Platform]!
 	# TODO
 }
 
@@ -2590,43 +2580,6 @@ func (ec *executionContext) _DesktopGame_languages(ctx context.Context, field gr
 	return ec.marshalOLanguages2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐLanguages(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _DesktopGame_platforms(ctx context.Context, field graphql.CollectedField, obj *store.DesktopGame) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "DesktopGame",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Platforms, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]store.Platform)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNPlatform2ᚕgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPlatform(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _DesktopGame_rating(ctx context.Context, field graphql.CollectedField, obj *store.DesktopGame) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2764,6 +2717,43 @@ func (ec *executionContext) _DesktopGame_discount(ctx context.Context, field gra
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DesktopGame_platforms(ctx context.Context, field graphql.CollectedField, obj *store.DesktopGame) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "DesktopGame",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Platforms, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]store.Platform)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNPlatform2ᚕgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPlatform(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _FreeGameOffer_game(ctx context.Context, field graphql.CollectedField, obj *store.FreeGameOffer) (ret graphql.Marshaler) {
@@ -4816,43 +4806,6 @@ func (ec *executionContext) _WebGame_languages(ctx context.Context, field graphq
 	return ec.marshalOLanguages2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐLanguages(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WebGame_platforms(ctx context.Context, field graphql.CollectedField, obj *store.WebGame) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "WebGame",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Platforms, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]store.Platform)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNPlatform2ᚕgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPlatform(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _WebGame_rating(ctx context.Context, field graphql.CollectedField, obj *store.WebGame) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -6472,11 +6425,6 @@ func (ec *executionContext) _DesktopGame(ctx context.Context, sel ast.SelectionS
 			}
 		case "languages":
 			out.Values[i] = ec._DesktopGame_languages(ctx, field, obj)
-		case "platforms":
-			out.Values[i] = ec._DesktopGame_platforms(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "rating":
 			out.Values[i] = ec._DesktopGame_rating(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6488,6 +6436,11 @@ func (ec *executionContext) _DesktopGame(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._DesktopGame_currency(ctx, field, obj)
 		case "discount":
 			out.Values[i] = ec._DesktopGame_discount(ctx, field, obj)
+		case "platforms":
+			out.Values[i] = ec._DesktopGame_platforms(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7231,11 +7184,6 @@ func (ec *executionContext) _WebGame(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "languages":
 			out.Values[i] = ec._WebGame_languages(ctx, field, obj)
-		case "platforms":
-			out.Values[i] = ec._WebGame_platforms(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "rating":
 			out.Values[i] = ec._WebGame_rating(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
