@@ -27,7 +27,16 @@ spec:
     - host: {{printf "%s" .Values.ingressStore.hostname }}
       http:
         paths:
-          - path: /
+          - path: /api
             backend:
               serviceName: {{ $endpointSvc }}
               servicePort: 8080
+          - path: /v1/rambler
+            backend:
+              serviceName: {{ $endpointSvc }}
+              servicePort: 8080
+          - path: /
+            backend:
+              serviceName: qilin-store-ui
+              servicePort: 80
+
