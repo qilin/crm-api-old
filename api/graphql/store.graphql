@@ -1,5 +1,6 @@
 type StoreQuery {
 	game(id:ID!): Game                                  @goField(forceResolver: true)
+	gameBySlug(slug:String!): Game                      @goField(forceResolver: true)
 	games(genre:Genre): [Game!]!                        @goField(forceResolver: true)
 
 	module(id:ID!, locale:String): Module               @goField(forceResolver: true)

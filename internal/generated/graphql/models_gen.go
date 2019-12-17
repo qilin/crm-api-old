@@ -54,6 +54,7 @@ type SignupOut struct {
 
 type StoreQuery struct {
 	Game       store.Game        `json:"game"`
+	GameBySlug store.Game        `json:"gameBySlug"`
 	Games      []store.Game      `json:"games"`
 	Module     store.Module      `json:"module"`
 	StoreFront *store.StoreFront `json:"storeFront"`

@@ -22,3 +22,5 @@ CREATE TABLE store.modules_history (
 
 -- +migrate Down
 
+DROP TABLE store.modules_history;
+DROP TABLE store.modules;

@@ -110,6 +110,20 @@ func (r *GamesRepo) Get(ctx context.Context, id string) (store.Game, error) {
 	return g, nil
 }
 
+func (r *GamesRepo) GetBySlug(ctx context.Context, slug string) (store.Game, error) {
+	var item gameItem
+	if err := r.db.Where("data->>'slug' = ?", slug).First(&item).Error; err != nil {
+		return nil, err
+	}
+
+	g, err := store.UnmarshalGame(item.Data.RawMessage)
+	if err != nil {
+		return nil, err
+	}
+
+	return g, nil
+}
+
 func (r *GamesRepo) All(ctx context.Context) ([]store.Game, error) {
 	var items []gameItem
 	if err := r.db.Find(&items).Error; err != nil {

@@ -167,6 +167,7 @@ type ComplexityRoot struct {
 
 	StoreQuery struct {
 		Game       func(childComplexity int, id string) int
+		GameBySlug func(childComplexity int, slug string) int
 		Games      func(childComplexity int, genre *store.Genre) int
 		Module     func(childComplexity int, id string, locale *string) int
 		StoreFront func(childComplexity int, locale *string) int
@@ -241,6 +242,7 @@ type QueryResolver interface {
 }
 type StoreQueryResolver interface {
 	Game(ctx context.Context, obj *StoreQuery, id string) (store.Game, error)
+	GameBySlug(ctx context.Context, obj *StoreQuery, slug string) (store.Game, error)
 	Games(ctx context.Context, obj *StoreQuery, genre *store.Genre) ([]store.Game, error)
 	Module(ctx context.Context, obj *StoreQuery, id string, locale *string) (store.Module, error)
 	StoreFront(ctx context.Context, obj *StoreQuery, locale *string) (*store.StoreFront, error)
@@ -703,6 +705,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StoreQuery.Game(childComplexity, args["id"].(string)), true
 
+	case "StoreQuery.gameBySlug":
+		if e.complexity.StoreQuery.GameBySlug == nil {
+			break
+		}
+
+		args, err := ec.field_StoreQuery_gameBySlug_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.StoreQuery.GameBySlug(childComplexity, args["slug"].(string)), true
+
 	case "StoreQuery.games":
 		if e.complexity.StoreQuery.Games == nil {
 			break
@@ -1119,6 +1133,7 @@ enum RoleEnum {
 }`},
 	&ast.Source{Name: "api/graphql/store.graphql", Input: `type StoreQuery {
 	game(id:ID!): Game                                  @goField(forceResolver: true)
+	gameBySlug(slug:String!): Game                      @goField(forceResolver: true)
 	games(genre:Genre): [Game!]!                        @goField(forceResolver: true)
 
 	module(id:ID!, locale:String): Module               @goField(forceResolver: true)
@@ -1380,6 +1395,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_StoreQuery_gameBySlug_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["slug"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["slug"] = arg0
 	return args, nil
 }
 
@@ -3801,6 +3830,47 @@ func (ec *executionContext) _StoreQuery_game(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.StoreQuery().Game(rctx, obj, args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(store.Game)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StoreQuery_gameBySlug(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "StoreQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_StoreQuery_gameBySlug_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StoreQuery().GameBySlug(rctx, obj, args["slug"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6954,6 +7024,17 @@ func (ec *executionContext) _StoreQuery(ctx context.Context, sel ast.SelectionSe
 					}
 				}()
 				res = ec._StoreQuery_game(ctx, field, obj)
+				return res
+			})
+		case "gameBySlug":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StoreQuery_gameBySlug(ctx, field, obj)
 				return res
 			})
 		case "games":

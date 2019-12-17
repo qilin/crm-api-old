@@ -21,16 +21,19 @@ func (r *Resolver) StoreQuery() graphql.StoreQueryResolver {
 	return &storeQueryResolver{r}
 }
 
-func (r *storeQueryResolver) Game(
-	ctx context.Context,
-	obj *graphql.StoreQuery,
-	id string,
-) (store.Game, error) {
-	game, e := r.repo.Games.Get(ctx, id)
-	if e != nil {
-		return nil, e
+func (r *storeQueryResolver) Game(ctx context.Context, obj *graphql.StoreQuery, id string) (store.Game, error) {
+	game, err := r.repo.Games.Get(ctx, id)
+	if err != nil {
+		return nil, err
 	}
+	return game, nil
+}
 
+func (r *storeQueryResolver) GameBySlug(ctx context.Context, obj *graphql.StoreQuery, slug string) (store.Game, error) {
+	game, err := r.repo.Games.GetBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
 	return game, nil
 }
 
