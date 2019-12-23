@@ -10,5 +10,6 @@ import (
 )
 
 func main() {
+
 	root.Execute(version.Cmd, migrate.Cmd, daemon.Cmd, mailer.Cmd, sdk.Cmd)
 }
