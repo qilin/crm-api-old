@@ -137,5 +137,7 @@ func (r *StorefrontRepo) GetModule(ctx context.Context, id string, category stor
 		return nil, err
 	}
 
-	return store.UnmarshalModule(m.Type, m.Data.RawMessage)
+	fmt.Printf("%#v\n", m)
+
+	return store.UnmarshalModule(m.Type, m.Version, m.Data.RawMessage)
 }

@@ -15,6 +15,7 @@ type StoreFront {
 interface Module {
 	type: ModuleType!
 	title: String!
+	version: Int!
 }
 
 enum ModuleType {
@@ -25,6 +26,7 @@ enum ModuleType {
 type Breaker implements Module {
 	type: ModuleType!
 	title: String!
+	version: Int!
 	description: String
 	link: String!
 	image: Image
@@ -34,6 +36,7 @@ type Breaker implements Module {
 type FreeGamesGroup implements Module {
 	type: ModuleType!
 	title: String!
+	version: Int!
 	games: [FreeGameOffer!]!
 }
 

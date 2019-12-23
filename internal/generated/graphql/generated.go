@@ -68,6 +68,7 @@ type ComplexityRoot struct {
 		Link        func(childComplexity int) int
 		Title       func(childComplexity int) int
 		Type        func(childComplexity int) int
+		Version     func(childComplexity int) int
 	}
 
 	CursorOut struct {
@@ -106,9 +107,10 @@ type ComplexityRoot struct {
 	}
 
 	FreeGamesGroup struct {
-		Games func(childComplexity int) int
-		Title func(childComplexity int) int
-		Type  func(childComplexity int) int
+		Games   func(childComplexity int) int
+		Title   func(childComplexity int) int
+		Type    func(childComplexity int) int
+		Version func(childComplexity int) int
 	}
 
 	FriendGame struct {
@@ -343,6 +345,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Breaker.Type(childComplexity), true
 
+	case "Breaker.version":
+		if e.complexity.Breaker.Version == nil {
+			break
+		}
+
+		return e.complexity.Breaker.Version(childComplexity), true
+
 	case "CursorOut.count":
 		if e.complexity.CursorOut.Count == nil {
 			break
@@ -545,6 +554,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.FreeGamesGroup.Type(childComplexity), true
+
+	case "FreeGamesGroup.version":
+		if e.complexity.FreeGamesGroup.Version == nil {
+			break
+		}
+
+		return e.complexity.FreeGamesGroup.Version(childComplexity), true
 
 	case "FriendGame.friends":
 		if e.complexity.FriendGame.Friends == nil {
@@ -1148,6 +1164,7 @@ type StoreFront {
 interface Module {
 	type: ModuleType!
 	title: String!
+	version: Int!
 }
 
 enum ModuleType {
@@ -1158,6 +1175,7 @@ enum ModuleType {
 type Breaker implements Module {
 	type: ModuleType!
 	title: String!
+	version: Int!
 	description: String
 	link: String!
 	image: Image
@@ -1167,6 +1185,7 @@ type Breaker implements Module {
 type FreeGamesGroup implements Module {
 	type: ModuleType!
 	title: String!
+	version: Int!
 	games: [FreeGameOffer!]!
 }
 
@@ -1782,6 +1801,43 @@ func (ec *executionContext) _Breaker_title(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Breaker_version(ctx context.Context, field graphql.CollectedField, obj *store.Breaker) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Breaker",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Breaker_description(ctx context.Context, field graphql.CollectedField, obj *store.Breaker) (ret graphql.Marshaler) {
@@ -2939,6 +2995,43 @@ func (ec *executionContext) _FreeGamesGroup_title(ctx context.Context, field gra
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FreeGamesGroup_version(ctx context.Context, field graphql.CollectedField, obj *store.FreeGamesGroup) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "FreeGamesGroup",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _FreeGamesGroup_games(ctx context.Context, field graphql.CollectedField, obj *store.FreeGamesGroup) (ret graphql.Marshaler) {
@@ -6399,6 +6492,11 @@ func (ec *executionContext) _Breaker(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "version":
+			out.Values[i] = ec._Breaker_version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "description":
 			out.Values[i] = ec._Breaker_description(ctx, field, obj)
 		case "link":
@@ -6626,6 +6724,11 @@ func (ec *executionContext) _FreeGamesGroup(ctx context.Context, sel ast.Selecti
 			}
 		case "title":
 			out.Values[i] = ec._FreeGamesGroup_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "version":
+			out.Values[i] = ec._FreeGamesGroup_version(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
