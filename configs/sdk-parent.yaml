@@ -69,18 +69,17 @@ plugins:
           rsaPrivateKey: ""
           rsaPublicKey: ""
 authentication:
-  cookieName: "qsid"
-  cookieDomain: "localhost:8084"
+  cookieName: "ssid"
+  cookieDomain: ""
+  cookieSecure: false
   jwt:
-    sub: "123456789"
-    iss: "store"
-    exp: 0
     publicKey: |
       -----BEGIN PUBLIC KEY-----
       MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEfQa/uwg5YlO8DTa98hwwt795y4F3ST4A
       T1/2WtQTdggoYIzdgNTgQ7lX9+ZLjorowANuooooeuO+51Sw1hZTKbtEa7oOHxr+
       o78UMCziRQeQzRBnIBjHt8Z2H9DUxrHb
       -----END PUBLIC KEY-----
+
     privateKey: |
       -----BEGIN PRIVATE KEY-----
       MIGkAgEBBDAEk3lnN3fagRuoi7SZnpiq6+KW9uU7OLgfvONA+gTzToFWYel8qW3L
@@ -89,6 +88,9 @@ authentication:
       vxQwLOJFB5DNEGcgGMe3xnYf0NTGsds=
       -----END PRIVATE KEY-----
 
+    subject: "CustomStore"
+    iss: "Store"
+    exp: 6000
 sdk:
   mode: "parent"
   jwt:

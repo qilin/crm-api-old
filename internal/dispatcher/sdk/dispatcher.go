@@ -8,14 +8,15 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/qilin/crm-api/internal/authentication"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 )
 
 // Dispatcher
 type Dispatcher struct {
-	ctx      context.Context
-	cfg      Config
-	handlers common.Handlers
+	ctx context.Context
+	cfg Config
+	app AppSet
 	provider.LMT
 }
 
@@ -31,12 +32,21 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AllowHeaders: d.cfg.CORS.Headers,
 	}))
 
+	// middleware: session to context
+	echoHttp.Use(d.app.Authentication.Middleware)
+
+	v1 := echoHttp.Group(common.V1Path)
+
 	grp := &common.Groups{
+		Auth:   v1.Group(common.AuthGroupPath),
 		SDK:    echoHttp.Group(common.SDKPath),
 		Common: echoHttp,
 	}
 
-	for _, handler := range d.handlers {
+	// auth routes
+	d.app.Authentication.Route(grp)
+
+	for _, handler := range d.app.Handlers {
 		handler.Route(grp)
 	}
 
@@ -58,13 +68,18 @@ func (c *Config) Reload(ctx context.Context) {
 	c.invoker.Reload(ctx)
 }
 
+type AppSet struct {
+	Authentication *authentication.AuthenticationService
+	Handlers       common.Handlers
+}
+
 // New
-func New(ctx context.Context, set provider.AwareSet, h common.Handlers, cfg *Config) *Dispatcher {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) *Dispatcher {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	return &Dispatcher{
-		ctx:      ctx,
-		cfg:      *cfg,
-		handlers: h,
-		LMT:      &set,
+		ctx: ctx,
+		cfg: *cfg,
+		app: appSet,
+		LMT: &set,
 	}
 }

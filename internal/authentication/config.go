@@ -7,13 +7,15 @@ import (
 )
 
 type Config struct {
-	Debug         bool `fallback:"shared.debug"`
-	Authenticator string
-	JWT           JWT
-	CookieName    string `default:"ssid"`
-	CookieDomain  string
-	CookieSecure  bool
-	invoker       *invoker.Invoker
+	Debug                bool `fallback:"shared.debug"`
+	Authenticator        string
+	JWT                  JWT
+	CookieName           string `default:"ssid"`
+	CookieDomain         string
+	CookieSecure         bool
+	LoginSuccessRedirect string
+	LogoutRedirect       string
+	invoker              *invoker.Invoker
 }
 
 type JWT struct {

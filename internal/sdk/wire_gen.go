@@ -13,6 +13,8 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/metric"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
+	"github.com/qilin/crm-api/internal/authentication"
+	"github.com/qilin/crm-api/internal/authentication/providers"
 	"github.com/qilin/crm-api/internal/db/repo"
 	sdk2 "github.com/qilin/crm-api/internal/dispatcher/sdk"
 	"github.com/qilin/crm-api/internal/handlers"
@@ -81,7 +83,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		Metric: scope,
 		Tracer: tracer,
 	}
-	validatorSet, cleanup8, err := validators.Provider()
+	pluginsConfig, cleanup8, err := plugins.Cfg(configurator)
 	if err != nil {
 		cleanup7()
 		cleanup6()
@@ -92,7 +94,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	validate, cleanup9, err := validators.ProviderValidators(validatorSet)
+	pluginManager, cleanup9, err := plugins.Provider(ctx, pluginsConfig, awareSet, initial)
 	if err != nil {
 		cleanup8()
 		cleanup7()
@@ -104,7 +106,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	pluginsConfig, cleanup10, err := plugins.Cfg(configurator)
+	postgresConfig, cleanup10, err := postgres.ProviderCfg(configurator)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -117,7 +119,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	pluginManager, cleanup11, err := plugins.Provider(ctx, pluginsConfig, awareSet, initial)
+	db, cleanup11, err := postgres.ProviderGORM(ctx, zap, postgresConfig)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -131,7 +133,15 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	postgresConfig, cleanup12, err := postgres.ProviderCfg(configurator)
+	authLogRepo := repo.NewAuthLogRepo(db)
+	usersRepo := repo.NewUsersRepo(db)
+	userProviderMapRepo := repo.NewAuthProviderRepo(db)
+	appSet := authentication.AppSet{
+		AuthLog:         authLogRepo,
+		UsersRepo:       usersRepo,
+		UserProviderMap: userProviderMapRepo,
+	}
+	validatorSet, cleanup12, err := validators.Provider()
 	if err != nil {
 		cleanup11()
 		cleanup10()
@@ -146,8 +156,82 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	db, cleanup13, err := postgres.ProviderGORM(ctx, zap, postgresConfig)
+	validate, cleanup13, err := validators.ProviderValidators(validatorSet)
 	if err != nil {
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	providersConfig, cleanup14, err := providers.Cfg(configurator)
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	p1Provider, cleanup15, err := providers.ProviderP1(ctx, awareSet, providersConfig)
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	authenticationConfig, cleanup16, err := authentication.Cfg(configurator)
+	if err != nil {
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	authenticationService, cleanup17, err := authentication.Provider(ctx, pluginManager, awareSet, appSet, validate, p1Provider, authenticationConfig)
+	if err != nil {
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
 		cleanup12()
 		cleanup11()
 		cleanup10()
@@ -174,81 +258,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		UserMap:     userMapRepo,
 		ActionsLog:  actionsLog,
 	}
-	sdkConfig, cleanup14, err := sdk.Cfg(configurator)
-	if err != nil {
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	sdkSDK, cleanup15, err := sdk.Provider(ctx, pluginManager, awareSet, repoRepo, sdkConfig)
-	if err != nil {
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	commonHandlers, cleanup16, err := handlers.ProviderSDKHandlers(validate, awareSet, sdkSDK)
-	if err != nil {
-		cleanup15()
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	config2, cleanup17, err := sdk2.Cfg(configurator)
-	if err != nil {
-		cleanup16()
-		cleanup15()
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	dispatcher, cleanup18, err := sdk2.ProviderDispatcher(ctx, awareSet, commonHandlers, config2)
+	sdkConfig, cleanup18, err := sdk.Cfg(configurator)
 	if err != nil {
 		cleanup17()
 		cleanup16()
@@ -269,7 +279,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup19, err := http.Cfg(configurator)
+	sdkSDK, cleanup19, err := sdk.Provider(ctx, pluginManager, awareSet, repoRepo, sdkConfig)
 	if err != nil {
 		cleanup18()
 		cleanup17()
@@ -291,7 +301,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup20, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	commonHandlers, cleanup20, err := handlers.ProviderSDKHandlers(validate, awareSet, sdkSDK)
 	if err != nil {
 		cleanup19()
 		cleanup18()
@@ -314,7 +324,117 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
+	sdkAppSet := sdk2.AppSet{
+		Authentication: authenticationService,
+		Handlers:       commonHandlers,
+	}
+	config2, cleanup21, err := sdk2.Cfg(configurator)
+	if err != nil {
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcher, cleanup22, err := sdk2.ProviderDispatcher(ctx, awareSet, sdkAppSet, config2)
+	if err != nil {
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpConfig, cleanup23, err := http.Cfg(configurator)
+	if err != nil {
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpHTTP, cleanup24, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	if err != nil {
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return httpHTTP, func() {
+		cleanup24()
+		cleanup23()
+		cleanup22()
+		cleanup21()
 		cleanup20()
 		cleanup19()
 		cleanup18()
@@ -393,7 +513,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		Metric: scope,
 		Tracer: tracer,
 	}
-	validatorSet, cleanup8, err := validators.Provider()
+	pluginsConfig, cleanup8, err := plugins.CfgTest()
 	if err != nil {
 		cleanup7()
 		cleanup6()
@@ -404,7 +524,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	validate, cleanup9, err := validators.ProviderValidators(validatorSet)
+	pluginManager, cleanup9, err := plugins.Provider(ctx, pluginsConfig, awareSet, initial)
 	if err != nil {
 		cleanup8()
 		cleanup7()
@@ -416,7 +536,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	pluginsConfig, cleanup10, err := plugins.CfgTest()
+	db, cleanup10, err := postgres.ProviderGORMTest()
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -429,7 +549,15 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	pluginManager, cleanup11, err := plugins.Provider(ctx, pluginsConfig, awareSet, initial)
+	authLogRepo := repo.NewAuthLogRepo(db)
+	usersRepo := repo.NewUsersRepo(db)
+	userProviderMapRepo := repo.NewAuthProviderRepo(db)
+	appSet := authentication.AppSet{
+		AuthLog:         authLogRepo,
+		UsersRepo:       usersRepo,
+		UserProviderMap: userProviderMapRepo,
+	}
+	validatorSet, cleanup11, err := validators.Provider()
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -443,8 +571,78 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	db, cleanup12, err := postgres.ProviderGORMTest()
+	validate, cleanup12, err := validators.ProviderValidators(validatorSet)
 	if err != nil {
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	providersConfig, cleanup13, err := providers.Cfg(configurator)
+	if err != nil {
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	p1Provider, cleanup14, err := providers.ProviderP1(ctx, awareSet, providersConfig)
+	if err != nil {
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	authenticationConfig, cleanup15, err := authentication.CfgTest()
+	if err != nil {
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	authenticationService, cleanup16, err := authentication.Provider(ctx, pluginManager, awareSet, appSet, validate, p1Provider, authenticationConfig)
+	if err != nil {
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
 		cleanup11()
 		cleanup10()
 		cleanup9()
@@ -470,77 +668,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		UserMap:     userMapRepo,
 		ActionsLog:  actionsLog,
 	}
-	sdkConfig, cleanup13, err := sdk.CfgTest()
-	if err != nil {
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	sdkSDK, cleanup14, err := sdk.Provider(ctx, pluginManager, awareSet, repoRepo, sdkConfig)
-	if err != nil {
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	commonHandlers, cleanup15, err := handlers.ProviderSDKHandlers(validate, awareSet, sdkSDK)
-	if err != nil {
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	config2, cleanup16, err := sdk2.CfgTest()
-	if err != nil {
-		cleanup15()
-		cleanup14()
-		cleanup13()
-		cleanup12()
-		cleanup11()
-		cleanup10()
-		cleanup9()
-		cleanup8()
-		cleanup7()
-		cleanup6()
-		cleanup5()
-		cleanup4()
-		cleanup3()
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	dispatcher, cleanup17, err := sdk2.ProviderDispatcher(ctx, awareSet, commonHandlers, config2)
+	sdkConfig, cleanup17, err := sdk.CfgTest()
 	if err != nil {
 		cleanup16()
 		cleanup15()
@@ -560,7 +688,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpConfig, cleanup18, err := http.CfgTest()
+	sdkSDK, cleanup18, err := sdk.Provider(ctx, pluginManager, awareSet, repoRepo, sdkConfig)
 	if err != nil {
 		cleanup17()
 		cleanup16()
@@ -581,7 +709,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup19, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	commonHandlers, cleanup19, err := handlers.ProviderSDKHandlers(validate, awareSet, sdkSDK)
 	if err != nil {
 		cleanup18()
 		cleanup17()
@@ -603,7 +731,113 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
+	sdkAppSet := sdk2.AppSet{
+		Authentication: authenticationService,
+		Handlers:       commonHandlers,
+	}
+	config2, cleanup20, err := sdk2.CfgTest()
+	if err != nil {
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcher, cleanup21, err := sdk2.ProviderDispatcher(ctx, awareSet, sdkAppSet, config2)
+	if err != nil {
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpConfig, cleanup22, err := http.CfgTest()
+	if err != nil {
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	httpHTTP, cleanup23, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	if err != nil {
+		cleanup22()
+		cleanup21()
+		cleanup20()
+		cleanup19()
+		cleanup18()
+		cleanup17()
+		cleanup16()
+		cleanup15()
+		cleanup14()
+		cleanup13()
+		cleanup12()
+		cleanup11()
+		cleanup10()
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return httpHTTP, func() {
+		cleanup23()
+		cleanup22()
+		cleanup21()
+		cleanup20()
 		cleanup19()
 		cleanup18()
 		cleanup17()

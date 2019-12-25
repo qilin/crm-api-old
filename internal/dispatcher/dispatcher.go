@@ -3,7 +3,7 @@ package dispatcher
 import (
 	"context"
 
-	"github.com/qilin/crm-api/internal/authentication"
+	"time"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -14,7 +14,6 @@ import (
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"github.com/qilin/crm-api/pkg/graphql"
 	"github.com/uber-go/tally"
-	"time"
 )
 
 // Dispatcher
@@ -60,9 +59,6 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AllowHeaders:     d.cfg.CORS.Headers,
 		AllowCredentials: true,
 	}))
-
-	// authentication middleware
-	echoHttp.Use(d.appSet.Authentication.Middleware)
 
 	v1 := echoHttp.Group(common.V1Path)
 
@@ -113,10 +109,9 @@ func (c *Config) Reload(ctx context.Context) {
 }
 
 type AppSet struct {
-	Auth           *auth.Auth
-	Authentication *authentication.AuthenticationService
-	GraphQL        *graphql.GraphQL
-	Handlers       common.Handlers
+	Auth     *auth.Auth
+	GraphQL  *graphql.GraphQL
+	Handlers common.Handlers
 }
 
 // New

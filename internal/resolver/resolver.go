@@ -3,6 +3,7 @@ package resolver
 import (
 	"context"
 	"fmt"
+
 	"github.com/eko/gocache/store"
 
 	"github.com/qilin/crm-api/internal/authentication"
@@ -72,6 +73,7 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 // Repo
 type Repo struct {
 	User        domain.UserRepo
+	Users       domain.UsersRepo
 	Games       *repo.GamesRepo
 	Storefronts *repo.StorefrontRepo
 }

@@ -53,13 +53,10 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	AuthMutation struct {
 		PasswordUpdate func(childComplexity int, old string, new string) int
-		SignUp         func(childComplexity int, email string, password string) int
 	}
 
 	AuthQuery struct {
 		Profile func(childComplexity int) int
-		SignIn  func(childComplexity int, email string, password string) int
-		SignOut func(childComplexity int) int
 	}
 
 	Breaker struct {
@@ -146,20 +143,6 @@ type ComplexityRoot struct {
 		RAM       func(childComplexity int) int
 	}
 
-	SignInResponse struct {
-		Status func(childComplexity int) int
-		Token  func(childComplexity int) int
-	}
-
-	SignOutResponse struct {
-		Status func(childComplexity int) int
-	}
-
-	SignUpResponse struct {
-		Message func(childComplexity int) int
-		Status  func(childComplexity int) int
-	}
-
 	StoreFront struct {
 		Modules func(childComplexity int) int
 	}
@@ -189,6 +172,7 @@ type ComplexityRoot struct {
 		Language  func(childComplexity int) int
 		LastName  func(childComplexity int) int
 		Phone     func(childComplexity int) int
+		PhotoURL  func(childComplexity int) int
 		Status    func(childComplexity int) int
 	}
 
@@ -218,12 +202,9 @@ type ComplexityRoot struct {
 }
 
 type AuthMutationResolver interface {
-	SignUp(ctx context.Context, obj *AuthMutation, email string, password string) (*SignUpResponse, error)
 	PasswordUpdate(ctx context.Context, obj *AuthMutation, old string, new string) (*PasswordUpdateResponse, error)
 }
 type AuthQueryResolver interface {
-	SignIn(ctx context.Context, obj *AuthQuery, email string, password string) (*SignInResponse, error)
-	SignOut(ctx context.Context, obj *AuthQuery) (*SignOutResponse, error)
 	Profile(ctx context.Context, obj *AuthQuery) (*User, error)
 }
 type FreeGameOfferResolver interface {
@@ -271,43 +252,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AuthMutation.PasswordUpdate(childComplexity, args["old"].(string), args["new"].(string)), true
 
-	case "AuthMutation.signUp":
-		if e.complexity.AuthMutation.SignUp == nil {
-			break
-		}
-
-		args, err := ec.field_AuthMutation_signUp_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.AuthMutation.SignUp(childComplexity, args["email"].(string), args["password"].(string)), true
-
 	case "AuthQuery.profile":
 		if e.complexity.AuthQuery.Profile == nil {
 			break
 		}
 
 		return e.complexity.AuthQuery.Profile(childComplexity), true
-
-	case "AuthQuery.signIn":
-		if e.complexity.AuthQuery.SignIn == nil {
-			break
-		}
-
-		args, err := ec.field_AuthQuery_signIn_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.AuthQuery.SignIn(childComplexity, args["email"].(string), args["password"].(string)), true
-
-	case "AuthQuery.signOut":
-		if e.complexity.AuthQuery.SignOut == nil {
-			break
-		}
-
-		return e.complexity.AuthQuery.SignOut(childComplexity), true
 
 	case "Breaker.backgound":
 		if e.complexity.Breaker.Backgound == nil {
@@ -624,41 +574,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RequirementsSet.RAM(childComplexity), true
 
-	case "SignInResponse.status":
-		if e.complexity.SignInResponse.Status == nil {
-			break
-		}
-
-		return e.complexity.SignInResponse.Status(childComplexity), true
-
-	case "SignInResponse.token":
-		if e.complexity.SignInResponse.Token == nil {
-			break
-		}
-
-		return e.complexity.SignInResponse.Token(childComplexity), true
-
-	case "SignOutResponse.status":
-		if e.complexity.SignOutResponse.Status == nil {
-			break
-		}
-
-		return e.complexity.SignOutResponse.Status(childComplexity), true
-
-	case "SignUpResponse.message":
-		if e.complexity.SignUpResponse.Message == nil {
-			break
-		}
-
-		return e.complexity.SignUpResponse.Message(childComplexity), true
-
-	case "SignUpResponse.status":
-		if e.complexity.SignUpResponse.Status == nil {
-			break
-		}
-
-		return e.complexity.SignUpResponse.Status(childComplexity), true
-
 	case "StoreFront.modules":
 		if e.complexity.StoreFront.Modules == nil {
 			break
@@ -790,6 +705,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Phone(childComplexity), true
+
+	case "User.photoURL":
+		if e.complexity.User.PhotoURL == nil {
+			break
+		}
+
+		return e.complexity.User.PhotoURL(childComplexity), true
 
 	case "User.status":
 		if e.complexity.User.Status == nil {
@@ -970,8 +892,6 @@ var parsedSchema = gqlparser.MustLoadSchema(
 # Queries type definitions
 
 type AuthQuery {
-    signIn(email: String!, password: String!): SignInResponse! @goField(forceResolver: true)
-    signOut: SignOutResponse! @goField(forceResolver: true) @isAuthenticated
     profile: User! @goField(forceResolver: true) @isAuthenticated
 }
 
@@ -985,37 +905,16 @@ type User {
     #
     firstName: String!
     lastName: String!
+    photoURL: String!
     #
     language: String!
-}
-
-type SignInResponse {
-    status: RequestStatus!
-    token: String!
-}
-
-type SignOutResponse {
-    status: AuthenticatedRequestStatus!
 }
 
 # Mutations type definitions
 
 type AuthMutation {
-    signUp(email: String!, password: String!): SignUpResponse! @goField(forceResolver: true)
     passwordUpdate(old: String!, new: String!): PasswordUpdateResponse @goField(forceResolver: true) @isAuthenticated
     # updateProfile(...): UpdateProfileResponse @goField(forceResolver: true) @isAuthenticated
-}
-
-enum SignUpResponseStatus {
-    OK
-    BAD_REQUEST
-    SERVER_INTERNAL_ERROR
-    USER_EXISTS
-}
-
-type SignUpResponse {
-    message: String!
-    status: SignUpResponseStatus!
 }
 
 type PasswordUpdateResponse {
@@ -1287,50 +1186,6 @@ func (ec *executionContext) field_AuthMutation_passwordUpdate_args(ctx context.C
 	return args, nil
 }
 
-func (ec *executionContext) field_AuthMutation_signUp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["email"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["email"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["password"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["password"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_AuthQuery_signIn_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["email"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["email"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["password"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["password"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1445,50 +1300,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _AuthMutation_signUp(ctx context.Context, field graphql.CollectedField, obj *AuthMutation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "AuthMutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_AuthMutation_signUp_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.AuthMutation().SignUp(rctx, obj, args["email"].(string), args["password"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*SignUpResponse)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignUpResponse2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignUpResponse(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _AuthMutation_passwordUpdate(ctx context.Context, field graphql.CollectedField, obj *AuthMutation) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1544,103 +1355,6 @@ func (ec *executionContext) _AuthMutation_passwordUpdate(ctx context.Context, fi
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOPasswordUpdateResponse2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐPasswordUpdateResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _AuthQuery_signIn(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "AuthQuery",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_AuthQuery_signIn_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.AuthQuery().SignIn(rctx, obj, args["email"].(string), args["password"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*SignInResponse)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignInResponse2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignInResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _AuthQuery_signOut(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "AuthQuery",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.AuthQuery().SignOut(rctx, obj)
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			return ec.directives.IsAuthenticated(ctx, obj, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, err
-		}
-		if data, ok := tmp.(*SignOutResponse); ok {
-			return data, nil
-		} else if tmp == nil {
-			return nil, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/qilin/crm-api/internal/generated/graphql.SignOutResponse`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*SignOutResponse)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignOutResponse2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignOutResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _AuthQuery_profile(ctx context.Context, field graphql.CollectedField, obj *AuthQuery) (ret graphql.Marshaler) {
@@ -3391,191 +3105,6 @@ func (ec *executionContext) _RequirementsSet_ram(ctx context.Context, field grap
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SignInResponse_status(ctx context.Context, field graphql.CollectedField, obj *SignInResponse) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "SignInResponse",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(RequestStatus)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRequestStatus(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SignInResponse_token(ctx context.Context, field graphql.CollectedField, obj *SignInResponse) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "SignInResponse",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Token, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SignOutResponse_status(ctx context.Context, field graphql.CollectedField, obj *SignOutResponse) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "SignOutResponse",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(AuthenticatedRequestStatus)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNAuthenticatedRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐAuthenticatedRequestStatus(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SignUpResponse_message(ctx context.Context, field graphql.CollectedField, obj *SignUpResponse) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "SignUpResponse",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SignUpResponse_status(ctx context.Context, field graphql.CollectedField, obj *SignUpResponse) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "SignUpResponse",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(SignUpResponseStatus)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNSignUpResponseStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignUpResponseStatus(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _StoreFront_modules(ctx context.Context, field graphql.CollectedField, obj *store.StoreFront) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -4164,6 +3693,43 @@ func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.Co
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.LastName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_photoURL(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "User",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PhotoURL, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5993,20 +5559,6 @@ func (ec *executionContext) _AuthMutation(ctx context.Context, sel ast.Selection
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("AuthMutation")
-		case "signUp":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._AuthMutation_signUp(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "passwordUpdate":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -6040,34 +5592,6 @@ func (ec *executionContext) _AuthQuery(ctx context.Context, sel ast.SelectionSet
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("AuthQuery")
-		case "signIn":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._AuthQuery_signIn(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "signOut":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._AuthQuery_signOut(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "profile":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -6607,97 +6131,6 @@ func (ec *executionContext) _RequirementsSet(ctx context.Context, sel ast.Select
 	return out
 }
 
-var signInResponseImplementors = []string{"SignInResponse"}
-
-func (ec *executionContext) _SignInResponse(ctx context.Context, sel ast.SelectionSet, obj *SignInResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, signInResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SignInResponse")
-		case "status":
-			out.Values[i] = ec._SignInResponse_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "token":
-			out.Values[i] = ec._SignInResponse_token(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var signOutResponseImplementors = []string{"SignOutResponse"}
-
-func (ec *executionContext) _SignOutResponse(ctx context.Context, sel ast.SelectionSet, obj *SignOutResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, signOutResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SignOutResponse")
-		case "status":
-			out.Values[i] = ec._SignOutResponse_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var signUpResponseImplementors = []string{"SignUpResponse"}
-
-func (ec *executionContext) _SignUpResponse(ctx context.Context, sel ast.SelectionSet, obj *SignUpResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, signUpResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SignUpResponse")
-		case "message":
-			out.Values[i] = ec._SignUpResponse_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "status":
-			out.Values[i] = ec._SignUpResponse_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var storeFrontImplementors = []string{"StoreFront"}
 
 func (ec *executionContext) _StoreFront(ctx context.Context, sel ast.SelectionSet, obj *store.StoreFront) graphql.Marshaler {
@@ -6895,6 +6328,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "lastName":
 			out.Values[i] = ec._User_lastName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "photoURL":
+			out.Values[i] = ec._User_photoURL(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -7679,66 +7117,6 @@ func (ec *executionContext) marshalNModuleType2githubᚗcomᚋqilinᚋcrmᚑapi�
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRequestStatus(ctx context.Context, v interface{}) (RequestStatus, error) {
-	var res RequestStatus
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNRequestStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐRequestStatus(ctx context.Context, sel ast.SelectionSet, v RequestStatus) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) marshalNSignInResponse2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignInResponse(ctx context.Context, sel ast.SelectionSet, v SignInResponse) graphql.Marshaler {
-	return ec._SignInResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSignInResponse2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignInResponse(ctx context.Context, sel ast.SelectionSet, v *SignInResponse) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._SignInResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNSignOutResponse2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignOutResponse(ctx context.Context, sel ast.SelectionSet, v SignOutResponse) graphql.Marshaler {
-	return ec._SignOutResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSignOutResponse2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignOutResponse(ctx context.Context, sel ast.SelectionSet, v *SignOutResponse) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._SignOutResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNSignUpResponse2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignUpResponse(ctx context.Context, sel ast.SelectionSet, v SignUpResponse) graphql.Marshaler {
-	return ec._SignUpResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSignUpResponse2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignUpResponse(ctx context.Context, sel ast.SelectionSet, v *SignUpResponse) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._SignUpResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNSignUpResponseStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignUpResponseStatus(ctx context.Context, v interface{}) (SignUpResponseStatus, error) {
-	var res SignUpResponseStatus
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNSignUpResponseStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignUpResponseStatus(ctx context.Context, sel ast.SelectionSet, v SignUpResponseStatus) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

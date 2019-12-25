@@ -20,12 +20,12 @@ type UserProviderMapItem struct {
 
 // TableName
 func (UserProviderMapItem) TableName() string {
-	return "users.authentication_providers"
+	return "users.user_providers_map"
 }
 
 type UserProviderMapRepo interface {
 	Create(ctx context.Context, model *UserProviderMapItem) error
 	Delete(ctx context.Context, model *UserProviderMapItem) error
-	Get(ctx context.Context, user_id int, provider, provider_id string) (*UserProviderMapItem, error)
+	Get(ctx context.Context, provider, provider_id string) (*UserProviderMapItem, error)
 	GetByUserId(ctx context.Context, user_id int) ([]UserProviderMapItem, error)
 }

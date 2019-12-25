@@ -7,12 +7,13 @@ import (
 )
 
 const (
+	ActionSignUp  = "sign_up"
 	ActionSignIn  = "sign_in"
 	ActionSignOut = "sign_out"
 )
 
 type AuthLogItem struct {
-	ID int `gorm:"column:user_id" json:"id"`
+	ID int `gorm:"column:id" json:"id"`
 	// user_id
 	UserID int `gorm:"column:user_id" json:"id"`
 	// log

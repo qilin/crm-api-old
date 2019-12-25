@@ -129,10 +129,12 @@ func Build(ctx context.Context, initial config.Initial, observer invoker.Observe
 		return graphql.Config{}, nil, err
 	}
 	userRepo := repo.NewUserRepo(db)
+	usersRepo := repo.NewUsersRepo(db)
 	gamesRepo := repo.NewGamesRepo(db)
 	storefrontRepo := repo.NewStorefrontRepo(db)
 	resolverRepo := Repo{
 		User:        userRepo,
+		Users:       usersRepo,
 		Games:       gamesRepo,
 		Storefronts: storefrontRepo,
 	}
@@ -319,10 +321,12 @@ func BuildTest(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return graphql.Config{}, nil, err
 	}
 	userRepo := repo.NewUserRepo(db)
+	usersRepo := repo.NewUsersRepo(db)
 	gamesRepo := repo.NewGamesRepo(db)
 	storefrontRepo := repo.NewStorefrontRepo(db)
 	resolverRepo := Repo{
 		User:        userRepo,
+		Users:       usersRepo,
 		Games:       gamesRepo,
 		Storefronts: storefrontRepo,
 	}

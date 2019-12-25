@@ -6,6 +6,8 @@ import (
 	"os"
 	"plugin"
 
+	common2 "github.com/qilin/crm-api/internal/authentication/common"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 
 	"github.com/spf13/viper"
@@ -16,11 +18,12 @@ import (
 )
 
 type PluginManager struct {
-	log   logger.Logger
-	init  []Initable
-	auth  []Authenticator
-	order []Orderer
-	http  []Httper
+	log           logger.Logger
+	init          []Initable
+	auth          []Authenticator
+	order         []Orderer
+	http          []Httper
+	authProviders []common2.AuthenticationProvider
 }
 
 func NewPluginManager(log logger.Logger) *PluginManager {
@@ -46,6 +49,11 @@ func (m *PluginManager) Load(path string) error {
 	instance, err := file.Lookup("Plugin")
 	if err != nil {
 		return errors.New("Can not lookup {" + path + "}: " + err.Error())
+	}
+
+	authProvider, ok := instance.(common2.AuthenticationProvider)
+	if ok {
+		m.authProviders = append(m.authProviders, authProvider)
 	}
 
 	init, ok := instance.(Initable)
@@ -88,6 +96,10 @@ func (m *PluginManager) Auth(authenticate common.Authenticate) common.Authentica
 		authenticate = plg.Auth(authenticate)
 	}
 	return authenticate
+}
+
+func (m *PluginManager) AuthProviders() []common2.AuthenticationProvider {
+	return m.authProviders
 }
 
 func (m *PluginManager) Order(order common.Order) common.Order {

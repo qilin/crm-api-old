@@ -6,6 +6,19 @@ import (
 	"time"
 )
 
+type UserStatus int
+
+func (u UserStatus) Int8() int8 {
+	return int8(u)
+}
+
+const (
+	// todo: define needed statuses
+	UserActive UserStatus = iota + 1
+	UserBlocked
+	UserLocked
+)
+
 type UsersItem struct {
 	ID int `gorm:"column:id" json:"id"`
 
@@ -13,7 +26,7 @@ type UsersItem struct {
 	Phone    string `gorm:"column:phone" json:"phone"`
 	Password string `gorm:"column:password" json:"-"`
 
-	Status       byte `gorm:"column:status" json:"status"`
+	Status       int8 `gorm:"column:status" json:"status"`
 	ServiceLevel byte `gorm:"column:service_level" json:"service_level"`
 
 	Address1 string `gorm:"column:address_1" json:"address_1"`

@@ -23,13 +23,13 @@ func (a *AuthProvider) Delete(ctx context.Context, model *domain.UserProviderMap
 	return db.Delete(model).Error
 }
 
-func (a *AuthProvider) Get(ctx context.Context, user_id int, provider, provider_id string) (*domain.UserProviderMapItem, error) {
+func (a *AuthProvider) Get(ctx context.Context, provider, provider_id string) (*domain.UserProviderMapItem, error) {
 	db := trx.Inject(ctx, a.db)
 	var (
 		out = &domain.UserProviderMapItem{}
 		e   error
 	)
-	e = db.Where("user_id=? AND provider=? AND provider_id=?", user_id, provider, provider_id).First(out).Error
+	e = db.Where("provider=? AND provider_id=?", provider, provider_id).First(out).Error
 	return out, e
 }
 

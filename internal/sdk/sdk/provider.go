@@ -3,6 +3,8 @@ package sdk
 import (
 	"context"
 
+	"github.com/qilin/crm-api/internal/authentication"
+
 	"github.com/qilin/crm-api/internal/plugins"
 
 	dispatcher "github.com/qilin/crm-api/internal/dispatcher/sdk"
@@ -44,6 +46,7 @@ var (
 		repo.NewPlatformJWTKeyRepo,
 		repo.NewProductsRepo,
 		repo.NewUserMapRepo,
+		repo.NewUsersRepo,
 		repo.ActionsLogProvider,
 		trx.NewTrxManager,
 	)
@@ -67,6 +70,7 @@ var (
 		resolver.ValidatorsProduction,
 		dispatcher.WireSet,
 		plugins.WireSet,
+		authentication.WireSet,
 		http.Provider,
 		http.Cfg,
 	)
@@ -78,6 +82,7 @@ var (
 		resolver.ValidatorsTest,
 		dispatcher.WireTestSet,
 		plugins.WireTestSet,
+		authentication.WireTestSet,
 		http.Provider,
 		http.CfgTest,
 	)

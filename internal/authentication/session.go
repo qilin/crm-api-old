@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/qilin/crm-api/internal/authentication/common"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/qilin/crm-api/internal/db/domain"
 )
 
 type SessionClaims struct {
-	User User
+	User common.User
 	jwt.StandardClaims
 }
 
 // todo: Audience
 func (c *SessionClaims) Valid() error {
-	if !c.VerifyAudience("Audience", true) {
+	if !c.VerifyAudience("store", true) {
 		return fmt.Errorf("invalid token audience")
 	}
 	return c.StandardClaims.Valid()
@@ -24,7 +26,7 @@ func (c *SessionClaims) Valid() error {
 func NewAccessClaims(user *domain.UsersItem) *SessionClaims {
 	var now = time.Now()
 	return &SessionClaims{
-		User: User{
+		User: common.User{
 			ID:       user.ID,
 			Language: user.Language,
 		},

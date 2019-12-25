@@ -11,14 +11,11 @@ import (
 )
 
 type AuthMutation struct {
-	SignUp         *SignUpResponse         `json:"signUp"`
 	PasswordUpdate *PasswordUpdateResponse `json:"passwordUpdate"`
 }
 
 type AuthQuery struct {
-	SignIn  *SignInResponse  `json:"signIn"`
-	SignOut *SignOutResponse `json:"signOut"`
-	Profile *User            `json:"profile"`
+	Profile *User `json:"profile"`
 }
 
 type CursorIn struct {
@@ -44,20 +41,6 @@ type PasswordUpdateResponse struct {
 	Status AuthenticatedRequestStatus `json:"status"`
 }
 
-type SignInResponse struct {
-	Status RequestStatus `json:"status"`
-	Token  string        `json:"token"`
-}
-
-type SignOutResponse struct {
-	Status AuthenticatedRequestStatus `json:"status"`
-}
-
-type SignUpResponse struct {
-	Message string               `json:"message"`
-	Status  SignUpResponseStatus `json:"status"`
-}
-
 type StoreQuery struct {
 	Game       store.Game        `json:"game"`
 	Games      []store.Game      `json:"games"`
@@ -72,6 +55,7 @@ type User struct {
 	Phone     string `json:"phone"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
+	PhotoURL  string `json:"photoURL"`
 	Language  string `json:"language"`
 }
 
@@ -253,50 +237,5 @@ func (e *RoleEnum) UnmarshalGQL(v interface{}) error {
 }
 
 func (e RoleEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type SignUpResponseStatus string
-
-const (
-	SignUpResponseStatusOk                  SignUpResponseStatus = "OK"
-	SignUpResponseStatusBadRequest          SignUpResponseStatus = "BAD_REQUEST"
-	SignUpResponseStatusServerInternalError SignUpResponseStatus = "SERVER_INTERNAL_ERROR"
-	SignUpResponseStatusUserExists          SignUpResponseStatus = "USER_EXISTS"
-)
-
-var AllSignUpResponseStatus = []SignUpResponseStatus{
-	SignUpResponseStatusOk,
-	SignUpResponseStatusBadRequest,
-	SignUpResponseStatusServerInternalError,
-	SignUpResponseStatusUserExists,
-}
-
-func (e SignUpResponseStatus) IsValid() bool {
-	switch e {
-	case SignUpResponseStatusOk, SignUpResponseStatusBadRequest, SignUpResponseStatusServerInternalError, SignUpResponseStatusUserExists:
-		return true
-	}
-	return false
-}
-
-func (e SignUpResponseStatus) String() string {
-	return string(e)
-}
-
-func (e *SignUpResponseStatus) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = SignUpResponseStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid SignUpResponseStatus", str)
-	}
-	return nil
-}
-
-func (e SignUpResponseStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

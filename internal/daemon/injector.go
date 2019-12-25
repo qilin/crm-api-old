@@ -6,7 +6,6 @@ import (
 	"context"
 
 	"github.com/qilin/crm-api/internal/auth"
-	"github.com/qilin/crm-api/internal/authentication"
 	"github.com/qilin/crm-api/internal/handlers"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
@@ -34,7 +33,6 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		handlers.ProviderHandlers,
 		handlers.NewInternal,
 		auth.WireSet,
-		authentication.WireSet,
 		dispatcher.WireSet,
 	))
 }
@@ -53,7 +51,6 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		handlers.ProviderHandlers,
 		handlers.NewInternal,
 		auth.WireSet,
-		authentication.WireTestSet,
 		dispatcher.WireSet,
 	))
 }
