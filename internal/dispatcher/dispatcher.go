@@ -2,6 +2,9 @@ package dispatcher
 
 import (
 	"context"
+
+	"time"
+
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -11,7 +14,6 @@ import (
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"github.com/qilin/crm-api/pkg/graphql"
 	"github.com/uber-go/tally"
-	"time"
 )
 
 // Dispatcher
@@ -80,7 +82,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
 func (d *Dispatcher) graphqlGroup(group *common.Groups) {
 	// add graphql handlers
-	group.GraphQL.Use(d.appSet.Auth.Middleware)
+	//group.GraphQL.Use(d.appSet.Auth.Middleware)
 }
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {

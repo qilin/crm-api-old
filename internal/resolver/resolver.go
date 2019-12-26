@@ -3,7 +3,10 @@ package resolver
 import (
 	"context"
 	"fmt"
+
 	"github.com/eko/gocache/store"
+
+	"github.com/qilin/crm-api/internal/authentication"
 
 	"gopkg.in/go-playground/validator.v9"
 
@@ -40,6 +43,7 @@ func (c *Config) Reload(ctx context.Context) {
 
 // Resolver config graphql resolvers
 type Resolver struct {
+	auth     authentication.AuthenticationService
 	ctx      context.Context
 	cfg      *Config
 	repo     Repo
@@ -69,6 +73,7 @@ func (r *Resolver) AddDebugErrorf(ctx context.Context, format string, args ...in
 // Repo
 type Repo struct {
 	User        domain.UserRepo
+	Users       domain.UsersRepo
 	Games       *repo.GamesRepo
 	Storefronts *repo.StorefrontRepo
 }
@@ -101,7 +106,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 		return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 	}
 	c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-		user := auth.ExtractUserContext(ctx)
+		user := authentication.ExtractUserContext(ctx)
 		if user.IsEmpty() {
 			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 		}

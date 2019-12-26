@@ -10,6 +10,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	dispatcher "github.com/qilin/crm-api/internal/dispatcher/sdk"
+	"github.com/qilin/crm-api/internal/handlers"
 	"github.com/qilin/crm-api/internal/sdk/common"
 	sdk "github.com/qilin/crm-api/internal/sdk/sdk"
 	"github.com/qilin/crm-api/pkg/http"
@@ -22,6 +23,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
 		wire.Bind(new(common.SDK), new(*sdk.SDK)),
 		wire.Struct(new(provider.AwareSet), "*"),
+		handlers.ProviderSDKHandlers,
 		sdk.WireSet,
 	))
 }
@@ -33,6 +35,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		wire.Bind(new(http.Dispatcher), new(*dispatcher.Dispatcher)),
 		wire.Bind(new(common.SDK), new(*sdk.SDK)),
 		wire.Struct(new(provider.AwareSet), "*"),
+		handlers.ProviderSDKHandlers,
 		sdk.WireTestSet,
 	))
 }

@@ -3,44 +3,31 @@
 # Queries type definitions
 
 type AuthQuery {
-    signin(email: String!, password: String!): SigninOut! @goField(forceResolver: true)
-    me: User! @goField(forceResolver: true) @hasRole(role: [USER,ADMIN])
-    signout: SignoutOut! @goField(forceResolver: true) @isAuthenticated
+    profile: User! @goField(forceResolver: true) @isAuthenticated
 }
 
 type User {
     id: Int!
+    #
+    status: String!
+    #
     email: String!
-}
-
-enum SigninOutStatus {
-    OK
-    BAD_REQUEST
-    SERVER_INTERNAL_ERROR
-}
-
-type SigninOut {
-    status: SigninOutStatus!
-    token: String!
-}
-
-type SignoutOut {
-    status: AuthenticatedRequestStatus!
+    phone: String!
+    #
+    firstName: String!
+    lastName: String!
+    photoURL: String!
+    #
+    language: String!
 }
 
 # Mutations type definitions
 
 type AuthMutation {
-    signup(email: String!, password: String!): SignupOut! @goField(forceResolver: true)
+    passwordUpdate(old: String!, new: String!): PasswordUpdateResponse @goField(forceResolver: true) @isAuthenticated
+    # updateProfile(...): UpdateProfileResponse @goField(forceResolver: true) @isAuthenticated
 }
 
-enum SignupOutStatus {
-    OK
-    BAD_REQUEST
-    SERVER_INTERNAL_ERROR
-    USER_EXISTS
-}
-
-type SignupOut {
-    status: SignupOutStatus!
+type PasswordUpdateResponse {
+    status: AuthenticatedRequestStatus!
 }

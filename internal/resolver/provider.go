@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"context"
+
 	"github.com/eko/gocache/cache"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
@@ -45,6 +46,8 @@ var (
 		repo.NewUserRepo,
 		repo.NewGamesRepo,
 		repo.NewStorefrontRepo,
+		repo.NewUsersRepo,
+		repo.NewUserMapRepo,
 		trx.NewTrxManager,
 	)
 	ProviderRepoProduction = wire.NewSet(

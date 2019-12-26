@@ -6,6 +6,10 @@ import (
 	"os"
 	"plugin"
 
+	common2 "github.com/qilin/crm-api/internal/authentication/common"
+
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+
 	"github.com/spf13/viper"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
@@ -14,14 +18,17 @@ import (
 )
 
 type PluginManager struct {
-	init  []Initable
-	auth  []Authenticator
-	order []Orderer
-	http  []Httper
+	log           logger.Logger
+	init          []Initable
+	auth          []Authenticator
+	order         []Orderer
+	http          []Httper
+	authProviders []common2.AuthenticationProvider
 }
 
-func NewPluginManager() *PluginManager {
+func NewPluginManager(log logger.Logger) *PluginManager {
 	return &PluginManager{
+		log:   log,
 		init:  []Initable{},
 		auth:  []Authenticator{},
 		order: []Orderer{},
@@ -42,6 +49,11 @@ func (m *PluginManager) Load(path string) error {
 	instance, err := file.Lookup("Plugin")
 	if err != nil {
 		return errors.New("Can not lookup {" + path + "}: " + err.Error())
+	}
+
+	authProvider, ok := instance.(common2.AuthenticationProvider)
+	if ok {
+		m.authProviders = append(m.authProviders, authProvider)
 	}
 
 	init, ok := instance.(Initable)
@@ -69,7 +81,7 @@ func (m *PluginManager) Load(path string) error {
 
 func (m *PluginManager) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) {
 	for _, p := range m.init {
-		p.Init(ctx, cfg, log)
+		p.Init(ctx, cfg.Sub(p.Name()), log)
 	}
 }
 
@@ -86,9 +98,28 @@ func (m *PluginManager) Auth(authenticate common.Authenticate) common.Authentica
 	return authenticate
 }
 
+func (m *PluginManager) AuthProviders() []common2.AuthenticationProvider {
+	return m.authProviders
+}
+
 func (m *PluginManager) Order(order common.Order) common.Order {
 	for _, plg := range m.order {
 		order = plg.Order(order)
 	}
 	return order
+}
+
+type Config struct {
+	Plugins []string
+	invoker *invoker.Invoker
+}
+
+// OnReload
+func (c *Config) OnReload(callback func(ctx context.Context)) {
+	c.invoker.OnReload(callback)
+}
+
+// Reload
+func (c *Config) Reload(ctx context.Context) {
+	c.invoker.Reload(ctx)
 }

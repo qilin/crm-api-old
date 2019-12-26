@@ -9,19 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-
-	"github.com/jinzhu/gorm"
-
-	"github.com/ProtocolONE/go-core/v2/pkg/config"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
 	"github.com/qilin/crm-api/internal/db/domain"
+	"github.com/qilin/crm-api/internal/plugins"
 	"github.com/qilin/crm-api/internal/sdk/common"
-	"github.com/qilin/crm-api/internal/sdk/plugins"
 	"github.com/qilin/crm-api/internal/sdk/qilin"
 	"github.com/qilin/crm-api/internal/sdk/repo"
 )
@@ -32,9 +28,9 @@ type interfaces struct {
 }
 
 type SDK struct {
-	ctx           context.Context
-	cfg           *Config
-	pluginsCfg    *PluginsConfig
+	ctx context.Context
+	cfg *Config
+	//pluginsCfg    *PluginsConfig
 	pluginManager *plugins.PluginManager
 	interfaces    interfaces
 	keyRegister   jwt.KeyRegister
@@ -101,6 +97,7 @@ func (s *SDK) IssueJWT(userId, qilinProductUUID string) ([]byte, error) {
 	return claims.ECDSASign(jwt.ES512, s.keyPair.Private)
 }
 
+// todo: map users.user_providers_map
 func (s *SDK) MapExternalUserToUser(iss string, externalId string) (string, error) {
 	// todo: fixme
 	if iss == "" {
@@ -146,25 +143,11 @@ func (s *SDK) ActionsLog() domain.ActionsLog {
 	return s.repo.ActionsLog
 }
 
-func New(ctx context.Context, set provider.AwareSet, repo *repo.Repo, cfg *Config, pCfg *PluginsConfig, init config.Initial) *SDK {
-	pm := plugins.NewPluginManager()
-	if cfg.Mode == common.StoreMode || cfg.Mode == common.ProviderMode {
-		for _, p := range cfg.Plugins {
-			err := pm.Load(p)
-			if err != nil {
-				set.L().Emergency(err.Error())
-			} else {
-				set.L().Info("loaded plugin " + p)
-			}
-		}
-	}
-
-	pm.Init(ctx, init.Viper.Sub(common.UnmarshalKeyPluginConfig), set.L())
-
+func New(ctx context.Context, pm *plugins.PluginManager, set provider.AwareSet, repo *repo.Repo, cfg *Config) *SDK {
 	sdk := &SDK{
-		ctx:           ctx,
-		cfg:           cfg,
-		pluginsCfg:    pCfg,
+		ctx: ctx,
+		cfg: cfg,
+		//pluginsCfg:    pCfg,
 		repo:          repo,
 		pluginManager: pm,
 		LMT:           &set,

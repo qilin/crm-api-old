@@ -25,11 +25,10 @@ dispatcher:
       - "DELETE"
     headers:
       - "*"
-sdk:
-  mode: "parent"
+plugins:
   plugins:
     - plugins/rambler.so
-  plugin:
+  configs:
     store:
       billing:
         shopId: 76
@@ -41,7 +40,7 @@ sdk:
       url:
         iframe: "https://tst.qilin.super.com/integration/demo/qilin/sdk/v1/iframe"
         qilin: "https://tst.qilin.super.com/integration/demo/qilin/"
-        # qilin: "http://192.168.1.64:8086/"
+          # qilin: "http://192.168.1.64:8086/"
       auth:
         fake: true
         cookieName: "qlsid"
@@ -69,6 +68,31 @@ sdk:
           kid: "rambler_games"
           rsaPrivateKey: ""
           rsaPublicKey: ""
+authentication:
+  cookieName: "ssid"
+  cookieDomain: ""
+  cookieSecure: false
+  jwt:
+    publicKey: |
+      -----BEGIN PUBLIC KEY-----
+      MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEfQa/uwg5YlO8DTa98hwwt795y4F3ST4A
+      T1/2WtQTdggoYIzdgNTgQ7lX9+ZLjorowANuooooeuO+51Sw1hZTKbtEa7oOHxr+
+      o78UMCziRQeQzRBnIBjHt8Z2H9DUxrHb
+      -----END PUBLIC KEY-----
+
+    privateKey: |
+      -----BEGIN PRIVATE KEY-----
+      MIGkAgEBBDAEk3lnN3fagRuoi7SZnpiq6+KW9uU7OLgfvONA+gTzToFWYel8qW3L
+      4PFpjFPb0MmgBwYFK4EEACKhZANiAAR9Br+7CDliU7wNNr3yHDC3v3nLgXdJPgBP
+      X/Za1BN2CChgjN2A1OBDuVf35kuOiujAA26iiih6477nVLDWFlMpu0Rrug4fGv6j
+      vxQwLOJFB5DNEGcgGMe3xnYf0NTGsds=
+      -----END PRIVATE KEY-----
+
+    subject: "CustomStore"
+    iss: "Store"
+    exp: 6000
+sdk:
+  mode: "parent"
   jwt:
     publicKey: |
       -----BEGIN PUBLIC KEY-----

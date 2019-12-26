@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// todo: probably remove, probably replaced by AuthProvider
 type UserMapItem struct {
 	UserID     string    `gorm:"column:user_id" json:"user_id"`
 	StoreID    int       `gorm:"column:store_id" json:"store_id"`

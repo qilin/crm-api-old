@@ -3706,47 +3706,6 @@ func (ec *executionContext) _StoreQuery_game(ctx context.Context, field graphql.
 	return ec.marshalOGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _StoreQuery_gameBySlug(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "StoreQuery",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_StoreQuery_gameBySlug_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.StoreQuery().GameBySlug(rctx, obj, args["slug"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(store.Game)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -3944,7 +3903,52 @@ func (ec *executionContext) _SystemRequirements_minimal(ctx context.Context, fie
 	return ec.marshalORequirementsSet2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐRequirementsSet(ctx, field.Selections, res)
 }
 
+<<<<<<< HEAD
+func (ec *executionContext) _StoreQuery_gameBySlug(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "StoreQuery",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_StoreQuery_gameBySlug_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.StoreQuery().GameBySlug(rctx, obj, args["slug"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(store.Game)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOGame2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐGame(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _StoreQuery_games(ctx context.Context, field graphql.CollectedField, obj *StoreQuery) (ret graphql.Marshaler) {
+=======
 func (ec *executionContext) _SystemRequirements_recommended(ctx context.Context, field graphql.CollectedField, obj *store.SystemRequirements) (ret graphql.Marshaler) {
+>>>>>>> store-api-sessions
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -4268,13 +4272,14 @@ func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+<<<<<<< HEAD
+	res := resTmp.(store.TagType)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNTagType2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐTagType(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_photoURL(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -4293,7 +4298,7 @@ func (ec *executionContext) _User_photoURL(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.PhotoURL, nil
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4305,13 +4310,13 @@ func (ec *executionContext) _User_photoURL(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_language(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -4330,7 +4335,7 @@ func (ec *executionContext) _User_language(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Language, nil
+		return obj.Email, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4534,6 +4539,15 @@ func (ec *executionContext) _WebGame_type(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) _WebGame_slug(ctx context.Context, field graphql.CollectedField, obj *store.WebGame) (ret graphql.Marshaler) {
+=======
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_photoURL(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+>>>>>>> store-api-sessions
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -4552,7 +4566,11 @@ func (ec *executionContext) _WebGame_slug(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
+<<<<<<< HEAD
 		return obj.Slug, nil
+=======
+		return obj.PhotoURL, nil
+>>>>>>> store-api-sessions
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4570,7 +4588,11 @@ func (ec *executionContext) _WebGame_slug(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+<<<<<<< HEAD
 func (ec *executionContext) _WebGame_title(ctx context.Context, field graphql.CollectedField, obj *store.WebGame) (ret graphql.Marshaler) {
+=======
+func (ec *executionContext) _User_language(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+>>>>>>> store-api-sessions
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -4589,7 +4611,11 @@ func (ec *executionContext) _WebGame_title(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
+<<<<<<< HEAD
 		return obj.Title, nil
+=======
+		return obj.Language, nil
+>>>>>>> store-api-sessions
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8021,6 +8047,7 @@ func (ec *executionContext) marshalNModuleType2githubᚗcomᚋqilinᚋcrmᚑapi�
 	return res
 }
 
+<<<<<<< HEAD
 func (ec *executionContext) unmarshalNPlatform2ᚕgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPlatform(ctx context.Context, v interface{}) ([]store.Platform, error) {
 	var vSlice []interface{}
 	if v != nil {
@@ -8078,6 +8105,68 @@ func (ec *executionContext) marshalNPlatform2ᚕgithubᚗcomᚋqilinᚋcrmᚑapi
 	return ret
 }
 
+func (ec *executionContext) marshalNSigninOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v SigninOut) graphql.Marshaler {
+	return ec._SigninOut(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSigninOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOut(ctx context.Context, sel ast.SelectionSet, v *SigninOut) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SigninOut(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, v interface{}) (SigninOutStatus, error) {
+	var res SigninOutStatus
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNSigninOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSigninOutStatus(ctx context.Context, sel ast.SelectionSet, v SigninOutStatus) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNSignoutOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignoutOut(ctx context.Context, sel ast.SelectionSet, v SignoutOut) graphql.Marshaler {
+	return ec._SignoutOut(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSignoutOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignoutOut(ctx context.Context, sel ast.SelectionSet, v *SignoutOut) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SignoutOut(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSignupOut2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v SignupOut) graphql.Marshaler {
+	return ec._SignupOut(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSignupOut2ᚖgithubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOut(ctx context.Context, sel ast.SelectionSet, v *SignupOut) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SignupOut(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, v interface{}) (SignupOutStatus, error) {
+	var res SignupOutStatus
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNSignupOutStatus2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐSignupOutStatus(ctx context.Context, sel ast.SelectionSet, v SignupOutStatus) graphql.Marshaler {
+	return v
+}
+
+=======
+>>>>>>> store-api-sessions
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -8681,6 +8770,15 @@ func (ec *executionContext) marshalOModule2githubᚗcomᚋqilinᚋcrmᚑapiᚋin
 	return ec._Module(ctx, sel, &v)
 }
 
+<<<<<<< HEAD
+func (ec *executionContext) unmarshalOPlatform2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPlatform(ctx context.Context, v interface{}) (store.Platform, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return store.Platform(tmp), err
+}
+
+func (ec *executionContext) marshalOPlatform2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPlatform(ctx context.Context, sel ast.SelectionSet, v store.Platform) graphql.Marshaler {
+	return graphql.MarshalString(string(v))
+=======
 func (ec *executionContext) marshalOPasswordUpdateResponse2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋgeneratedᚋgraphqlᚐPasswordUpdateResponse(ctx context.Context, sel ast.SelectionSet, v PasswordUpdateResponse) graphql.Marshaler {
 	return ec._PasswordUpdateResponse(ctx, sel, &v)
 }
@@ -8690,15 +8788,7 @@ func (ec *executionContext) marshalOPasswordUpdateResponse2ᚖgithubᚗcomᚋqil
 		return graphql.Null
 	}
 	return ec._PasswordUpdateResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOPlatform2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPlatform(ctx context.Context, v interface{}) (store.Platform, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	return store.Platform(tmp), err
-}
-
-func (ec *executionContext) marshalOPlatform2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐPlatform(ctx context.Context, sel ast.SelectionSet, v store.Platform) graphql.Marshaler {
-	return graphql.MarshalString(string(v))
+>>>>>>> store-api-sessions
 }
 
 func (ec *executionContext) marshalORequirementsSet2githubᚗcomᚋqilinᚋcrmᚑapiᚋinternalᚋdbᚋdomainᚋstoreᚐRequirementsSet(ctx context.Context, sel ast.SelectionSet, v store.RequirementsSet) graphql.Marshaler {

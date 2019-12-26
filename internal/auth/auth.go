@@ -9,14 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/qilin/crm-api/internal/dispatcher/common"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/coreos/go-oidc"
 	"github.com/labstack/echo/v4"
+    qilinCrypto "github.com/qilin/crm-api/internal/crypto"
 	"github.com/pkg/errors"
 	"github.com/qilin/crm-api/internal/db/domain"
+	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"golang.org/x/oauth2"
 )
 
@@ -49,7 +49,7 @@ type Auth struct {
 	cfg         Config
 	oauth2      *oauth2.Config
 	verifier    *oidc.IDTokenVerifier
-	jwtKeys     KeyPair
+	jwtKeys     qilinCrypto.KeyPair
 	stateSecret []byte
 	appSet      AppSet
 	provider.LMT
@@ -64,13 +64,10 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config)
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	keys := oidc.NewRemoteKeySet(context.Background(), cfg.OAuth2.Provider+".well-known/jwks.json")
 
-	var jwtKeys KeyPair
-	if cfg.Enabled {
-		k, err := NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
-		if err != nil {
-			return nil, errors.Wrap(err, "can't parse auth.jwt keys")
-		}
-		jwtKeys = k
+	jwtKeys, err := qilinCrypto.NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
+
+	if err != nil {
+		return nil, err
 	}
 
 	return &Auth{

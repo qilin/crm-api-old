@@ -174,10 +174,12 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
+	usersRepo := repo.NewUsersRepo(db)
 	gamesRepo := repo.NewGamesRepo(db)
 	storefrontRepo := repo.NewStorefrontRepo(db)
 	resolverRepo := resolver.Repo{
 		User:        userRepo,
+		Users:       usersRepo,
 		Games:       gamesRepo,
 		Storefronts: storefrontRepo,
 	}
@@ -928,10 +930,12 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
+	usersRepo := repo.NewUsersRepo(db)
 	gamesRepo := repo.NewGamesRepo(db)
 	storefrontRepo := repo.NewStorefrontRepo(db)
 	resolverRepo := resolver.Repo{
 		User:        userRepo,
+		Users:       usersRepo,
 		Games:       gamesRepo,
 		Storefronts: storefrontRepo,
 	}

@@ -1,19 +1,21 @@
-package sdk
+package authentication
 
 import (
 	"context"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
-	"github.com/qilin/crm-api/internal/sdk/common"
 )
 
 type Config struct {
-	Debug   bool `fallback:"shared.debug"`
-	Mode    common.SDKMode
-	Iframes map[string]string // todo: it's temporary
-	Plugins []string
-	JWT     JWT
-	invoker *invoker.Invoker
+	Debug                bool `fallback:"shared.debug"`
+	Authenticator        string
+	JWT                  JWT
+	CookieName           string `default:"ssid"`
+	CookieDomain         string
+	CookieSecure         bool
+	LoginSuccessRedirect string
+	LogoutRedirect       string
+	invoker              *invoker.Invoker
 }
 
 type JWT struct {
