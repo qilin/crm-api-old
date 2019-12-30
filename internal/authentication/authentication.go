@@ -181,14 +181,14 @@ func (a *AuthenticationService) Callback(ctx echo.Context) error {
 	if err != nil {
 		a.L().Error("callback error %s", logger.Args(err.Error()))
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
-			"status": "500/0",
+			"status": "500",
 		})
 	}
 
 	user, err := a.mapUser(ctx.Request().Context(), *externalUser)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
-			"status": "500/1",
+			"status": "500",
 		})
 	}
 
@@ -196,7 +196,7 @@ func (a *AuthenticationService) Callback(ctx echo.Context) error {
 	if err := a.startSession(ctx, *user); err != nil {
 		a.L().Error("Authentication.Callback error on startSession: %s", logger.Args(err))
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{
-			"status": "500/2",
+			"status": "500",
 		})
 	}
 
@@ -344,6 +344,7 @@ func (a *AuthenticationService) mapUser(ctx context.Context, externalUser common
 	var u *common2.User
 	// map external externalUser to externalUser if mapping not found
 	if gorm.IsRecordNotFoundError(err) {
+		a.L().Info("CREATE NEW EXTERNAL USER")
 		user := &domain.UsersItem{
 			Email:        externalUser.Email,
 			Phone:        externalUser.Phone,
