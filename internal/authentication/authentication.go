@@ -122,6 +122,7 @@ func (a *AuthenticationService) SignIn(ctx echo.Context) error {
 	providerName := ctx.Param("provider")
 	if providerName == "" {
 		// login by email & password
+		a.L().Info("log by name / password")
 		return a.loginByEmailPassword(ctx)
 	}
 
@@ -434,8 +435,8 @@ func (a *AuthenticationService) loginByEmailPassword(ctx echo.Context) error {
 
 // Routes
 func (a *AuthenticationService) Route(groups *common.Groups) {
-	groups.Auth.GET("/signup", a.SignUp)
-	groups.Auth.GET("/login", a.SignIn)
+	groups.Auth.POST("/signup", a.SignUp)
+	groups.Auth.POST("/login", a.SignIn)
 	groups.Auth.GET("/login/:provider", a.SignIn)
 	groups.Auth.GET("/login/:provider/callback", a.Callback)
 	groups.Auth.GET("/logout", a.SignOut)
