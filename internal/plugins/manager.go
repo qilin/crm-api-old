@@ -81,7 +81,10 @@ func (m *PluginManager) Load(path string) error {
 
 func (m *PluginManager) Init(ctx context.Context, cfg *viper.Viper, log logger.Logger) {
 	for _, p := range m.init {
-		p.Init(ctx, cfg.Sub(p.Name()), log)
+		if cfg != nil && cfg.IsSet(p.Name()) {
+			sub := cfg.Sub(p.Name())
+			p.Init(ctx, sub, log)
+		}
 	}
 }
 

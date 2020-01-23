@@ -31,8 +31,12 @@ func Provider(ctx context.Context, cfg *Config, set provider.AwareSet, init conf
 			set.L().Info("loaded plugin from %s", logger.Args(path))
 		}
 	}
-
-	pm.Init(ctx, init.Viper.Sub(UnmarshalKeyPluginConfigs), set.L())
+	sub := init.Viper.Sub(UnmarshalKeyPluginConfigs)
+	if sub == nil {
+		set.L().Warning("No plugins.configs defined")
+		sub = init.Viper.Viper
+	}
+	pm.Init(ctx, sub, set.L())
 
 	return pm, func() {}, nil
 }
