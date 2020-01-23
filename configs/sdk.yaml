@@ -54,6 +54,7 @@ sdk:
 plugins:
   plugins:
 #    - plugins/auth.so
+  configs:
 authentication:
   cookieName: "ssid"
   cookieDomain: ""
