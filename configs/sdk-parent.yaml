@@ -27,7 +27,6 @@ dispatcher:
       - "*"
 plugins:
   plugins:
-    - plugins/rambler.so
   configs:
     store:
       billing:
