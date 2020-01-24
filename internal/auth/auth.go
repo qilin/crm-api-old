@@ -226,6 +226,7 @@ func (a *Auth) saveRedirectURL(c echo.Context, url string) {
 		Name:     redirectURLCookie,
 		Value:    url,
 		Domain:   a.cfg.Domain,
+		Path:     "/",
 		MaxAge:   int((30 * time.Minute).Seconds()),
 		HttpOnly: true,
 		Secure:   false, // TODO
