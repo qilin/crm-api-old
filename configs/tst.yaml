@@ -30,7 +30,7 @@ auth:
     provider: "https://auth1.tst.protocol.one/"
     clientId: "5da4ec412b13220001efe179"
     clientSecret: "w9JkFlYOa7Hr6QY4OwMv4CWUl3rkJJkwkBjEdkGFE6SQILaM3Hpzxsvs5REdMFNV"
-    redirectUrl: "http://store.tst.qilin.super.com/v1/auth/callback"
+    redirectUrl: "https://store.tst.qilin.super.com/api/v1/auth/callback"
   domain: store.tst.qilin.super.com
   secure: false
   secret: secretkey
