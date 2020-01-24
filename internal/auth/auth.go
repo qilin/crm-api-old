@@ -13,8 +13,8 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/coreos/go-oidc"
 	"github.com/labstack/echo/v4"
-    qilinCrypto "github.com/qilin/crm-api/internal/crypto"
 	"github.com/pkg/errors"
+	qilinCrypto "github.com/qilin/crm-api/internal/crypto"
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"golang.org/x/oauth2"
@@ -183,6 +183,7 @@ func (a *Auth) setState(c echo.Context, value string) {
 	c.SetCookie(&http.Cookie{
 		Name:     "state",
 		Value:    value,
+		Domain:   a.cfg.Domain,
 		MaxAge:   int((30 * time.Minute).Seconds()),
 		HttpOnly: true,
 		Secure:   false, // TODO
@@ -207,4 +208,42 @@ func (a *Auth) secureState(state string) string {
 	h.Write([]byte(state))
 	h.Write(a.stateSecret)
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// redirectURL ==============================================================
+
+const (
+	redirectURLCookie = "redirect"
+)
+
+// todo: make it safe (store on backend or encrypt / sign)
+func (a *Auth) saveRedirectURL(c echo.Context, url string) {
+	// todo: probably it would be better to save it to redis or so
+	c.SetCookie(&http.Cookie{
+		Name:     redirectURLCookie,
+		Value:    url,
+		Domain:   a.cfg.Domain,
+		MaxAge:   int((30 * time.Minute).Seconds()),
+		HttpOnly: true,
+		Secure:   false, // TODO
+	})
+}
+
+func (a *Auth) extractRedirectURL(c echo.Context) string {
+	cookie, err := c.Cookie(redirectURLCookie)
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
+}
+
+func (a *Auth) removeRedirectURL(c echo.Context) {
+	c.SetCookie(&http.Cookie{
+		Name:     redirectURLCookie,
+		Value:    "",
+		Domain:   a.cfg.Domain,
+		MaxAge:   0,
+		HttpOnly: true,
+		Secure:   false, // TODO
+	})
 }
