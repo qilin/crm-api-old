@@ -64,10 +64,13 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config)
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	keys := oidc.NewRemoteKeySet(context.Background(), cfg.OAuth2.Provider+".well-known/jwks.json")
 
-	jwtKeys, err := qilinCrypto.NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
-
-	if err != nil {
-		return nil, err
+	var jwtKeys qilinCrypto.KeyPair
+	if cfg.Enabled {
+		k, err := qilinCrypto.NewKeyPairFromPEM(cfg.JWT.PublicKey, cfg.JWT.PrivateKey)
+		if err != nil {
+			return nil, errors.Wrap(err, "can't parse auth.jwt keys")
+		}
+		jwtKeys = k
 	}
 
 	return &Auth{
