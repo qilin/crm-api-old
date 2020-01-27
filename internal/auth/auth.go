@@ -32,7 +32,7 @@ type Config struct {
 	// cookies rules
 	SessionCookieName string `default:"ssid"`
 	Domain            string
-	Secure            bool
+	SecureCookie      bool
 
 	AutoSignIn         bool
 	Secret             string
@@ -155,7 +155,7 @@ func (a *Auth) removeSession(c echo.Context) {
 		HttpOnly: true,
 		Domain:   a.cfg.Domain,
 		Path:     "/",
-		Secure:   a.cfg.Secure,
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -166,7 +166,7 @@ func (a *Auth) setSession(c echo.Context, value string) {
 		HttpOnly: true,
 		Domain:   a.cfg.Domain,
 		Path:     "/",
-		Secure:   a.cfg.Secure,
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -178,7 +178,7 @@ func (a *Auth) removeState(c echo.Context) {
 		Value:    "",
 		MaxAge:   0,
 		HttpOnly: true,
-		Secure:   false, // TODO
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -189,7 +189,7 @@ func (a *Auth) setState(c echo.Context, value string) {
 		Domain:   a.cfg.Domain,
 		MaxAge:   int((30 * time.Minute).Seconds()),
 		HttpOnly: true,
-		Secure:   false, // TODO
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -230,7 +230,7 @@ func (a *Auth) saveRedirectURL(c echo.Context, url string) {
 		Path:     "/",
 		MaxAge:   0,
 		HttpOnly: true,
-		Secure:   false, // TODO
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -258,6 +258,6 @@ func (a *Auth) removeRedirectURL(c echo.Context) {
 		Path:     "/",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   false, // TODO
+		Secure:   a.cfg.SecureCookie,
 	})
 }
