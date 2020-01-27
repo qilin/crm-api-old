@@ -222,6 +222,7 @@ const (
 // todo: make it safe (store on backend or encrypt / sign)
 func (a *Auth) saveRedirectURL(c echo.Context, url string) {
 	// todo: probably it would be better to save it to redis or so
+	c.Set(ctxRedirectURL, url)
 	c.SetCookie(&http.Cookie{
 		Name:     redirectURLCookie,
 		Value:    url,
@@ -234,11 +235,19 @@ func (a *Auth) saveRedirectURL(c echo.Context, url string) {
 }
 
 func (a *Auth) extractRedirectURL(c echo.Context) string {
+	var url string
 	cookie, err := c.Cookie(redirectURLCookie)
 	if err != nil {
+		a.L().Error(err.Error())
 		return ""
 	}
-	return cookie.Value
+	if cookie.Value != "" {
+		url = cookie.Value
+	}
+	if url == "" {
+		url, _ = c.Get(ctxRedirectURL).(string)
+	}
+	return url
 }
 
 func (a *Auth) removeRedirectURL(c echo.Context) {
@@ -246,6 +255,7 @@ func (a *Auth) removeRedirectURL(c echo.Context) {
 		Name:     redirectURLCookie,
 		Value:    "",
 		Domain:   a.cfg.Domain,
+		Path:     "/",
 		MaxAge:   0,
 		HttpOnly: true,
 		Secure:   false, // TODO
