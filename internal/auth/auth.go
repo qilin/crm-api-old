@@ -228,7 +228,7 @@ func (a *Auth) saveRedirectURL(c echo.Context, url string) {
 		Value:    url,
 		Domain:   a.cfg.Domain,
 		Path:     "/",
-		MaxAge:   int((30 * time.Minute).Seconds()),
+		MaxAge:   0,
 		HttpOnly: true,
 		Secure:   false, // TODO
 	})
@@ -256,7 +256,7 @@ func (a *Auth) removeRedirectURL(c echo.Context) {
 		Value:    "",
 		Domain:   a.cfg.Domain,
 		Path:     "/",
-		MaxAge:   0,
+		MaxAge:   -1,
 		HttpOnly: true,
 		Secure:   false, // TODO
 	})
