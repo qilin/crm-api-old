@@ -71,6 +71,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	}
 
 	d.commonGroup(grp.Common)
+	d.graphqlGroup(grp)
 
 	// init routes
 	for _, handler := range d.appSet.Handlers {
@@ -82,7 +83,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
 func (d *Dispatcher) graphqlGroup(group *common.Groups) {
 	// add graphql handlers
-	//group.GraphQL.Use(d.appSet.Auth.Middleware)
+	group.GraphQL.Use(d.appSet.Auth.Middleware)
 }
 
 func (d *Dispatcher) commonGroup(grp *echo.Echo) {

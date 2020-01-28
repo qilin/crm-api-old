@@ -3,6 +3,7 @@ package resolver
 import (
 	"context"
 
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/qilin/crm-api/internal/auth"
 
 	graphql1 "github.com/qilin/crm-api/internal/generated/graphql"
@@ -24,19 +25,21 @@ func (r *authMutationResolver) PasswordUpdate(ctx context.Context, obj *graphql1
 
 func (r *authQueryResolver) Profile(ctx context.Context, obj *graphql1.AuthQuery) (*graphql1.User, error) {
 	user := auth.ExtractUserContext(ctx)
+	r.L().Info("%v", logger.Args(user))
 	u, err := r.repo.Users.Get(ctx, user.Id)
 	if err != nil {
+		r.L().Error(err.Error())
 		return nil, err
 	}
 	return &graphql1.User{
-		ID:        u.ID,
-		Status:    string(u.Status),
-		Email:     u.Email,
-		Phone:     u.Phone,
+		ID:     u.ID,
+		Status: "true", // string(u.Status), // todo: tmp fix
+		Email:  u.Email,
+		//Phone:     u.Phone,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
-		PhotoURL:  u.PhotoURL,
-		Language:  u.Language,
+		//PhotoURL:  u.PhotoURL,
+		//Language:  u.Language,
 	}, nil
 }
 

@@ -25,7 +25,6 @@ const (
 var empty = map[string]interface{}{}
 
 func (a *Auth) Route(groups *common.Groups) {
-	a.L().Info("Auth.Route execution")
 	groups.Auth.GET("/login", a.login)
 	groups.Auth.GET("/callback", a.callback)
 	groups.Auth.GET("/logout", a.logout)

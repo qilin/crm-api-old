@@ -106,7 +106,7 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 		return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 	}
 	c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-		user := authentication.ExtractUserContext(ctx)
+		user := auth.ExtractUserContext(ctx)
 		if user.IsEmpty() {
 			return nil, gqErrs.WrapAccessDeniedErr(fmt.Errorf("access denied"))
 		}

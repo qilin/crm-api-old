@@ -20,36 +20,24 @@ const (
 )
 
 type UsersItem struct {
-	ID int `gorm:"column:id" json:"id"`
-
-	Email    string `gorm:"column:email" json:"email"`
-	Phone    string `gorm:"column:phone" json:"phone"`
-	Password string `gorm:"column:password" json:"-"`
-
-	Status       int8 `gorm:"column:status" json:"status"`
-	ServiceLevel byte `gorm:"column:service_level" json:"service_level"`
-
-	Address1 string `gorm:"column:address_1" json:"address_1"`
-	Address2 string `gorm:"column:address_2" json:"address_2"`
-	City     string `gorm:"column:city" json:"city"`
-	State    string `gorm:"column:state" json:"state"`
-	Country  string `gorm:"column:country" json:"country"`
-	Zip      string `gorm:"column:zip" json:"zip"`
-
-	PhotoURL  string `gorm:"column:photo_url" json:"photo_url"`
-	FirstName string `gorm:"column:first_name" json:"first_name"`
-	LastName  string `gorm:"column:last_name" json:"last_name"`
-	BirthDate int    `gorm:"column:birth_date" json:"birth_date"`
-
-	Language string `gorm:"column:language" json:"language"`
-
-	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
+	ID            int       `gorm:"column:id" json:"id"`
+	TenantID      int       `gorm:"column:tenant_id" json:"tenant_id"`
+	Status        bool      `gorm:"column:status" json:"status"`
+	Email         string    `gorm:"column:email" json:"email"`
+	Picture       string    `gorm:"column:picture" json:"picture"`
+	FirstName     string    `gorm:"column:first_name" json:"first_name"`
+	LastName      string    `gorm:"column:last_name" json:"last_name"`
+	Role          string    `gorm:"column:role" json:"role"`
+	ExternalID    string    `gorm:"column:external_id" json:"external_id"`
+	CreatedAt     time.Time `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt     time.Time `gorm:"column:updated_at" json:"updated_at"`
+	AuthTimestamp time.Time `gorm:"column:auth_timestamp" json:"-"`
+	Password      string    `gorm:"-" json:"-"`
 }
 
 // TableName
 func (UsersItem) TableName() string {
-	return "users.users"
+	return "users"
 }
 
 type UsersRepo interface {

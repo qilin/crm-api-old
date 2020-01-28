@@ -78,7 +78,7 @@ func (a *AuthenticationService) SignUp(ctx echo.Context) error {
 	user := &domain.UsersItem{
 		Email:    r.Email,
 		Password: string(hash),
-		Status:   domain.UserActive.Int8(),
+		//Status:   domain.UserActive.Int8(), // todo: tmp fix
 		// todo: fill other fields?
 		CreatedAt: time.Now(),
 	}
@@ -347,23 +347,23 @@ func (a *AuthenticationService) mapUser(ctx context.Context, externalUser common
 	if gorm.IsRecordNotFoundError(err) {
 		a.L().Info("CREATE NEW EXTERNAL USER")
 		user := &domain.UsersItem{
-			Email:        externalUser.Email,
-			Phone:        externalUser.Phone,
-			Password:     "",
-			Status:       domain.UserActive.Int8(),
-			ServiceLevel: 0,
-			Address1:     externalUser.Address1,
-			Address2:     externalUser.Address2,
-			City:         externalUser.City,
-			State:        externalUser.State,
-			Country:      externalUser.Country,
-			Zip:          externalUser.Zip,
-			PhotoURL:     "", // todo
-			FirstName:    externalUser.FirstName,
-			LastName:     externalUser.LastName,
-			BirthDate:    externalUser.BirthDate,
-			Language:     externalUser.Language,
-			CreatedAt:    time.Now(),
+			Email: externalUser.Email,
+			//Phone:        externalUser.Phone, // todo: tmp fix
+			Password: "",
+			Status:   true, //domain.UserActive.Int8(), // todo: tmp fix
+			//ServiceLevel: 0, // todo: tmp fix
+			//Address1:     externalUser.Address1, // todo: tmp fix
+			//Address2:     externalUser.Address2, // todo: tmp fix
+			//City:         externalUser.City, // todo: tmp fix
+			//State:        externalUser.State, // todo: tmp fix
+			//Country:      externalUser.Country, // todo: tmp fix
+			//Zip:          externalUser.Zip, // todo: tmp fix
+			//PhotoURL:     "", // todo
+			FirstName: externalUser.FirstName,
+			LastName:  externalUser.LastName,
+			//BirthDate:    externalUser.BirthDate, // todo: tmp fix
+			//Language:     externalUser.Language, // todo: tmp fix
+			CreatedAt: time.Now(),
 		}
 		// todo: run in transaction
 		err := a.app.UsersRepo.Create(ctx, user)

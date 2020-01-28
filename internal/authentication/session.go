@@ -27,8 +27,8 @@ func NewAccessClaims(user *domain.UsersItem) *SessionClaims {
 	var now = time.Now()
 	return &SessionClaims{
 		User: common.User{
-			ID:       user.ID,
-			Language: user.Language,
+			ID: user.ID,
+			//Language: user.Language, // todo: tmp fix
 		},
 		StandardClaims: jwt.StandardClaims{
 			Issuer:   "https://qilin.protocol.one", // todo: to config

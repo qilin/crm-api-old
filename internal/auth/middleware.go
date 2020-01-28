@@ -43,13 +43,7 @@ func (u *User) IsEmpty() bool {
 // Middleware returns authorization middleware for http server
 func (a *Auth) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		authHeader := ctx.Request().Header.Get(echo.HeaderAuthorization)
-		if authHeader == "" {
-			a.L().Error("no auth header")
-			return next(ctx)
-		}
-
-		rawToken, ok := ExtractTokenFromAuthHeader(authHeader)
+		rawToken, ok := a.extractToken(ctx)
 		if !ok {
 			a.L().Error("invalid auth header")
 			return next(ctx)
@@ -85,11 +79,36 @@ func (a *Auth) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 const bearer = "bearer"
 
-func ExtractTokenFromAuthHeader(val string) (token string, ok bool) {
-	authHeaderParts := strings.Split(val, " ")
+func ExtractTokenFromAuthHeader(ctx echo.Context) (token string, ok bool) {
+	authHeader := ctx.Request().Header.Get(echo.HeaderAuthorization)
+	if authHeader == "" {
+		return "", false
+	}
+
+	authHeaderParts := strings.Split(authHeader, " ")
 	if len(authHeaderParts) != 2 || !strings.EqualFold(strings.ToLower(authHeaderParts[0]), bearer) {
 		return "", false
 	}
 
 	return authHeaderParts[1], true
+}
+
+func (a *Auth) extractTokenFromCookie(ctx echo.Context) (token string, ok bool) {
+	cookie, err := ctx.Request().Cookie(a.cfg.SessionCookieName)
+	if err != nil {
+		return "", false
+	}
+	token = cookie.Value
+	if token != "" {
+		ok = true
+	}
+	return token, ok
+}
+
+func (a *Auth) extractToken(ctx echo.Context) (token string, ok bool) {
+	token, ok = ExtractTokenFromAuthHeader(ctx)
+	if token != "" {
+		return token, ok
+	}
+	return a.extractTokenFromCookie(ctx)
 }

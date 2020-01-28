@@ -7,18 +7,18 @@ import (
 
 func item2user(user *domain.UsersItem) *common.User {
 	return &common.User{
-		ID:        user.ID,
-		Email:     user.Email,
-		Phone:     user.Phone,
-		Address1:  user.Address1,
-		Address2:  user.Address2,
-		City:      user.City,
-		State:     user.State,
-		Country:   user.Country,
-		Zip:       user.Zip,
+		ID:    user.ID,
+		Email: user.Email,
+		//Phone:     user.Phone, // todo: tmp fix
+		//Address1:  user.Address1,
+		//Address2:  user.Address2,
+		//City:      user.City,
+		//State:     user.State,
+		//Country:   user.Country,
+		//Zip:       user.Zip,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
-		BirthDate: user.BirthDate,
-		Language:  user.Language,
+		//BirthDate: user.BirthDate, // todo: tmp fix
+		//Language:  user.Language,
 	}
 }
