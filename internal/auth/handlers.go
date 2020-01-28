@@ -65,7 +65,11 @@ func (a *Auth) login(c echo.Context) error {
 
 func (a *Auth) logout(c echo.Context) error {
 	a.removeSession(c)
-	return c.JSON(http.StatusOK, empty)
+	rURL := c.QueryParam(redirectURLParam)
+	if rURL != "" {
+		c.Redirect(http.StatusFound, rURL)
+	}
+	return c.Redirect(http.StatusFound, a.cfg.LogoutRedirect)
 }
 
 func (a *Auth) redirectSuccess(c echo.Context) error {

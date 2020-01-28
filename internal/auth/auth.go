@@ -28,6 +28,7 @@ type Config struct {
 		ClientSecret string `required:"true"`
 		RedirectUrl  string `required:"true"`
 	}
+	LogoutRedirect string
 
 	// cookies rules
 	SessionCookieName string `default:"ssid"`
