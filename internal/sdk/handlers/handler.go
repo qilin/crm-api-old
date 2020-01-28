@@ -1,4 +1,4 @@
-package sdk
+package handlers
 
 import (
 	"bytes"
@@ -14,6 +14,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
+	"gopkg.in/go-playground/validator.v9"
 
 	"github.com/qilin/crm-api/internal/db/domain"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
@@ -28,6 +29,17 @@ const (
 	sdkQilinIframe = "/iframe"
 	sdkHealthRoute = "/health"
 )
+
+// ProviderHandlers
+func ProviderSDKHandlers(validator *validator.Validate, set provider.AwareSet, app common2.SDK) (common.Handlers, func(), error) {
+	hSet := common.HandlerSet{
+		Validate: validator,
+		AwareSet: set,
+	}
+	return []common.Handler{
+		NewSDKGroup(hSet, app),
+	}, func() {}, nil
+}
 
 type SDKGroup struct {
 	sdk common2.SDK
