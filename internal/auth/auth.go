@@ -32,7 +32,7 @@ type Config struct {
 	// cookies rules
 	SessionCookieName string `default:"ssid"`
 	Domain            string
-	Secure            bool
+	SecureCookie      bool
 
 	AutoSignIn         bool
 	Secret             string
@@ -155,7 +155,7 @@ func (a *Auth) removeSession(c echo.Context) {
 		HttpOnly: true,
 		Domain:   a.cfg.Domain,
 		Path:     "/",
-		Secure:   a.cfg.Secure,
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -166,7 +166,7 @@ func (a *Auth) setSession(c echo.Context, value string) {
 		HttpOnly: true,
 		Domain:   a.cfg.Domain,
 		Path:     "/",
-		Secure:   a.cfg.Secure,
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -178,7 +178,7 @@ func (a *Auth) removeState(c echo.Context) {
 		Value:    "",
 		MaxAge:   0,
 		HttpOnly: true,
-		Secure:   false, // TODO
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -186,9 +186,10 @@ func (a *Auth) setState(c echo.Context, value string) {
 	c.SetCookie(&http.Cookie{
 		Name:     "state",
 		Value:    value,
+		Domain:   a.cfg.Domain,
 		MaxAge:   int((30 * time.Minute).Seconds()),
 		HttpOnly: true,
-		Secure:   false, // TODO
+		Secure:   a.cfg.SecureCookie,
 	})
 }
 
@@ -210,4 +211,53 @@ func (a *Auth) secureState(state string) string {
 	h.Write([]byte(state))
 	h.Write(a.stateSecret)
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// redirectURL ==============================================================
+
+const (
+	redirectURLCookie = "redirect"
+)
+
+// todo: make it safe (store on backend or encrypt / sign)
+func (a *Auth) saveRedirectURL(c echo.Context, url string) {
+	// todo: probably it would be better to save it to redis or so
+	c.Set(ctxRedirectURL, url)
+	c.SetCookie(&http.Cookie{
+		Name:     redirectURLCookie,
+		Value:    url,
+		Domain:   a.cfg.Domain,
+		Path:     "/",
+		MaxAge:   0,
+		HttpOnly: true,
+		Secure:   a.cfg.SecureCookie,
+	})
+}
+
+func (a *Auth) extractRedirectURL(c echo.Context) string {
+	var url string
+	cookie, err := c.Cookie(redirectURLCookie)
+	if err != nil {
+		a.L().Error(err.Error())
+		return ""
+	}
+	if cookie.Value != "" {
+		url = cookie.Value
+	}
+	if url == "" {
+		url, _ = c.Get(ctxRedirectURL).(string)
+	}
+	return url
+}
+
+func (a *Auth) removeRedirectURL(c echo.Context) {
+	c.SetCookie(&http.Cookie{
+		Name:     redirectURLCookie,
+		Value:    "",
+		Domain:   a.cfg.Domain,
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   a.cfg.SecureCookie,
+	})
 }

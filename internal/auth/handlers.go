@@ -17,9 +17,15 @@ import (
 	"github.com/qilin/crm-api/internal/db/domain"
 )
 
+const (
+	redirectURLParam = "redirect"
+	ctxRedirectURL   = "redirect"
+)
+
 var empty = map[string]interface{}{}
 
 func (a *Auth) Route(groups *common.Groups) {
+	a.L().Info("Auth.Route execution")
 	groups.Auth.GET("/login", a.login)
 	groups.Auth.GET("/callback", a.callback)
 	groups.Auth.GET("/logout", a.logout)
@@ -44,6 +50,9 @@ func (a *Auth) session(c echo.Context) error {
 }
 
 func (a *Auth) login(c echo.Context) error {
+	rURL := c.QueryParam(redirectURLParam)
+	a.saveRedirectURL(c, rURL)
+
 	if _, ok := a.checkAuthorized(c); ok {
 		return a.redirectSuccess(c)
 	}
@@ -61,11 +70,17 @@ func (a *Auth) logout(c echo.Context) error {
 }
 
 func (a *Auth) redirectSuccess(c echo.Context) error {
+	// extract redirectURL from cookie if possible
+	if rURL := a.extractRedirectURL(c); rURL != "" {
+		a.removeRedirectURL(c)
+		return c.Redirect(http.StatusFound, rURL)
+	}
 	return c.Redirect(http.StatusFound, a.cfg.SuccessRedirectURL)
 }
 
 func (a *Auth) callback(c echo.Context) error {
 	if err := a.callbackError(c); err != nil {
+		a.L().Error(err.Error())
 		// redirect error
 		u, perr := url.Parse(a.cfg.ErrorRedirectURL)
 		if perr != nil {
