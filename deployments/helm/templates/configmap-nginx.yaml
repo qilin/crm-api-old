@@ -69,7 +69,11 @@ data:
         }
 
         location /api {
-            rewrite ^/api/(.*)$ /$1 break;
+            proxy_pass http://{{ $crmParentSvcName }}:8082;
+        }
+
+        # not for production ( separate internal nginx server)
+        location /internal {
             proxy_pass http://{{ $crmParentSvcName }}:8082;
         }
 

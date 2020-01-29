@@ -54,5 +54,5 @@ var (
 
 func init() {
 	// pflags
-	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":8081", "bind address")
+	Cmd.PersistentFlags().StringP("http.bind", "b", ":8081", "bind address")
 }

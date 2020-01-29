@@ -4,11 +4,26 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 )
+
+const (
+	Prefix       = "pkg.http"
+	UnmarshalKey = "http"
+)
+
+// Dispatcher
+type Dispatcher interface {
+	Dispatch(http *echo.Echo) error
+}
+
+// Config
+type Config struct {
+	Debug bool   `fallback:"shared.debug"`
+	Bind  string `required:"true"`
+}
 
 // HTTP
 type HTTP struct {
@@ -49,23 +64,6 @@ func (h *HTTP) ListenAndServe(ctx context.Context) (err error) {
 
 	h.L().Info("http server stopped successfully")
 	return nil
-}
-
-// Config
-type Config struct {
-	Debug   bool   `fallback:"shared.debug"`
-	Bind    string `required:"true"`
-	invoker *invoker.Invoker
-}
-
-// OnReload
-func (c *Config) OnReload(callback func(ctx context.Context)) {
-	c.invoker.OnReload(callback)
-}
-
-// Reload
-func (c *Config) Reload(ctx context.Context) {
-	c.invoker.Reload(ctx)
 }
 
 // New

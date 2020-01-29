@@ -129,7 +129,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	authAuth, cleanup11, err := auth.Provider(ctx, awareSet, appSet, authConfig)
+	authAuth, cleanup11, err := auth.Provider(awareSet, appSet, authConfig)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -888,7 +888,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	authAuth, cleanup10, err := auth.Provider(ctx, awareSet, appSet, authConfig)
+	authAuth, cleanup10, err := auth.Provider(awareSet, appSet, authConfig)
 	if err != nil {
 		cleanup9()
 		cleanup8()

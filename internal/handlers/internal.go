@@ -25,8 +25,8 @@ func NewInternal(games *repo.GamesRepo, storefronts *repo.StorefrontRepo) *Inter
 }
 
 func (h *Internal) Route(groups *common.Groups) {
-	groups.V1.POST("/internal/games", h.publishGames)
-	groups.V1.POST("/internal/modules", h.saveModule)
+	groups.Common.POST("/internal/v1/games", h.publishGames)
+	groups.Common.POST("/internal/v1/modules", h.saveModule)
 }
 
 func (h *Internal) publishGames(ctx echo.Context) error {
