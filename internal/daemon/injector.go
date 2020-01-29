@@ -16,6 +16,7 @@ import (
 	"github.com/qilin/crm-api/internal/eventbus"
 	"github.com/qilin/crm-api/internal/stan"
 	"github.com/qilin/crm-api/internal/webhooks"
+	"github.com/qilin/crm-api/pkg/graphql"
 	"github.com/qilin/crm-api/pkg/http"
 )
 
@@ -32,6 +33,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		wire.Struct(new(handlers.Handlers), "*"),
 		handlers.ProviderHandlers,
 		handlers.NewInternal,
+		graphql.WireSet,
 		auth.WireSet,
 		dispatcher.WireSet,
 	))
@@ -50,6 +52,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		wire.Struct(new(handlers.Handlers), "*"),
 		handlers.ProviderHandlers,
 		handlers.NewInternal,
+		graphql.WireTestSet,
 		auth.WireSet,
 		dispatcher.WireSet,
 	))

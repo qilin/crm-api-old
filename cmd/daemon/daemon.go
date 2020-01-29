@@ -43,7 +43,7 @@ var (
 				}
 				return nil
 			}, func(ctx context.Context) error {
-				if e := s.ListenAndServe(); e != nil {
+				if e := s.ListenAndServe(ctx); e != nil {
 					return e
 				}
 				return nil
