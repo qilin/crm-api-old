@@ -12,7 +12,7 @@ dist: trusty
 stages:
 - test
 - name: deploy
-  if: branch IN (master, demo-sdk)
+  if: branch IN (master, demo-sdk) AND type != pull_request
 jobs:
   include:
   - stage: test
