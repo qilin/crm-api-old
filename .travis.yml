@@ -21,8 +21,8 @@ jobs:
       - $HOME/gopath/pkg/mod
     install: true
     script:
+    - make test
     #- make github-test
-    - echo "tests here"
     #- sonar-scanner
     after_success:
     - bash <(curl -s https://codecov.io/bash)
