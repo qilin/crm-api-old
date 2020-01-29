@@ -38,15 +38,9 @@ var (
 				})
 				initial, _ := entrypoint.CtxExtractInitial(ctx)
 				s, c, e = daemon.BuildHTTP(ctx, initial, cmd.Observer)
-				if e != nil {
-					return e
-				}
-				return nil
+				return e
 			}, func(ctx context.Context) error {
-				if e := s.ListenAndServe(); e != nil {
-					return e
-				}
-				return nil
+				return s.ListenAndServe(ctx)
 			})
 		},
 	}
@@ -54,5 +48,5 @@ var (
 
 func init() {
 	// pflags
-	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":8081", "bind address")
+	Cmd.PersistentFlags().StringP("http.bind", "b", ":8081", "bind address")
 }

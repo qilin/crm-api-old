@@ -129,7 +129,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	authAuth, cleanup11, err := auth.Provider(ctx, awareSet, appSet, authConfig)
+	authAuth, cleanup11, err := auth.Provider(awareSet, appSet, authConfig)
 	if err != nil {
 		cleanup10()
 		cleanup9()
@@ -731,7 +731,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup34, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	httpHTTP, cleanup34, err := http.Provider(awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
 		cleanup33()
 		cleanup32()
@@ -888,7 +888,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	authAuth, cleanup10, err := auth.Provider(ctx, awareSet, appSet, authConfig)
+	authAuth, cleanup10, err := auth.Provider(awareSet, appSet, authConfig)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -1467,7 +1467,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup33, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	httpHTTP, cleanup33, err := http.Provider(awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
 		cleanup32()
 		cleanup31()

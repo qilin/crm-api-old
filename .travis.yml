@@ -3,7 +3,7 @@ os:
 language: go
 sudo: required
 go:
-- 1.12.x
+- 1.13.x
 dist: trusty
 #addons:
 #  sonarcloud:
@@ -12,7 +12,7 @@ dist: trusty
 stages:
 - test
 - name: deploy
-  if: branch IN (master, demo-sdk)
+  if: branch IN (master, demo-sdk) AND type != pull_request
 jobs:
   include:
   - stage: test
@@ -21,8 +21,8 @@ jobs:
       - $HOME/gopath/pkg/mod
     install: true
     script:
+    - make test
     #- make github-test
-    - echo "tests here"
     #- sonar-scanner
     after_success:
     - bash <(curl -s https://codecov.io/bash)
