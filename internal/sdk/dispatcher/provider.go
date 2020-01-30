@@ -1,4 +1,4 @@
-package sdk
+package dispatcher
 
 import (
 	"context"

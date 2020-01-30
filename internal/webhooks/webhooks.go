@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/qilin/crm-api/internal/eventbus/events"
+	"github.com/qilin/crm-api/internal/handlers/common"
 
 	"github.com/gurukami/typ/v2"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 )
 
 type WebHooks struct {

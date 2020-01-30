@@ -582,13 +582,13 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	internal := handlers.NewInternal(gamesRepo, storefrontRepo)
-	handlersHandlers := handlers.Handlers{
+	handlerSet := handlers.HandlerSet{
 		GraphQL:  graphQL,
 		WebHooks: webHooks,
 		Auth:     authAuth,
 		Internal: internal,
 	}
-	commonHandlers, cleanup30, err := handlers.ProviderHandlers(initial, validate, awareSet, handlersHandlers)
+	commonHandlers, cleanup30, err := handlers.ProviderHandlers(initial, validate, awareSet, handlerSet)
 	if err != nil {
 		cleanup29()
 		cleanup28()
@@ -1322,13 +1322,13 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		return nil, nil, err
 	}
 	internal := handlers.NewInternal(gamesRepo, storefrontRepo)
-	handlersHandlers := handlers.Handlers{
+	handlerSet := handlers.HandlerSet{
 		GraphQL:  graphQL,
 		WebHooks: webHooks,
 		Auth:     authAuth,
 		Internal: internal,
 	}
-	commonHandlers, cleanup29, err := handlers.ProviderHandlers(initial, validate, awareSet, handlersHandlers)
+	commonHandlers, cleanup29, err := handlers.ProviderHandlers(initial, validate, awareSet, handlerSet)
 	if err != nil {
 		cleanup28()
 		cleanup27()

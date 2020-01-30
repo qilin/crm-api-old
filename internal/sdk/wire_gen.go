@@ -16,8 +16,8 @@ import (
 	"github.com/qilin/crm-api/internal/authentication"
 	"github.com/qilin/crm-api/internal/authentication/providers"
 	"github.com/qilin/crm-api/internal/db/repo"
-	sdk2 "github.com/qilin/crm-api/internal/dispatcher/sdk"
 	"github.com/qilin/crm-api/internal/plugins"
+	"github.com/qilin/crm-api/internal/sdk/dispatcher"
 	"github.com/qilin/crm-api/internal/sdk/handlers"
 	repo2 "github.com/qilin/crm-api/internal/sdk/repo"
 	"github.com/qilin/crm-api/internal/sdk/sdk"
@@ -324,11 +324,11 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	sdkAppSet := sdk2.AppSet{
+	dispatcherAppSet := dispatcher.AppSet{
 		Authentication: authenticationService,
 		Handlers:       commonHandlers,
 	}
-	config2, cleanup21, err := sdk2.Cfg(configurator)
+	dispatcherConfig, cleanup21, err := dispatcher.Cfg(configurator)
 	if err != nil {
 		cleanup20()
 		cleanup19()
@@ -352,7 +352,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcher, cleanup22, err := sdk2.ProviderDispatcher(ctx, awareSet, sdkAppSet, config2)
+	dispatcherDispatcher, cleanup22, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
 	if err != nil {
 		cleanup21()
 		cleanup20()
@@ -403,7 +403,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup24, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	httpHTTP, cleanup24, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
 		cleanup23()
 		cleanup22()
@@ -731,11 +731,11 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	sdkAppSet := sdk2.AppSet{
+	dispatcherAppSet := dispatcher.AppSet{
 		Authentication: authenticationService,
 		Handlers:       commonHandlers,
 	}
-	config2, cleanup20, err := sdk2.CfgTest()
+	dispatcherConfig, cleanup20, err := dispatcher.CfgTest()
 	if err != nil {
 		cleanup19()
 		cleanup18()
@@ -758,7 +758,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcher, cleanup21, err := sdk2.ProviderDispatcher(ctx, awareSet, sdkAppSet, config2)
+	dispatcherDispatcher, cleanup21, err := dispatcher.ProviderDispatcher(ctx, awareSet, dispatcherAppSet, dispatcherConfig)
 	if err != nil {
 		cleanup20()
 		cleanup19()
@@ -807,7 +807,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup23, err := http.Provider(ctx, awareSet, dispatcher, httpConfig)
+	httpHTTP, cleanup23, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
 		cleanup22()
 		cleanup21()

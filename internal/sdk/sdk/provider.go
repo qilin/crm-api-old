@@ -4,10 +4,9 @@ import (
 	"context"
 
 	"github.com/qilin/crm-api/internal/authentication"
+	dispatcher2 "github.com/qilin/crm-api/internal/sdk/dispatcher"
 
 	"github.com/qilin/crm-api/internal/plugins"
-
-	dispatcher "github.com/qilin/crm-api/internal/dispatcher/sdk"
 
 	"github.com/qilin/crm-api/pkg/http"
 
@@ -68,7 +67,7 @@ var (
 		Provider,
 		ProviderSDKRepo,
 		resolver.ValidatorsProduction,
-		dispatcher.WireSet,
+		dispatcher2.WireSet,
 		plugins.WireSet,
 		authentication.WireSet,
 		http.Provider,
@@ -80,7 +79,7 @@ var (
 		Provider,
 		ProviderSDKTestRepo,
 		resolver.ValidatorsTest,
-		dispatcher.WireTestSet,
+		dispatcher2.WireTestSet,
 		plugins.WireTestSet,
 		authentication.WireTestSet,
 		http.Provider,

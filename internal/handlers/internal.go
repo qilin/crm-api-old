@@ -6,10 +6,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/mitchellh/mapstructure"
+	"github.com/qilin/crm-api/internal/handlers/common"
 
 	"github.com/qilin/crm-api/internal/db/domain/store"
 	"github.com/qilin/crm-api/internal/db/repo"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 )
 
 type Internal struct {

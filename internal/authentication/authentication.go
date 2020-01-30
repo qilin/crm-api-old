@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/qilin/crm-api/internal/authentication/providers"
+	"github.com/qilin/crm-api/internal/handlers/common"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -15,7 +16,6 @@ import (
 	common2 "github.com/qilin/crm-api/internal/authentication/common"
 	"github.com/qilin/crm-api/internal/crypto"
 	"github.com/qilin/crm-api/internal/db/domain"
-	"github.com/qilin/crm-api/internal/dispatcher/common"
 	"github.com/qilin/crm-api/internal/plugins"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/go-playground/validator.v9"

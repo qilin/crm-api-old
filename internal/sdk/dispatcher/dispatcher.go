@@ -1,4 +1,4 @@
-package sdk
+package dispatcher
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/qilin/crm-api/internal/authentication"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
+	common2 "github.com/qilin/crm-api/internal/handlers/common"
 )
 
 // Dispatcher
@@ -37,7 +38,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
 	v1 := echoHttp.Group(common.V1Path)
 
-	grp := &common.Groups{
+	grp := &common2.Groups{
 		Auth:   v1.Group(common.AuthGroupPath),
 		SDK:    echoHttp.Group(common.SDKPath),
 		Common: echoHttp,
@@ -70,7 +71,7 @@ func (c *Config) Reload(ctx context.Context) {
 
 type AppSet struct {
 	Authentication *authentication.AuthenticationService
-	Handlers       common.Handlers
+	Handlers       common2.Handlers
 }
 
 // New

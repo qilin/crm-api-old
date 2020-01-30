@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/qilin/crm-api/internal/auth"
 	"github.com/qilin/crm-api/internal/dispatcher/common"
+	common2 "github.com/qilin/crm-api/internal/handlers/common"
 	"github.com/qilin/crm-api/pkg/graphql"
 	"github.com/uber-go/tally"
 )
@@ -63,7 +64,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	v1 := echoHttp.Group(common.V1Path)
 
 	// init group routes
-	grp := &common.Groups{
+	grp := &common2.Groups{
 		V1:      v1,
 		Common:  echoHttp,
 		Auth:    v1.Group(common.AuthGroupPath),
@@ -81,7 +82,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	return nil
 }
 
-func (d *Dispatcher) graphqlGroup(group *common.Groups) {
+func (d *Dispatcher) graphqlGroup(group *common2.Groups) {
 	// add graphql handlers
 	group.GraphQL.Use(d.appSet.Auth.Middleware)
 }
@@ -112,7 +113,7 @@ func (c *Config) Reload(ctx context.Context) {
 type AppSet struct {
 	Auth     *auth.Auth
 	GraphQL  *graphql.GraphQL
-	Handlers common.Handlers
+	Handlers common2.Handlers
 }
 
 // New

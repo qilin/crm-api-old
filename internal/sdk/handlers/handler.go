@@ -14,6 +14,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/pascaldekloe/jwt"
+	common3 "github.com/qilin/crm-api/internal/handlers/common"
 	"gopkg.in/go-playground/validator.v9"
 
 	"github.com/qilin/crm-api/internal/db/domain"
@@ -31,12 +32,12 @@ const (
 )
 
 // ProviderHandlers
-func ProviderSDKHandlers(validator *validator.Validate, set provider.AwareSet, app common2.SDK) (common.Handlers, func(), error) {
+func ProviderSDKHandlers(validator *validator.Validate, set provider.AwareSet, app common2.SDK) (common3.Handlers, func(), error) {
 	hSet := common.HandlerSet{
 		Validate: validator,
 		AwareSet: set,
 	}
-	return []common.Handler{
+	return []common3.Handler{
 		NewSDKGroup(hSet, app),
 	}, func() {}, nil
 }
@@ -56,7 +57,7 @@ func NewSDKGroup(set common.HandlerSet, sdk common2.SDK) *SDKGroup {
 	}
 }
 
-func (h *SDKGroup) Route(groups *common.Groups) {
+func (h *SDKGroup) Route(groups *common3.Groups) {
 	// plugins routes
 	h.sdk.PluginsRoute(groups.Common)
 	// sdk routes

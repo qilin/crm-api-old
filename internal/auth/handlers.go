@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/qilin/crm-api/internal/dispatcher/common"
+	"github.com/qilin/crm-api/internal/handlers/common"
 
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/google/uuid"
