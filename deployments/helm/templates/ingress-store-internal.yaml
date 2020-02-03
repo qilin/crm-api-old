@@ -1,0 +1,33 @@
+{{- $endpoint := .Values.crmngx -}}
+{{- $endpointSvc := printf "%s-%s" .Release.Name $endpoint.name}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-store-internal
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/issuer: {{ .Release.Name }}
+    ingress.kubernetes.io/ssl-redirect: "true"
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  tls:
+    - hosts:
+#        - {{printf "%s%s" .Values.ingressProxy.hostnamePrefix .Values.ingressProxy.hostname }}
+        - {{printf "%s" .Values.ingressStore.hostname }}
+      secretName: {{ .Release.Name}}-store-ssl-secret
+  rules:
+#    - host: {{printf "%s%s" .Values.ingressProxy.hostnamePrefix .Values.ingressProxy.hostname }}
+    - host: {{printf "%s" .Values.ingressStore.hostname }}
+      http:
+        paths:
+          - path: /internal
+            backend:
+              serviceName: {{ $endpointSvc }}
+              servicePort: 8080
