@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"context"
-
 	"github.com/ProtocolONE/go-core/v2/pkg/config"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
@@ -23,8 +21,8 @@ func CfgTest() (*Config, func(), error) {
 }
 
 // Provider
-func Provider(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) (*Auth, func(), error) {
-	g, e := New(ctx, set, appSet, cfg)
+func Provider(set provider.AwareSet, appSet AppSet, cfg *Config) (*Auth, func(), error) {
+	g, e := New(set, appSet, cfg)
 	return g, func() {}, e
 }
 

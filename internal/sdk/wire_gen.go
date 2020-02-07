@@ -403,7 +403,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup24, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	httpHTTP, cleanup24, err := http.Provider(awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
 		cleanup23()
 		cleanup22()
@@ -807,7 +807,7 @@ func BuildHTTPTest(ctx context.Context, initial config.Initial, observer invoker
 		cleanup()
 		return nil, nil, err
 	}
-	httpHTTP, cleanup23, err := http.Provider(ctx, awareSet, dispatcherDispatcher, httpConfig)
+	httpHTTP, cleanup23, err := http.Provider(awareSet, dispatcherDispatcher, httpConfig)
 	if err != nil {
 		cleanup22()
 		cleanup21()

@@ -43,7 +43,7 @@ var (
 				}
 				return nil
 			}, func(ctx context.Context) error {
-				if e := s.ListenAndServe(); e != nil {
+				if e := s.ListenAndServe(ctx); e != nil {
 					return e
 				}
 				return nil
@@ -54,5 +54,5 @@ var (
 
 func init() {
 	// pflags
-	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":8081", "bind address")
+	Cmd.PersistentFlags().StringP("http.bind", "b", ":8081", "bind address")
 }

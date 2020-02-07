@@ -11,7 +11,6 @@ require (
 	github.com/carlescere/goback v0.0.0-20150314180917-ebe10501f4c4
 	github.com/casbin/casbin v1.8.3
 	github.com/coreos/go-oidc v2.1.0+incompatible
-	github.com/davecgh/go-spew v1.1.1
 	github.com/dgraph-io/ristretto v0.0.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eko/gocache v1.0.0

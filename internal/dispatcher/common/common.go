@@ -7,6 +7,6 @@ const (
 	// routes
 	GraphQLGroupPath = "/graphql"
 	AuthGroupPath    = "/auth"
-	V1Path           = "/v1"
+	V1Path           = "/api/v1"
 	SDKPath          = "/sdk/v1"
 )

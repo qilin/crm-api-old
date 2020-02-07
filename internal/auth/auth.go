@@ -46,7 +46,6 @@ type Config struct {
 }
 
 type Auth struct {
-	ctx         context.Context
 	cfg         Config
 	oauth2      *oauth2.Config
 	verifier    *oidc.IDTokenVerifier
@@ -61,7 +60,7 @@ type AppSet struct {
 }
 
 // New
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config) (*Auth, error) {
+func New(set provider.AwareSet, appSet AppSet, cfg *Config) (*Auth, error) {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	keys := oidc.NewRemoteKeySet(context.Background(), cfg.OAuth2.Provider+".well-known/jwks.json")
 
@@ -75,7 +74,6 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config)
 	}
 
 	return &Auth{
-		ctx: ctx,
 		cfg: *cfg,
 		oauth2: &oauth2.Config{
 			RedirectURL:  cfg.OAuth2.RedirectUrl,
