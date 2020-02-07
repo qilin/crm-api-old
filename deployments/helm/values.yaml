@@ -14,7 +14,7 @@ ingressProxy:
   hostnamePrefix:
 
 ingressStore:
-  hostname: store.tst.qilin.super.com
+  hostname: oldstore.tst.qilin.super.com
   path: /
   hostnamePrefix:
 
