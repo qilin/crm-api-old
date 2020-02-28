@@ -166,6 +166,7 @@ func (a *Auth) setSession(c echo.Context, value string) {
 		Domain:   a.cfg.Domain,
 		Path:     "/",
 		Secure:   a.cfg.SecureCookie,
+		SameSite: http.SameSiteLaxMode,
 	})
 }
 
@@ -189,6 +190,7 @@ func (a *Auth) setState(c echo.Context, value string) {
 		MaxAge:   int((30 * time.Minute).Seconds()),
 		HttpOnly: true,
 		Secure:   a.cfg.SecureCookie,
+		SameSite: http.SameSiteNoneMode,
 	})
 }
 
@@ -230,6 +232,7 @@ func (a *Auth) saveRedirectURL(c echo.Context, url string) {
 		MaxAge:   0,
 		HttpOnly: true,
 		Secure:   a.cfg.SecureCookie,
+		SameSite: http.SameSiteNoneMode,
 	})
 }
 
