@@ -32,6 +32,7 @@ type Config struct {
 
 	// cookies rules
 	SessionCookieName string `default:"ssid"`
+	SessionTTL        int    `default:336` // session max age in hours
 	Domain            string
 	SecureCookie      bool
 
@@ -163,6 +164,7 @@ func (a *Auth) setSession(c echo.Context, value string) {
 		Name:     a.cfg.SessionCookieName,
 		Value:    value,
 		HttpOnly: true,
+		MaxAge:   int((time.Duration(a.cfg.SessionTTL) * time.Hour).Seconds()),
 		Domain:   a.cfg.Domain,
 		Path:     "/",
 		Secure:   a.cfg.SecureCookie,
